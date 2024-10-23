@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "654492757407",
+    "firebase_url": "https://tarswapper-d4b2a-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "tarswapper-d4b2a",
+    "storage_bucket": "tarswapper-d4b2a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:654492757407:android:f5acdbef29feeff81d21aa",
+        "android_client_info": {
+          "package_name": "com.example.tarswapper"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCq-5SwCPPNYCpHGjOcbKCQftoqmLheivc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
