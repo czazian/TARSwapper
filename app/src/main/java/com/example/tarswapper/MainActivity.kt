@@ -55,7 +55,7 @@ class MainActivity : AppCompatActivity() {
 
                 R.id.chat -> {
                     val transaction = fragmentManager.beginTransaction()
-                    val fragment = Chat()
+                    val fragment = ChatSelection()
                     transaction.replace(binding.frameLayout.id, fragment)
                     transaction.addToBackStack(null)
                     transaction.commit()
