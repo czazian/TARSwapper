@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/video"
+        android:title="Video"
+        android:icon="@drawable/videocam_selector"/>
+    <item
+        android:id="@+id/community"
+        android:title="Community"
+        android:icon="@drawable/people_selector"/>
+    <item
+        android:id="@+id/tag"
+        android:icon="@drawable/tag_selector"
+        android:title="Tag" />
+    <item
+        android:id="@+id/chat"
+        android:icon="@drawable/chat_selector"
+        android:title="Chat" />
+    <item
+        android:id="@+id/setting"
+        android:title="Settings"
+        android:icon="@drawable/setting_selector"/>
+
+</menu>
