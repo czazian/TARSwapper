@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Outermost shadow layer (lightest) -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#10000000" />
+            <corners android:radius="10dp" />
+        </shape>
+    </item>
+
+    <!-- Third shadow layer -->
+    <item
+        android:left="1dp"
+        android:top="0dp"
+        android:right="0dp"
+        android:bottom="1dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#15000000" />
+            <corners android:radius="10dp" />
+        </shape>
+    </item>
+
+    <!-- Second shadow layer -->
+    <item
+        android:left="2dp"
+        android:top="0dp"
+        android:right="0dp"
+        android:bottom="2dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#20000000" />
+            <corners android:radius="10dp" />
+        </shape>
+    </item>
+
+    <!-- Main shadow layer (darkest) -->
+    <item
+        android:left="3dp"
+        android:top="0dp"
+        android:right="0dp"
+        android:bottom="3dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#25000000" />
+            <corners android:radius="10dp" />
+        </shape>
+    </item>
+
+    <!-- Content white layer -->
+    <item
+        android:left="4dp"
+        android:top="0dp"
+        android:right="0dp"
+        android:bottom="4dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#756AB6" />
+            <corners android:radius="10dp" />
+        </shape>
+    </item>
+</layer-list>

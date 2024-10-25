@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/aichatbotContainer"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".AIChatbot">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/bottomContainerView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clickable="false"
+        android:elevation="20dp"
+        android:foregroundGravity="center|center_horizontal"
+        android:padding="10dp"
+        app:cardElevation="10dp"
+        app:cardPreventCornerOverlap="false"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent">
+
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/bottomContainerSendMsg"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="15dp">
+
+            <ImageButton
+                android:id="@+id/faqBtn"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="10dp"
+                android:background="@drawable/purpledot"
+                android:elevation="5dp"
+                android:foreground="@drawable/ripple_effect"
+                android:hapticFeedbackEnabled="true"
+                android:src="@drawable/outline_send_24"
+                app:layout_constraintBottom_toBottomOf="@+id/faqText"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/faqText"
+                app:layout_constraintTop_toTopOf="@+id/faqText"
+                app:tint="@color/white" />
+
+            <EditText
+                android:id="@+id/faqText"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:background="@drawable/inputbox"
+                android:ems="10"
+                android:hint="FAQ / Product Details"
+                android:inputType="text"
+                android:padding="15dp"
+                android:paddingStart="20dp"
+                android:textColorHint="#4A4A4A"
+                android:textSize="14dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/faqBtn"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <HorizontalScrollView
+                android:id="@+id/scrollFAQ"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="none"
+                app:layout_constraintBottom_toTopOf="@+id/faqText"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/btnPreQues1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:layout_marginBottom="5dp"
+                        android:text="What can I do?" />
+
+                    <Button
+                        android:id="@+id/btnPreQues2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:layout_marginStart="5dp"
+                        android:text="How to buy item? hahahahahaha Shit fuck" />
+                </LinearLayout>
+            </HorizontalScrollView>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/topContainerView"
+        android:layout_width="match_parent"
+        android:layout_height="82dp"
+        android:clickable="false"
+        android:elevation="12dp"
+        android:foregroundGravity="center|center_horizontal"
+        app:cardElevation="10dp"
+        app:cardPreventCornerOverlap="false"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/topContainerChat"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="10dp">
+
+            <ImageButton
+                android:id="@+id/backChatButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:background="@drawable/ripple_effect"
+                android:backgroundTint="@color/white"
+                android:padding="-20dp"
+                android:src="@drawable/baseline_chevron_left_24"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintHorizontal_chainStyle="packed"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:tint="#756AB6" />
+
+            <TextView
+                android:id="@+id/chatHistoryTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:foregroundGravity="center_horizontal"
+                android:gravity="center_horizontal"
+                android:text="AI Chatbot"
+                android:textColor="#765AB6"
+                android:textSize="20dp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="@+id/backChatButton"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/backChatButton" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.cardview.widget.CardView>
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="322dp"
+        android:layout_height="443dp"
+        android:src="@drawable/ai"
+        app:layout_constraintBottom_toTopOf="@+id/bottomContainerView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/previewTextAI"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="55dp"
+        android:ellipsize="end"
+        android:foregroundGravity="center"
+        android:gravity="center_horizontal|center_vertical"
+        android:maxLines="2"
+        android:text="Hii 👋 my name is Tracy. I'm here to help you 😊"
+        android:textColor="#000000"
+        android:textSize="16dp"
+        app:layout_constraintBottom_toBottomOf="@+id/imageView"
+        app:layout_constraintEnd_toEndOf="@+id/imageView"
+        app:layout_constraintStart_toStartOf="@+id/imageView"
+        app:lineHeight="30dp" />
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -21,7 +21,7 @@ class MainActivity : AppCompatActivity() {
         //Set initial fragment
         if (savedInstanceState == null) {
             val transaction = fragmentManager.beginTransaction()
-            val initialFragment = Chat()
+            val initialFragment = ResetPassword()
             transaction.replace(binding.frameLayout.id, initialFragment)
             transaction.addToBackStack(null)
             transaction.commit()
@@ -31,7 +31,7 @@ class MainActivity : AppCompatActivity() {
             when (item.itemId) {
                 R.id.video -> {
                     val transaction = fragmentManager.beginTransaction()
-                    val fragment = Chat()
+                    val fragment = ChatSelection()
                     transaction.replace(binding.frameLayout.id, fragment)
                     transaction.addToBackStack(null)
                     transaction.commit()

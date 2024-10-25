@@ -5,26 +5,26 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.example.tarswapper.databinding.FragmentChatBinding
+import com.example.tarswapper.databinding.FragmentLoginBinding
+import com.example.tarswapper.databinding.FragmentStartedBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
-
-class Chat : Fragment() {
-    private lateinit var binding: FragmentChatBinding
-
+class Login : Fragment() {
+    private lateinit var binding: FragmentLoginBinding
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        binding = FragmentChatBinding.inflate(layoutInflater, container, false)
+        // Inflate the layout for this fragment
+        binding = FragmentLoginBinding.inflate(layoutInflater, container, false)
 
         //Hide Bottom Navigation Bar
         val bottomNavigation = (activity as MainActivity).findViewById<BottomNavigationView>(R.id.bottomNavigationView)
         bottomNavigation.visibility = View.GONE
 
-        //Back to Select Contact Page
-        binding.backContactListBtn.setOnClickListener() {
-            val fragment = ChatSelection()
+        //Go to Register Page
+        binding.loginregisterBtn.setOnClickListener() {
+            val fragment = Register()
 
             val navigationView =
                 requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigationView)
@@ -41,9 +41,9 @@ class Chat : Fragment() {
             transaction?.commit()
         }
 
-        //Go to Chat History Page
-        binding.moreOptionChatt.setOnClickListener() {
-            val fragment = ChatHistory()
+        //Go to Forget Password Page
+        binding.forgetPasswordBtn.setOnClickListener() {
+            val fragment = ForgetPassword()
 
             val navigationView =
                 requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigationView)
@@ -59,7 +59,6 @@ class Chat : Fragment() {
             transaction?.addToBackStack(null)
             transaction?.commit()
         }
-
 
         return binding.root
     }

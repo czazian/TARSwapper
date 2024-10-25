@@ -7,4 +7,27 @@
     </style>
 
     <style name="Theme.TARSwapper" parent="Base.Theme.TARSwapper" />
+    <style name="circleImageView" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+
+    <style name="BottomSheetAnimation" parent="@android:style/Animation.Dialog">
+        <item name="android:windowEnterAnimation">@anim/slide_in_bottom</item>
+        <item name="android:windowExitAnimation">@anim/slide_out_bottom</item>
+    </style>
+
+    <style name="imgButtonStyle">
+        <item name="android:background">#00FFFFFF</item>
+    </style>
+
+    <style name="buttonStyle">
+        <item name="android:textColor">#FFFFFFFF</item>
+        <item name="android:textSize">17dp</item>
+    </style>
+
+    <style name="CustomEditTextStyle" parent="@style/Widget.Material3.AutoCompleteTextView.OutlinedBox">
+        <item name="android:textSize">18dp</item>
+    </style>
+
 </resources>
