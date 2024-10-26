@@ -21,7 +21,7 @@ class MainActivity : AppCompatActivity() {
         //Set initial fragment
         if (savedInstanceState == null) {
             val transaction = fragmentManager.beginTransaction()
-            val initialFragment = ResetPassword()
+            val initialFragment = UserProfile()
             transaction.replace(binding.frameLayout.id, initialFragment)
             transaction.addToBackStack(null)
             transaction.commit()
@@ -64,7 +64,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.setting -> {
                     // After a successful login, show the frameLayout and hide the businessProfileLayout
                     val transaction = fragmentManager.beginTransaction()
-                    val fragment = Setting()
+                    val fragment = UserProfile()
                     transaction.replace(binding.frameLayout.id, fragment)
                     transaction.addToBackStack(null)
                     transaction.commit()

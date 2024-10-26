@@ -5,27 +5,32 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.example.tarswapper.databinding.ActivityMainBinding
-import com.example.tarswapper.databinding.FragmentAIChatbotBinding
-import com.example.tarswapper.databinding.FragmentChatHistoryBinding
+import androidx.recyclerview.widget.GridLayoutManager
+import com.example.tarswapper.databinding.FragmentCoinShopBinding
+import com.example.tarswapper.databinding.FragmentLoginBinding
+import com.example.tarswapper.databinding.FragmentStartedBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
-class AIChatbot : Fragment() {
-    private lateinit var binding: FragmentAIChatbotBinding
+class CoinShop : Fragment() {
+    private lateinit var binding: FragmentCoinShopBinding
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        binding = FragmentAIChatbotBinding.inflate(layoutInflater, container, false)
+        binding = FragmentCoinShopBinding.inflate(layoutInflater, container, false)
 
         //Hide Bottom Navigation Bar
         val bottomNavigation = (activity as MainActivity).findViewById<BottomNavigationView>(R.id.bottomNavigationView)
         bottomNavigation.visibility = View.GONE
 
+        //Manage RecyclerView
+        val recyclerView = binding.cardRecyclerView
+        recyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
+
 
         //Go to User Profile Page
-        binding.backChatButton.setOnClickListener() {
+        binding.backUserProfileBtn.setOnClickListener() {
             val fragment = UserProfile()
 
             //Bottom Navigation Indicator Update
@@ -43,7 +48,6 @@ class AIChatbot : Fragment() {
             transaction?.addToBackStack(null)
             transaction?.commit()
         }
-
 
         return binding.root
     }

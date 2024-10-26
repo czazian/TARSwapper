@@ -22,6 +22,25 @@ class Started : Fragment() {
         val bottomNavigation = (activity as MainActivity).findViewById<BottomNavigationView>(R.id.bottomNavigationView)
         bottomNavigation.visibility = View.GONE
 
+        //Go to Login Page
+        binding.btnStart.setOnClickListener() {
+            val fragment = Login()
+
+            val navigationView =
+                requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigationView)
+            navigationView.selectedItemId = R.id.chat
+
+            //Back to previous page with animation
+            val transaction = activity?.supportFragmentManager?.beginTransaction()
+            transaction?.replace(R.id.frameLayout, fragment)
+            transaction?.setCustomAnimations(
+                R.anim.fade_out,  // Enter animation
+                R.anim.fade_in  // Exit animation
+            )
+            transaction?.addToBackStack(null)
+            transaction?.commit()
+        }
+
         return binding.root
     }
 }

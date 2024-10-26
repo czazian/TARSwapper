@@ -60,6 +60,7 @@
             android:text="Already have an account?"
             android:textColor="#000000"
             app:layout_constraintEnd_toStartOf="@+id/registerloginBtn"
+            app:layout_constraintHorizontal_bias="0.6"
             app:layout_constraintHorizontal_chainStyle="packed"
             app:layout_constraintStart_toStartOf="@+id/signupBtn"
             app:layout_constraintTop_toBottomOf="@+id/signupBtn" />

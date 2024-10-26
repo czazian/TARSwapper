@@ -209,6 +209,7 @@
                 android:inputType="text"
                 android:padding="15dp"
                 android:paddingStart="20dp"
+                android:paddingEnd="45dp"
                 android:textColorHint="#4A4A4A"
                 android:textSize="14dp"
                 app:layout_constraintBottom_toBottomOf="parent"

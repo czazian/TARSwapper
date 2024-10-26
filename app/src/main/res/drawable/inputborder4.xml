@@ -1,0 +1,25 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item>
+        <shape android:shape="rectangle">
+            <corners android:radius="25dp" />
+        </shape>
+    </item>
+
+    <item
+        android:bottom="4px"
+        android:left="5px"
+        android:right="5px"
+        android:top="0px">
+        <shape android:shape="rectangle">
+            <corners android:radius="10dp" />
+        </shape>
+    </item>
+
+    <item>
+        <shape xmlns:android="http://schemas.android.com/apk/res/android">
+            <solid android:color="@color/white" /> <!-- Background color is white -->
+            <corners android:radius="25dp" /> <!-- Radius for rounded corners -->
+        </shape>
+    </item>
+</layer-list>
