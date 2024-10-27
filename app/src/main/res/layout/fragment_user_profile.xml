@@ -386,7 +386,7 @@
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/useInfoBox"
                 android:layout_width="match_parent"
-                android:layout_height="260dp"
+                android:layout_height="wrap_content"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
@@ -394,10 +394,10 @@
                 <ImageView
                     android:id="@+id/user_bg"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="0dp"
                     android:alpha="0.99"
                     android:scaleType="centerCrop"
-                    android:src="@drawable/bg_example"
+                    android:src="@drawable/default_bg"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="1.0"
@@ -414,7 +414,7 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="@+id/user_bg"
                     app:shapeAppearanceOverlay="@style/circleImageView"
-                    app:srcCompat="@drawable/tarswapper_appicon" />
+                    app:srcCompat="@drawable/empty" />
 
                 <Button
                     android:id="@+id/btnEditProfile"
@@ -431,44 +431,54 @@
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <ImageView
-                    android:id="@+id/user_title"
+                    android:id="@+id/usertitle"
                     android:layout_width="0dp"
-                    android:layout_height="40dp"
+                    android:layout_height="0dp"
                     android:layout_marginTop="7dp"
-                    android:src="@drawable/example_usertitle"
+                    android:src="@drawable/empty"
                     app:layout_constraintEnd_toEndOf="@+id/userLoggedIcon"
                     app:layout_constraintStart_toStartOf="@+id/userLoggedIcon"
                     app:layout_constraintTop_toBottomOf="@+id/userLoggedIcon" />
 
+                <!--User Title Default Config-->
+                <!--                android:layout_width="0dp"-->
+                <!--                android:layout_height="40dp"-->
+                <!--                android:layout_marginTop="7dp"-->
+                <!--                android:src="@drawable/empty"-->
+
                 <TextView
-                    android:id="@+id/user_name"
-                    android:layout_width="wrap_content"
+                    android:id="@+id/username"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
                     android:fontFamily="@font/poppins_bold"
+                    android:gravity="center|center_vertical"
                     android:shadowColor="@color/text_shadow"
                     android:shadowDx="6"
                     android:shadowDy="6"
                     android:shadowRadius="2"
-                    android:text="John Tan Yi Yang"
                     android:textColor="@color/white"
                     android:textSize="20dp"
-                    app:layout_constraintEnd_toEndOf="@+id/user_title"
-                    app:layout_constraintStart_toStartOf="@+id/user_title"
-                    app:layout_constraintTop_toBottomOf="@+id/user_title" />
+                    app:layout_constraintEnd_toEndOf="@+id/usertitle"
+                    app:layout_constraintStart_toStartOf="@+id/usertitle"
+                    app:layout_constraintTop_toBottomOf="@+id/usertitle" />
 
                 <TextView
-                    android:id="@+id/user_email"
+                    android:id="@+id/useremail"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="-2dp"
                     android:fontFamily="@font/poppins_regular"
-                    android:text="johntyy@gmail.com"
+                    android:paddingBottom="20dp"
+                    android:shadowColor="@color/text_shadow"
+                    android:shadowDx="2"
+                    android:shadowDy="2"
+                    android:shadowRadius="2"
                     android:textColor="#D6D6D6"
                     android:textSize="12dp"
-                    app:layout_constraintEnd_toEndOf="@+id/user_name"
-                    app:layout_constraintStart_toStartOf="@+id/user_name"
-                    app:layout_constraintTop_toBottomOf="@+id/user_name" />
+                    app:layout_constraintEnd_toEndOf="@+id/username"
+                    app:layout_constraintStart_toStartOf="@+id/username"
+                    app:layout_constraintTop_toBottomOf="@+id/username" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>

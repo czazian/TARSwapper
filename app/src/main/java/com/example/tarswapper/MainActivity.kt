@@ -1,4 +1,5 @@
 package com.example.tarswapper
+import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
@@ -6,6 +7,7 @@ import com.example.tarswapper.Chat
 import com.example.tarswapper.R
 import com.example.tarswapper.Setting
 import com.example.tarswapper.databinding.ActivityMainBinding
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
@@ -20,13 +22,29 @@ class MainActivity : AppCompatActivity() {
 
         //Set initial fragment
         if (savedInstanceState == null) {
-            val transaction = fragmentManager.beginTransaction()
-            val initialFragment = UserProfile()
-            transaction.replace(binding.frameLayout.id, initialFragment)
-            transaction.addToBackStack(null)
-            transaction.commit()
+            //Check for SharePreference (Permanent Session) is Empty. If not Empty, allow user to directly access the app.
+            //SharePreference is removed only when the user "Logout" from their account.
+            val sharedPreferences = this.getSharedPreferences("TARSwapperPreferences", Context.MODE_PRIVATE)
+            val userID = sharedPreferences.getString("userID", null) //Retrieve user ID, default is null if not found
+            if(userID != null) {
+                val transaction = fragmentManager.beginTransaction()
+                val initialFragment = UserProfile()
+                transaction.replace(binding.frameLayout.id, initialFragment)
+                transaction.addToBackStack(null)
+                transaction.commit()
+            } else {
+                //Otherwise, if SharePreference really really is empty, so redirect user for login.
+                //After "Login" successful, store the userID as SharePreference, so it is not empty now.
+                val transaction = fragmentManager.beginTransaction()
+                val initialFragment = Login()
+                transaction.replace(binding.frameLayout.id, initialFragment)
+                transaction.addToBackStack(null)
+                transaction.commit()
+            }
         }
 
+
+        //Bottom Navigation Redirection Processing
         binding.bottomNavigationView.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.video -> {
