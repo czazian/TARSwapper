@@ -23,7 +23,7 @@ class MainActivity : AppCompatActivity() {
 
         //Set initial fragment
         if (savedInstanceState == null) {
-            // Clear any existing fragments from the back stack
+            //Clear any existing fragments from the back stack
             val fragmentManager = supportFragmentManager
             while (fragmentManager.backStackEntryCount > 0) {
                 fragmentManager.popBackStack()
@@ -35,14 +35,14 @@ class MainActivity : AppCompatActivity() {
             val userID = sharedPreferences.getString("userID", null) //Retrieve user ID, default is null if not found
             if(userID != null) {
                 val transaction = fragmentManager.beginTransaction()
-                val initialFragment: Fragment = UserProfile() // Change this to the desired fragmen
+                val initialFragment: Fragment = UserProfile()
                 transaction.replace(binding.frameLayout.id, initialFragment)
                 transaction.commit()
             } else {
                 //Otherwise, if SharePreference really really is empty, so redirect user for login.
                 //After "Login" successful, store the userID as SharePreference, so it is not empty now.
                 val transaction = fragmentManager.beginTransaction()
-                val initialFragment: Fragment = Login() // Change this to the desired fragmen
+                val initialFragment: Fragment = Login()
                 transaction.replace(binding.frameLayout.id, initialFragment)
                 transaction.commit()
             }
