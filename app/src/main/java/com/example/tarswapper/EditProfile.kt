@@ -98,6 +98,9 @@ class EditProfile : Fragment() {
             }
         }
 
+        binding.userLoggedIcon.setOnClickListener() {
+            openImageChooser()
+        }
         binding.updateImgIcon.setOnClickListener() {
             openImageChooser()
         }

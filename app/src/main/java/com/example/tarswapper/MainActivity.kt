@@ -3,6 +3,7 @@ import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
+import androidx.fragment.app.Fragment
 import com.example.tarswapper.Chat
 import com.example.tarswapper.R
 import com.example.tarswapper.Setting
@@ -22,23 +23,27 @@ class MainActivity : AppCompatActivity() {
 
         //Set initial fragment
         if (savedInstanceState == null) {
+            // Clear any existing fragments from the back stack
+            val fragmentManager = supportFragmentManager
+            while (fragmentManager.backStackEntryCount > 0) {
+                fragmentManager.popBackStack()
+            }
+
             //Check for SharePreference (Permanent Session) is Empty. If not Empty, allow user to directly access the app.
             //SharePreference is removed only when the user "Logout" from their account.
             val sharedPreferences = this.getSharedPreferences("TARSwapperPreferences", Context.MODE_PRIVATE)
             val userID = sharedPreferences.getString("userID", null) //Retrieve user ID, default is null if not found
             if(userID != null) {
                 val transaction = fragmentManager.beginTransaction()
-                val initialFragment = UserProfile()
+                val initialFragment: Fragment = UserProfile() // Change this to the desired fragmen
                 transaction.replace(binding.frameLayout.id, initialFragment)
-                transaction.addToBackStack(null)
                 transaction.commit()
             } else {
                 //Otherwise, if SharePreference really really is empty, so redirect user for login.
                 //After "Login" successful, store the userID as SharePreference, so it is not empty now.
                 val transaction = fragmentManager.beginTransaction()
-                val initialFragment = Login()
+                val initialFragment: Fragment = Login() // Change this to the desired fragmen
                 transaction.replace(binding.frameLayout.id, initialFragment)
-                transaction.addToBackStack(null)
                 transaction.commit()
             }
         }
