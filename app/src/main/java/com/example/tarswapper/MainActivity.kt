@@ -3,6 +3,7 @@ import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.Fragment
 import com.example.tarswapper.Chat
 import com.example.tarswapper.R
@@ -17,6 +18,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Thread.sleep(1500)
+        installSplashScreen()
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -34,6 +37,10 @@ class MainActivity : AppCompatActivity() {
             val sharedPreferences = this.getSharedPreferences("TARSwapperPreferences", Context.MODE_PRIVATE)
             val userID = sharedPreferences.getString("userID", null) //Retrieve user ID, default is null if not found
             if(userID != null) {
+                val navigationView =
+                    this.findViewById<BottomNavigationView>(R.id.bottomNavigationView)
+                navigationView.selectedItemId = R.id.setting
+
                 val transaction = fragmentManager.beginTransaction()
                 val initialFragment: Fragment = UserProfile()
                 transaction.replace(binding.frameLayout.id, initialFragment)

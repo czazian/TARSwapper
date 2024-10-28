@@ -46,10 +46,6 @@ class Login : Fragment() {
         binding.loginregisterBtn.setOnClickListener() {
             val fragment = Register()
 
-            val navigationView =
-                requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigationView)
-            navigationView.selectedItemId = R.id.chat
-
             //Back to previous page with animation
             val transaction = activity?.supportFragmentManager?.beginTransaction()
             transaction?.replace(R.id.frameLayout, fragment)
@@ -64,10 +60,6 @@ class Login : Fragment() {
         //Go to Forget Password Page
         binding.forgetPasswordBtn.setOnClickListener() {
             val fragment = ForgetPassword()
-
-            val navigationView =
-                requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigationView)
-            navigationView.selectedItemId = R.id.chat
 
             //Back to previous page with animation
             val transaction = activity?.supportFragmentManager?.beginTransaction()

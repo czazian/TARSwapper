@@ -51,10 +51,6 @@ class Register : Fragment() {
         binding.registerloginBtn.setOnClickListener() {
             val fragment = Login()
 
-            val navigationView =
-                requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigationView)
-            navigationView.selectedItemId = R.id.chat
-
             //Back to previous page with animation
             val transaction = activity?.supportFragmentManager?.beginTransaction()
             transaction?.replace(R.id.frameLayout, fragment)
