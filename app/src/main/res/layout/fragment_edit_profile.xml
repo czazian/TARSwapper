@@ -59,6 +59,7 @@
                 android:inputType="text"
                 android:padding="10dp"
                 android:paddingStart="17dp"
+                android:textSize="16sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="@+id/textView7"
                 app:layout_constraintTop_toBottomOf="@+id/textView7" />
@@ -89,6 +90,7 @@
                 android:inputType="text"
                 android:padding="10dp"
                 android:paddingStart="17dp"
+                android:textSize="16sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="@+id/textView8"

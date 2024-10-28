@@ -122,6 +122,7 @@
             android:padding="10dp"
             android:paddingStart="20dp"
             android:textColorHint="#7C7C7C"
+            android:textSize="16sp"
             app:layout_constraintTop_toBottomOf="@+id/usernameTitle"
             tools:layout_editor_absoluteX="30dp" />
 
@@ -149,6 +150,7 @@
             android:padding="10dp"
             android:paddingStart="20dp"
             android:textColorHint="#7C7C7C"
+            android:textSize="16sp"
             app:layout_constraintStart_toStartOf="@+id/emailTitle"
             app:layout_constraintTop_toBottomOf="@+id/emailTitle" />
 
@@ -178,6 +180,7 @@
             android:padding="10dp"
             android:paddingStart="20dp"
             android:textColorHint="#7C7C7C"
+            android:textSize="16sp"
             app:layout_constraintStart_toStartOf="@+id/passwordTitle"
             app:layout_constraintTop_toBottomOf="@+id/passwordTitle" />
 
@@ -221,6 +224,7 @@
             android:padding="10dp"
             android:paddingStart="20dp"
             android:textColorHint="#7C7C7C"
+            android:textSize="16sp"
             app:layout_constraintStart_toStartOf="@+id/passwordTitle2"
             app:layout_constraintTop_toBottomOf="@+id/passwordTitle2" />
 

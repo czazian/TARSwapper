@@ -77,11 +77,11 @@
                 android:id="@+id/tvSuccessMessage"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
                 android:text="Transaction Successful!"
-                android:textSize="20sp"
-                android:textStyle="bold"
                 android:textColor="@android:color/black"
-                android:layout_marginBottom="16dp" />
+                android:textSize="22sp"
+                android:textStyle="bold" />
 
             <!-- Transaction Details -->
             <TextView

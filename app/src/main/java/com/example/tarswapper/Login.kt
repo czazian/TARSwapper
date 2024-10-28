@@ -108,11 +108,6 @@ class Login : Fragment() {
                     //Redirect to UserProfile Page
                     val fragment = UserProfile()
 
-                    //Update Bottom Navigation Selection
-                    val navigationView =
-                        requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigationView)
-                    navigationView.selectedItemId = R.id.setting
-
                     //Back to previous page with animation
                     val transaction = activity?.supportFragmentManager?.beginTransaction()
                     transaction?.replace(R.id.frameLayout, fragment)
@@ -127,7 +122,7 @@ class Login : Fragment() {
                     //Create and show an AlertDialog to display errors
                     AlertDialog
                         .Builder(requireContext())
-                        .setTitle("Errors")
+                        .setTitle("Error")
                         .setMessage("Invalid email or password. Please double-check and try again!")
                         .setPositiveButton("OK") { dialog, _ ->
                             //Close dialog when OK is clicked

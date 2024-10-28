@@ -9,6 +9,7 @@ android {
     namespace = "com.example.tarswapper"
     compileSdk = 34
 
+
     buildFeatures {
         viewBinding = true
         dataBinding = true
@@ -42,6 +43,12 @@ android {
         jvmTarget = "1.8"
     }
 
+    packagingOptions {
+        resources {
+            excludes += "META-INF/LICENSE.md"
+            excludes += "META-INF/NOTICE.md"
+        }
+    }
 }
 
 dependencies {
@@ -68,6 +75,7 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")
     implementation("com.github.bumptech.glide:glide:4.12.0")
     implementation("com.github.yalantis:ucrop:2.2.8")
+    implementation("org.eclipse.angus:jakarta.mail:2.0.3")
 
 
     // Compose Dependencies
