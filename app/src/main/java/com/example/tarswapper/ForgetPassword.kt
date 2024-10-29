@@ -163,7 +163,6 @@ class ForgetPassword : Fragment() {
                         R.anim.fade_out,  // Enter animation
                         R.anim.fade_in  // Exit animation
                     )
-                    transaction?.addToBackStack(null)
                     transaction?.commit()
                 } else {
                     // Show Unsuccessful Toast

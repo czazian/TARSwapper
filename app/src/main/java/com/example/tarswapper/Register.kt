@@ -1,9 +1,11 @@
 package com.example.tarswapper
 
 import android.app.AlertDialog
+import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.text.InputType
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -151,7 +153,7 @@ class Register : Fragment() {
                 if (errors.isNotEmpty()) {
                     val message = errors.joinToString("\n") { "• $it" }
 
-                    // Create and show an AlertDialog to display errors
+                    //Create and show an AlertDialog to display errors
                     AlertDialog
                         .Builder(requireContext())
                         .setTitle("Errors")
@@ -172,6 +174,13 @@ class Register : Fragment() {
         return binding.root
     }
 
+
+    //Get Today Date
+    private fun getCurrentDateString(): String {
+        val currentDate = Date() // Get the current date
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        return dateFormat.format(currentDate)
+    }
 
     //Hash is one-way. For verification, hash the user entered password, then compared with the password in Database.
     private fun hashPassword(password: String): String {
@@ -230,14 +239,16 @@ class Register : Fragment() {
 
         //Create Object
         val user = User(
-            userID,
-            userName,
-            userEmail,
-            hashedPassword,
-            defaultUserIcon,
-            joinedDate,
-            0,
-            true
+            userID = userID,
+            name = userName,
+            email = userEmail,
+            password = hashedPassword,
+            profileImage = defaultUserIcon,
+            joinedDate = joinedDate,
+            coinAmount = 0,
+            isActive = true,
+            gameChance = true,
+            lastPlayDate = getCurrentDateString()
         )
 
         //Insert into DB under parent "User"
@@ -246,13 +257,13 @@ class Register : Fragment() {
             .addOnSuccessListener {
                 Toast.makeText(
                     requireContext(),
-                    "User has inserted successfully!",
+                    "Register account successfully!",
                     Toast.LENGTH_LONG
                 ).show()
             }.addOnFailureListener {
                 Toast.makeText(
                     requireContext(),
-                    "User has fail inserted!",
+                    "Register account unsuccessfully!",
                     Toast.LENGTH_LONG
                 ).show()
             }

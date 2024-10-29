@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.FragmentManager
 import com.example.tarswapper.databinding.FragmentChatHistoryBinding
 import com.example.tarswapper.databinding.FragmentStartedBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -37,7 +38,7 @@ class Started : Fragment() {
                 R.anim.fade_out,  // Enter animation
                 R.anim.fade_in  // Exit animation
             )
-            transaction?.addToBackStack(null)
+            activity?.supportFragmentManager?.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
             transaction?.commit()
         }
 

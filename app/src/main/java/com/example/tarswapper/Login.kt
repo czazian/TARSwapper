@@ -12,7 +12,6 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.content.res.ResourcesCompat
 import com.example.tarswapper.databinding.FragmentLoginBinding
-import com.example.tarswapper.databinding.FragmentStartedBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -22,6 +21,9 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import java.security.MessageDigest
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class Login : Fragment() {
     private lateinit var binding: FragmentLoginBinding
@@ -42,9 +44,12 @@ class Login : Fragment() {
         val bottomNavigation = (activity as MainActivity).findViewById<BottomNavigationView>(R.id.bottomNavigationView)
         bottomNavigation.visibility = View.GONE
 
+
+
         //Go to Register Page
         binding.loginregisterBtn.setOnClickListener() {
             val fragment = Register()
+
 
             //Back to previous page with animation
             val transaction = activity?.supportFragmentManager?.beginTransaction()
@@ -91,14 +96,24 @@ class Login : Fragment() {
                         Toast.LENGTH_LONG
                     ).show()
 
+
+
+
                     //Store the user id of logged on user into SharePreference (Session)
                     val sharedPreferences: SharedPreferences = requireContext().getSharedPreferences("TARSwapperPreferences", Context.MODE_PRIVATE)
                     val editor = sharedPreferences.edit()
                     editor.putString("userID", it)
                     editor.apply()
 
+
+
                     //Redirect to UserProfile Page
                     val fragment = UserProfile()
+
+                    //Bottom Navigation Indicator Update
+                    val navigationView =
+                        requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigationView)
+                    navigationView.selectedItemId = R.id.setting
 
                     //Back to previous page with animation
                     val transaction = activity?.supportFragmentManager?.beginTransaction()
@@ -145,6 +160,7 @@ class Login : Fragment() {
 
         return binding.root
     }
+
 
     private fun accountVerification(userEmail: String, userPassword: String, onResult: (String?) -> Unit) {
         val databaseRef = FirebaseDatabase.getInstance().getReference("User")
@@ -193,5 +209,6 @@ class Login : Fragment() {
         //Convert the hashed bytes to a hexadecimal string
         return hashedBytes.joinToString("") { "%02x".format(it) }
     }
+
 
 }

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/GameOverContainer"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#121349"
+    android:orientation="vertical"
+    tools:context=".game.GameOver">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/textView17"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/poppins_bold"
+            android:gravity="center"
+            android:padding="15dp"
+            android:text="Game Over"
+            android:textColor="#FFFFFF"
+            android:textSize="45dp"
+            android:shadowColor="@color/text_shadow"
+            android:shadowDx="6"
+            android:shadowDy="6"
+            android:shadowRadius="2"/>
+
+        <ImageView
+            android:id="@+id/imageView7"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_marginBottom="10dp"
+            android:src="@drawable/padoru_title" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/textView14"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:fontFamily="@font/poppins_medium"
+                android:foregroundGravity="center"
+                android:gravity="center"
+                android:paddingTop="5dp"
+                android:text="Your Points: "
+                android:textColor="#FFFFFF"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/tvPoint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_weight="0"
+                android:fontFamily="@font/poppins_bold"
+                android:foregroundGravity="center"
+                android:gravity="center"
+                android:paddingTop="5dp"
+                android:text="0"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/tvPlusCoin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="15dp"
+                android:background="@drawable/inputborder"
+                android:gravity="center"
+                android:paddingLeft="30dp"
+                android:paddingTop="5dp"
+                android:paddingRight="30dp"
+                android:paddingBottom="5dp"
+                android:shadowColor="@color/text_shadow"
+                android:shadowDx="2"
+                android:shadowDy="3"
+                android:shadowRadius="2"
+                android:text="+0 coins"
+                android:textColor="#FFC107"
+                android:textSize="16dp" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btnBackUserProfileFromGameOver"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="25dp"
+            android:backgroundTint="#673AB7"
+            android:drawableLeft="@drawable/baseline_chevron_left_24"
+            android:drawableTint="#FFFFFF"
+            android:elevation="20dp"
+            android:paddingStart="10dp"
+            android:paddingRight="25dp"
+            android:text="Ok"
+            android:textColor="@color/white"
+            android:textSize="25dp" />
+
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

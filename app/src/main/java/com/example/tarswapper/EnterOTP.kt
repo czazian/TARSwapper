@@ -39,7 +39,6 @@ class EnterOTP : Fragment() {
                 R.anim.fade_out,  // Enter animation
                 R.anim.fade_in  // Exit animation
             )
-            transaction?.addToBackStack(null)
             transaction?.commit()
         }
 
@@ -98,7 +97,6 @@ class EnterOTP : Fragment() {
                             R.anim.fade_out,  // Enter animation
                             R.anim.fade_in  // Exit animation
                         )
-                        transaction?.addToBackStack(null)
                         transaction?.commit()
                     } else {
                         //Create and show an AlertDialog to display errors

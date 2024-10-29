@@ -13,4 +13,6 @@ data class User(
     var joinedDate: String? = null,
     var coinAmount: Int? = 0,
     var isActive: Boolean? = false,
+    var gameChance: Boolean? = false,
+    var lastPlayDate: String? = "",
 ):Serializable

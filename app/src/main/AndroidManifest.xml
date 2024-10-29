@@ -30,13 +30,22 @@
             android:name=".MainActivity"
             android:theme="@style/Theme.App.SplashScreen"
             android:exported="true"
-            android:windowSoftInputMode="adjustPan" >
+            android:windowSoftInputMode="adjustPan"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity> <!-- For Camera Take Image -->
+        </activity>
+        <activity
+            android:name=".game.GameOver"
+            android:exported="true"
+            android:screenOrientation="portrait">
+        </activity>
+
+
+        <!-- For Camera Take Image -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.provider"

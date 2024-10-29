@@ -26,11 +26,15 @@ import com.example.tarswapper.databinding.FragmentUserProfileBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
 import java.io.File
 import java.io.FileOutputStream
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class EditProfile : Fragment() {
     private lateinit var binding: FragmentEditProfileBinding
@@ -113,13 +117,14 @@ class EditProfile : Fragment() {
             val profileBackground = binding.spnProfileBackground.id.toString()
 
 
+
             updateAccountData(
                 userID,
                 username,
                 email,
                 hiddenImageURL,
                 userTitle,
-                profileBackground
+                profileBackground,
             ) {
                 if (it) {
                     //Show Toast
@@ -154,6 +159,7 @@ class EditProfile : Fragment() {
         return binding.root
     }
 
+
     //Update Account Data Processing
     private fun updateAccountData(
         userID: String,
@@ -174,7 +180,9 @@ class EditProfile : Fragment() {
             profileImageUrl,
             userObj.joinedDate,
             userObj.coinAmount,
-            true
+            true,
+            userObj.gameChance,
+            userObj.lastPlayDate
         )
 
         dbRef.child(userID).setValue(updatedUser).addOnSuccessListener {
@@ -183,6 +191,7 @@ class EditProfile : Fragment() {
             onResult(false)
         }
     }
+
 
 
     //Select Image/Take Photo Processing
@@ -294,7 +303,12 @@ class EditProfile : Fragment() {
 
 
 
-
+    //Get Today Date
+    private fun getCurrentDateString(): String {
+        val currentDate = Date() // Get the current date
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        return dateFormat.format(currentDate)
+    }
 
 
     //Get User ID from SharePreference as String

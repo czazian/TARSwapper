@@ -4,11 +4,13 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.DialogInterface
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.GridLayoutManager
 import com.bumptech.glide.Glide
 import com.example.tarswapper.data.User
@@ -127,8 +129,11 @@ class UserProfile : Fragment() {
                 requireContext(), "Logout Successfully!", Toast.LENGTH_LONG
             ).show()
 
-            val sharedPreferences =
-                requireContext().getSharedPreferences("TARSwapperPreferences", Context.MODE_PRIVATE)
+            ///////////////////////////Clear SharedPreference Here/////////////////////////////
+            //Clear all
+            val sharedPreferences = requireContext().getSharedPreferences(
+                "TARSwapperPreferences", Context.MODE_PRIVATE
+            )
             val editor = sharedPreferences.edit()
             editor.clear()
             editor.apply()
@@ -148,7 +153,8 @@ class UserProfile : Fragment() {
                 R.anim.fade_out,  // Enter animation
                 R.anim.fade_in  // Exit animation
             )
-            transaction?.addToBackStack(null)
+            //Clear all back stack
+            activity?.supportFragmentManager?.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
             transaction?.commit()
         }
 
@@ -186,13 +192,17 @@ class UserProfile : Fragment() {
                                 requireContext(), "Deactivated Successfully!", Toast.LENGTH_LONG
                             ).show()
 
-                            //Clear SharedPreference
+
+                            ///////////////////////////Clear SharedPreference Here/////////////////////////////
+                            //Clear all
                             val sharedPreferences = requireContext().getSharedPreferences(
                                 "TARSwapperPreferences", Context.MODE_PRIVATE
                             )
                             val editor = sharedPreferences.edit()
                             editor.clear()
                             editor.apply()
+
+
 
                             //After clearing, redirect user to login.
                             val fragment = Login()
@@ -209,7 +219,7 @@ class UserProfile : Fragment() {
                                 R.anim.fade_out,  // Enter animation
                                 R.anim.fade_in  // Exit animation
                             )
-                            transaction?.addToBackStack(null)
+                            //Clear all back stack
                             transaction?.commit()
                         }
                     }
@@ -224,6 +234,27 @@ class UserProfile : Fragment() {
             alertDialog.show()
         }
 
+
+        binding.playMiniGame.setOnClickListener(){
+            //After clearing, redirect user to login.
+            val fragment = MiniGame()
+
+            //Bottom Navigation Indicator Update
+            val navigationView =
+                requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigationView)
+            navigationView.selectedItemId = R.id.setting
+
+            //Back to previous page with animation
+            val transaction = activity?.supportFragmentManager?.beginTransaction()
+            transaction?.replace(R.id.frameLayout, fragment)
+            transaction?.setCustomAnimations(
+                R.anim.fade_out,  // Enter animation
+                R.anim.fade_in  // Exit animation
+            )
+            //Clear all back stack
+            transaction?.commit()
+        }
+
         return binding.root
     }
 
@@ -233,14 +264,16 @@ class UserProfile : Fragment() {
         val dbRef = FirebaseDatabase.getInstance().getReference("User")
 
         val updatedUser = User(
-            userID,
-            "",
-            "",
-            "",
-            "",
-            "",
-            0,
-            false
+            userID = userID,
+            name = "",
+            email = "",
+            password = "",
+            profileImage = "",
+            joinedDate = "",
+            coinAmount = 0,
+            isActive = false,
+            gameChance = false,
+            lastPlayDate = ""
         )
 
         dbRef.child(userID).setValue(updatedUser).addOnSuccessListener {
