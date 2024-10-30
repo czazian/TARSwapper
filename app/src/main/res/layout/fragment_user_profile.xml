@@ -434,18 +434,13 @@
                 <ImageView
                     android:id="@+id/usertitle"
                     android:layout_width="0dp"
-                    android:layout_height="0dp"
+                    android:layout_height="40dp"
                     android:layout_marginTop="7dp"
                     android:src="@drawable/empty"
                     app:layout_constraintEnd_toEndOf="@+id/userLoggedIcon"
                     app:layout_constraintStart_toStartOf="@+id/userLoggedIcon"
-                    app:layout_constraintTop_toBottomOf="@+id/userLoggedIcon" />
-
-                <!--User Title Default Config-->
-                <!--                android:layout_width="0dp"-->
-                <!--                android:layout_height="40dp"-->
-                <!--                android:layout_marginTop="7dp"-->
-                <!--                android:src="@drawable/empty"-->
+                    app:layout_constraintTop_toBottomOf="@+id/userLoggedIcon"
+                    android:visibility="gone"/>
 
                 <TextView
                     android:id="@+id/username"

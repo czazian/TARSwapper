@@ -8,21 +8,20 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.Toast
-import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import androidx.recyclerview.widget.GridLayoutManager
 import com.bumptech.glide.Glide
+import com.example.tarswapper.data.Items
+import com.example.tarswapper.data.PurchasedItem
 import com.example.tarswapper.data.User
-import com.example.tarswapper.databinding.FragmentCoinShopBinding
 import com.example.tarswapper.databinding.FragmentEditProfileBinding
-import com.example.tarswapper.databinding.FragmentLoginBinding
-import com.example.tarswapper.databinding.FragmentStartedBinding
-import com.example.tarswapper.databinding.FragmentUserProfileBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -36,6 +35,13 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+//For Spinners (Store two or more values into one selection)
+data class SpinnerItem(val itemID: Int, val itemName: String) {
+    override fun toString(): String {
+        return itemName
+    }
+}
+
 class EditProfile : Fragment() {
     private lateinit var binding: FragmentEditProfileBinding
     private lateinit var userObj: User
@@ -43,6 +49,10 @@ class EditProfile : Fragment() {
     private val IMAGE_PICK_CODE = 1000
     private val CAMERA_CAPTURE_CODE = 1002
     private var imageUri: Uri? = null
+
+    //Spinner Selection (-1 means not yet assigned)
+    var selectedUserTitleId: Int = -1
+    var selectedProfileBackgroundId: Int = -1
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -82,6 +92,46 @@ class EditProfile : Fragment() {
             transaction?.commit()
         }
 
+        //When user spinner select change
+        binding.spnUserTitle.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                parent: AdapterView<*>,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                if (view == null) return
+
+                val selectedItem = parent.getItemAtPosition(position) as SpinnerItem
+                selectedUserTitleId = selectedItem.itemID
+                Log.e("Selected User Title ID = ", selectedUserTitleId.toString())
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {
+            }
+        }
+        binding.spnProfileBackground.onItemSelectedListener =
+            object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(
+                    parent: AdapterView<*>,
+                    view: View?,
+                    position: Int,
+                    id: Long
+                ) {
+                    if (view == null) return
+
+                    val selectedItem = parent.getItemAtPosition(position) as SpinnerItem
+                    selectedProfileBackgroundId = selectedItem.itemID
+                    Log.e(
+                        "Selected Profile Background ID = ",
+                        selectedProfileBackgroundId.toString()
+                    )
+                }
+
+                override fun onNothingSelected(parent: AdapterView<*>) {
+                }
+            }
+
         //Get User ID first leh
         val userID: String = getUserID()
 
@@ -97,8 +147,8 @@ class EditProfile : Fragment() {
                 Glide.with(requireContext()).load(it.profileImage) // User Icon URL string
                     .into(binding.userLoggedIcon)
 
-                //UserTitle & ProfileBackground (Pending)
-
+                //Initially get all the UserTitle & ProfileBackground that the logged-in user owned
+                getOwnedUserTitleAndProfileBackground(userID)
             }
         }
 
@@ -113,18 +163,12 @@ class EditProfile : Fragment() {
         binding.btnSaveEdit.setOnClickListener() {
             val username = binding.txtEditUsername.text.toString()
             val email = binding.txtEditEmail.text.toString()
-            val userTitle = binding.spnUserTitle.id.toString()
-            val profileBackground = binding.spnProfileBackground.id.toString()
-
-
 
             updateAccountData(
                 userID,
                 username,
                 email,
                 hiddenImageURL,
-                userTitle,
-                profileBackground,
             ) {
                 if (it) {
                     //Show Toast
@@ -151,12 +195,248 @@ class EditProfile : Fragment() {
                     transaction?.commit()
                 }
             }
-
-
         }
 
 
+
+
         return binding.root
+    }
+
+    //Function to update spinners when no items are available
+    private fun updateSpinnersForNoItems() {
+        //Update the adapter of the spinner to show "No items available" message
+        getAllUserTitle(emptyList(), null)
+        getAllProfileBackground(emptyList(), null)
+    }
+
+
+    //Nested Firebase Process
+    private fun getOwnedUserTitleAndProfileBackground(userID: String) {
+        val database = FirebaseDatabase.getInstance()
+        val purchasedItemRef = database.getReference("PurchasedItem")
+        val itemsRef = database.getReference("Items")
+
+        purchasedItemRef.orderByChild("userID").equalTo(userID)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    val itemIDs = mutableListOf<Int>()
+                    var equippedTitleId: Int? = null
+                    var equippedBackgroundId: Int? = null
+                    var defaultTitleId: Int? = null
+                    var defaultBackgroundId: Int? = null
+
+
+                    if (dataSnapshot.childrenCount == 0L) {
+                        //Handle case where no purchased items are found
+                        Log.i("getOwnedUserTitle", "No purchased items found for userID: $userID")
+                        //Update spinners to show "No items available" message
+                        updateSpinnersForNoItems()
+                        return
+                    }
+
+
+                    for (itemSnapshot in dataSnapshot.children) {
+                        val purchasedItem = itemSnapshot.getValue(PurchasedItem::class.java)
+                        if (purchasedItem != null) {
+                            purchasedItem.itemID?.let { itemID ->
+                                itemIDs.add(itemID)
+                                //Check if the item is equipped
+                                if (purchasedItem.isEquipped == true) {
+                                    itemsRef.child(itemID.toString())
+                                        .addListenerForSingleValueEvent(object :
+                                            ValueEventListener {
+                                            override fun onDataChange(itemSnapshot: DataSnapshot) {
+                                                when (itemSnapshot.child("itemType")
+                                                    .getValue(String::class.java)) {
+                                                    "title" -> {
+                                                        equippedTitleId = itemID
+                                                        selectedUserTitleId = itemID
+                                                    }
+
+                                                    "background" -> {
+                                                        equippedBackgroundId = itemID
+                                                        selectedProfileBackgroundId = itemID
+                                                    }
+                                                }
+                                                //Load items into the spinners once the types are identified
+                                                getAllUserTitle(itemIDs, equippedTitleId)
+                                                getAllProfileBackground(
+                                                    itemIDs,
+                                                    equippedBackgroundId
+                                                )
+                                            }
+
+                                            override fun onCancelled(databaseError: DatabaseError) {
+                                                Log.e(
+                                                    "getOwnedProfile Error",
+                                                    "Error: ${databaseError.message}"
+                                                )
+                                            }
+                                        })
+                                } else {
+                                    //Store default item if they are not equipped (default item is the first un-equipped item)
+                                    itemsRef.child(itemID.toString())
+                                        .addListenerForSingleValueEvent(object :
+                                            ValueEventListener {
+                                            override fun onDataChange(itemSnapshot: DataSnapshot) {
+                                                when (itemSnapshot.child("itemType")
+                                                    .getValue(String::class.java)) {
+                                                    "title" -> {
+                                                        if (defaultTitleId == null) {
+                                                            //Set first un-equipped title as default
+                                                            defaultTitleId = itemID
+                                                        }
+                                                    }
+
+                                                    "background" -> {
+                                                        if (defaultBackgroundId == null) {
+                                                            //Set first un-equipped background as default
+                                                            defaultBackgroundId = itemID
+                                                        }
+                                                    }
+                                                }
+
+                                                //If none are equipped, set the default items
+                                                if (equippedTitleId == null && defaultTitleId != null) {
+                                                    equippedTitleId = defaultTitleId
+                                                    selectedUserTitleId = defaultTitleId as Int
+
+                                                }
+                                                if (equippedBackgroundId == null && defaultBackgroundId != null) {
+                                                    equippedBackgroundId = defaultBackgroundId
+                                                    selectedProfileBackgroundId =
+                                                        defaultBackgroundId as Int
+                                                }
+
+                                                //Load items into the spinners
+                                                getAllUserTitle(itemIDs, equippedTitleId)
+                                                getAllProfileBackground(
+                                                    itemIDs,
+                                                    equippedBackgroundId
+                                                )
+                                            }
+
+                                            override fun onCancelled(databaseError: DatabaseError) {
+                                                Log.e(
+                                                    "getOwnedProfile Error",
+                                                    "Error: ${databaseError.message}"
+                                                )
+                                            }
+                                        })
+                                }
+                            }
+                        }
+                    }
+                }
+
+                override fun onCancelled(databaseError: DatabaseError) {
+                    Log.e("getOwnedProfileBackground Error", "Error: ${databaseError.message}")
+                }
+            })
+    }
+
+
+    //Updated function for setting User Titles in Spinner with default selection
+    private fun getAllUserTitle(itemIDs: List<Int>, equippedTitleId: Int?) {
+        val database = FirebaseDatabase.getInstance()
+        val itemsRef = database.getReference("Items")
+
+        itemsRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                val userTitleList = mutableListOf<SpinnerItem>()
+
+                for (itemSnapshot in dataSnapshot.children) {
+                    val item = itemSnapshot.getValue(Items::class.java)
+                    if (item != null && itemIDs.contains(item.itemID) && item.itemType == "title") {
+                        userTitleList.add(SpinnerItem(item.itemID!!, item.itemName!!))
+                    }
+                }
+
+                val adapter = ArrayAdapter(
+                    requireContext(),
+                    android.R.layout.simple_spinner_item,
+                    userTitleList
+                )
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                binding.spnUserTitle.adapter = adapter
+
+                //Set equipped item as selected by default, if available
+                equippedTitleId?.let {
+
+                    val position =
+                        userTitleList.indexOfFirst { spinnerItem -> spinnerItem.itemID == it }
+                    if (position >= 0) {
+                        binding.spnUserTitle.setSelection(position)
+                    }
+
+                }
+
+                //Show message if no items available
+                if (userTitleList.isEmpty()) {
+                    adapter.clear()
+                    adapter.add(SpinnerItem(0, "No user titles available..."))
+                    binding.spnUserTitle.isEnabled = false
+                } else {
+                    binding.spnUserTitle.isEnabled = true
+                }
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                Log.e("getAllUserTitle Error", "Error: ${databaseError.message}")
+            }
+        })
+    }
+
+    private fun getAllProfileBackground(itemIDs: List<Int>, equippedBackgroundId: Int?) {
+        val database = FirebaseDatabase.getInstance()
+        val itemsRef = database.getReference("Items")
+
+        itemsRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                val profileBackgroundList = mutableListOf<SpinnerItem>()
+
+                for (itemSnapshot in dataSnapshot.children) {
+                    val item = itemSnapshot.getValue(Items::class.java)
+                    if (item != null && itemIDs.contains(item.itemID) && item.itemType == "background") {
+                        profileBackgroundList.add(SpinnerItem(item.itemID!!, item.itemName!!))
+
+                    }
+                }
+
+                val adapter = ArrayAdapter(
+                    requireContext(),
+                    android.R.layout.simple_spinner_item,
+                    profileBackgroundList
+                )
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                binding.spnProfileBackground.adapter = adapter
+
+                //Set equipped item as selected by default, if available
+                equippedBackgroundId?.let {
+
+                    val position =
+                        profileBackgroundList.indexOfFirst { spinnerItem -> spinnerItem.itemID == it }
+                    if (position >= 0) {
+                        binding.spnProfileBackground.setSelection(position)
+                    }
+
+                }
+
+                //Show message if no items available
+                if (profileBackgroundList.isEmpty()) {
+                    adapter.clear()
+                    adapter.add(SpinnerItem(0, "No backgrounds available..."))
+                    binding.spnProfileBackground.isEnabled = false
+                } else {
+                    binding.spnProfileBackground.isEnabled = true
+                }
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                Log.e("getAllProfileBackground Error", "Error: ${databaseError.message}")
+            }
+        })
     }
 
 
@@ -166,8 +446,6 @@ class EditProfile : Fragment() {
         username: String,
         email: String,
         profileImageUrl: String,
-        userTitle: String,
-        profileBackground: String,
         onResult: (Boolean) -> Unit
     ) {
         val dbRef = FirebaseDatabase.getInstance().getReference("User")
@@ -185,6 +463,8 @@ class EditProfile : Fragment() {
             userObj.lastPlayDate
         )
 
+        updateUserTitleAndProfileBackground(userID)
+
         dbRef.child(userID).setValue(updatedUser).addOnSuccessListener {
             onResult(true)
         }.addOnFailureListener {
@@ -192,6 +472,43 @@ class EditProfile : Fragment() {
         }
     }
 
+
+    private fun updateUserTitleAndProfileBackground(userID: String) {
+        val database = FirebaseDatabase.getInstance()
+        val purchasedItemRef = database.getReference("PurchasedItem")
+
+        //Update the title and background items based on selected IDs
+        purchasedItemRef.orderByChild("userID").equalTo(userID)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    //Prepare to collect update operations
+                    val updates = mutableMapOf<DatabaseReference, Map<String, Any>>()
+
+                    for (itemSnapshot in dataSnapshot.children) {
+                        val purchasedItem = itemSnapshot.getValue(PurchasedItem::class.java)
+                        if (purchasedItem != null) {
+                            //Determine if the item should be equipped (selected id as true, all other as false)
+                            val isEquipped = when (purchasedItem.itemID) {
+                                selectedUserTitleId -> true
+                                selectedProfileBackgroundId -> true
+                                else -> false
+                            }
+                            //Prepare the update for this item
+                            updates[itemSnapshot.ref] = mapOf("equipped" to isEquipped)
+                        }
+                    }
+
+                    //Execute all updates
+                    for ((ref, update) in updates) {
+                        ref.updateChildren(update)
+                    }
+                }
+
+                override fun onCancelled(databaseError: DatabaseError) {
+                    Log.e("updateUserTitleAndBackground Error", "Error: ${databaseError.message}")
+                }
+            })
+    }
 
 
     //Select Image/Take Photo Processing
@@ -209,6 +526,7 @@ class EditProfile : Fragment() {
         }
         builder.show()
     }
+
     private fun chooseFromGallery() {
         //Open Image Chooser
         val intent = Intent(Intent.ACTION_PICK)
@@ -219,6 +537,7 @@ class EditProfile : Fragment() {
         //After chosen an image
         startActivityForResult(intent, IMAGE_PICK_CODE)
     }
+
     private fun takePhoto() {
         val imageFile = File(requireContext().externalCacheDir, "${System.currentTimeMillis()}.jpg")
         imageUri = FileProvider.getUriForFile(
@@ -232,6 +551,7 @@ class EditProfile : Fragment() {
         intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri)
         startActivityForResult(intent, CAMERA_CAPTURE_CODE)
     }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -244,6 +564,7 @@ class EditProfile : Fragment() {
                     //Force the image become square
                     selectedImageUri?.let { cropImageToSquare(it) }
                 }
+
                 CAMERA_CAPTURE_CODE -> {
                     //Force the image become square
                     imageUri?.let { cropImageToSquare(it) }
@@ -251,6 +572,7 @@ class EditProfile : Fragment() {
             }
         }
     }
+
     //Force crop image to square
     private fun cropImageToSquare(imageUri: Uri) {
         //Load the image from the URI, keep it as bitmap
@@ -260,14 +582,17 @@ class EditProfile : Fragment() {
         val size = Math.min(bitmap.width, bitmap.height)
 
         //Create a square bitmap
-        val croppedBitmap = Bitmap.createBitmap(bitmap,
+        val croppedBitmap = Bitmap.createBitmap(
+            bitmap,
             (bitmap.width - size) / 2,
             (bitmap.height - size) / 2,
             size,
-            size)
+            size
+        )
 
         //Save the cropped bitmap to a file
-        val croppedFile = File(requireContext().cacheDir, "cropped_${System.currentTimeMillis()}.jpg")
+        val croppedFile =
+            File(requireContext().cacheDir, "cropped_${System.currentTimeMillis()}.jpg")
         FileOutputStream(croppedFile).use { out ->
             croppedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, out)
         }
@@ -275,6 +600,7 @@ class EditProfile : Fragment() {
         //Upload the cropped image to Firebase
         uploadImageToFirebase(Uri.fromFile(croppedFile))
     }
+
     private fun uploadImageToFirebase(imageUri: Uri) {
         //Get the user ID, then use the user id as the image name to be stored into the Firebase Storage as .jpg
         val userID = getUserID()
@@ -300,7 +626,6 @@ class EditProfile : Fragment() {
                 ).show()
             }
     }
-
 
 
     //Get Today Date

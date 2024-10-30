@@ -106,7 +106,7 @@
                 android:textColor="#000000"
                 android:textSize="15dp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/txtEditEmail" />
+                app:layout_constraintTop_toBottomOf="@+id/textView16" />
 
             <Spinner
                 android:id="@+id/spnUserTitle"
@@ -142,7 +142,7 @@
                 android:textColor="#000000"
                 android:textSize="15dp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/spnUserTitle" />
+                app:layout_constraintTop_toBottomOf="@+id/textView15" />
 
             <Spinner
                 android:id="@+id/spnProfileBackground"
@@ -170,24 +170,51 @@
                 android:id="@+id/btnSaveEdit"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="10dp"
                 android:backgroundTint="#765ab6"
                 android:includeFontPadding="true"
                 android:text="Save"
                 app:layout_constraintEnd_toEndOf="@+id/spnProfileBackground"
-                app:layout_constraintTop_toBottomOf="@+id/spnProfileBackground" />
+                app:layout_constraintTop_toBottomOf="@+id/textView13" />
 
             <ImageView
                 android:id="@+id/updateImgIcon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:clickable="true"
-                android:tint="#756ab6"
+                app:tint="#756ab6"
                 app:layout_constraintBottom_toBottomOf="@+id/userLoggedIcon"
                 app:layout_constraintEnd_toEndOf="@+id/userLoggedIcon"
                 app:layout_constraintStart_toStartOf="@+id/userLoggedIcon"
                 app:layout_constraintTop_toTopOf="@+id/userLoggedIcon"
                 app:srcCompat="@drawable/outline_file_upload_24" />
+
+            <TextView
+                android:id="@+id/textView13"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Note: If no profile background is selected, the first un-equipped profile background is selected as default."
+                android:textColor="#7d7d7d"
+                app:layout_constraintStart_toStartOf="@+id/spnProfileBackground"
+                app:layout_constraintTop_toBottomOf="@+id/spnProfileBackground" />
+
+            <TextView
+                android:id="@+id/textView15"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Note: If no user title is selected, the first un-equipped user title is selected as default."
+                android:textColor="#7d7d7d"
+                app:layout_constraintStart_toStartOf="@+id/spnUserTitle"
+                app:layout_constraintTop_toBottomOf="@+id/spnUserTitle" />
+
+            <TextView
+                android:id="@+id/textView16"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Note: Email is not modifiable, since it is served as the indicator for account recovery."
+                android:textColor="#7d7d7d"
+                app:layout_constraintStart_toStartOf="@+id/txtEditEmail"
+                app:layout_constraintTop_toBottomOf="@+id/txtEditEmail" />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

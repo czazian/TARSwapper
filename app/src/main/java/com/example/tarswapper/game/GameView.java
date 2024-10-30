@@ -10,8 +10,10 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Vibrator;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
@@ -61,6 +63,12 @@ public class GameView extends View {
 
     //List to manage bombs
     ArrayList<Bomb> bombs;
+
+    //Vibrator
+    Vibrator vibrator;
+
+    //Play Background music
+    MediaPlayer mediaPlayer;
 
 
     //Initialization and Settings
@@ -118,6 +126,12 @@ public class GameView extends View {
             Bomb bomb = new Bomb(context);
             bombs.add(bomb);
         }
+
+        //Add Vibrator
+        vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+
+        //Play Music
+        playMusic(context);
     }
 
 
@@ -157,8 +171,17 @@ public class GameView extends View {
                 life--;
                 bombs.get(i).resetPosition();
 
+                //Vibrate when collision happen
+                if (vibrator != null && vibrator.hasVibrator()) {
+                    //Vibrate for 300 milliseconds
+                    vibrator.vibrate(300);
+                }
+
                 //Game over condition
                 if (life == 0) {
+                    //Stop Music
+                    stopMusic();
+
                     //Create a new instance of GameOverFragment
                     GameOver gameOverFragment = new GameOver();
 
@@ -191,7 +214,7 @@ public class GameView extends View {
         //Change health bar display color
         if (life == 2) {
             healthPaint.setColor(Color.YELLOW);
-        } else if (life == 1){
+        } else if (life == 1) {
             healthPaint.setColor(Color.RED);
         }
     }
@@ -234,5 +257,34 @@ public class GameView extends View {
         return true;
     }
 
+
+
+    //Initialize the MediaPlayer
+    public void playMusic(Context context) {
+        //Initialize MediaPlayer with an audio file from res/raw
+        mediaPlayer = MediaPlayer.create(context, R.raw.game_music); // Ensure music.mp3 is in res/raw
+
+        //Start playback
+        mediaPlayer.start();
+
+        //Set a listener to release resources when playback is complete
+        mediaPlayer.setOnCompletionListener(mp -> releaseMediaPlayer());
+    }
+
+    //Stop and release resources
+    public void stopMusic() {
+        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+            mediaPlayer.stop();
+            releaseMediaPlayer();
+        }
+    }
+
+    //Release MediaPlayer resources
+    private void releaseMediaPlayer() {
+        if (mediaPlayer != null) {
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
+    }
 
 }

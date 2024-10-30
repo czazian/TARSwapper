@@ -10,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.view.marginTop
 import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.GridLayoutManager
 import com.bumptech.glide.Glide
@@ -99,7 +100,6 @@ class UserProfile : Fragment() {
             transaction?.commit()
         }
 
-
         //Go to Chat bot Page
         binding.aichatbot.setOnClickListener() {
             val fragment = AIChatbot()
@@ -154,7 +154,10 @@ class UserProfile : Fragment() {
                 R.anim.fade_in  // Exit animation
             )
             //Clear all back stack
-            activity?.supportFragmentManager?.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+            activity?.supportFragmentManager?.popBackStack(
+                null,
+                FragmentManager.POP_BACK_STACK_INCLUSIVE
+            )
             transaction?.commit()
         }
 
@@ -203,7 +206,6 @@ class UserProfile : Fragment() {
                             editor.apply()
 
 
-
                             //After clearing, redirect user to login.
                             val fragment = Login()
 
@@ -235,7 +237,7 @@ class UserProfile : Fragment() {
         }
 
 
-        binding.playMiniGame.setOnClickListener(){
+        binding.playMiniGame.setOnClickListener() {
             //After clearing, redirect user to login.
             val fragment = MiniGame()
 
@@ -255,7 +257,109 @@ class UserProfile : Fragment() {
             transaction?.commit()
         }
 
+
+        //Display selected user title and profile background
+        queryUserTitleAndProfileBackground(userID)
+
         return binding.root
+    }
+
+    private fun queryUserTitleAndProfileBackground(userID: String) {
+        val database = FirebaseDatabase.getInstance().reference
+        val purchasedItemsRef = database.child("PurchasedItem")
+        val itemRef = database.child("Items")
+
+        //Step 1: Load items from the Items table
+        itemRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(itemsSnapshot: DataSnapshot) {
+                //Create a map to store itemID and itemType for quick lookup
+                val itemTypeMap = mutableMapOf<Int, String>()
+                for (itemSnapshot in itemsSnapshot.children) {
+                    val itemID = itemSnapshot.child("itemID").getValue(Int::class.java)
+                    val itemType = itemSnapshot.child("itemType").getValue(String::class.java)
+                    if (itemID != null && itemType != null) {
+                        itemTypeMap[itemID] = itemType
+                    }
+                }
+
+                //Step 2: Query purchased items by userID
+                purchasedItemsRef.orderByChild("userID").equalTo(userID)
+                    .addListenerForSingleValueEvent(object : ValueEventListener {
+                        override fun onDataChange(snapshot: DataSnapshot) {
+                            for (itemSnapshot in snapshot.children) {
+                                val itemID = itemSnapshot.child("itemID").getValue(Int::class.java)
+                                val equipped = itemSnapshot.child("equipped").getValue(Boolean::class.java)
+
+                                //Step 3: Check if the item is equipped and retrieve item type
+                                if (equipped == true && itemID != null) {
+                                    val itemType = itemTypeMap[itemID]
+                                    //Check if the item type is "title"
+                                    if (itemType == "title") {
+                                        displayUserTitle(itemID)
+                                        //Check if the item type is "background"
+                                    } else if(itemType == "background"){
+                                        displayUserProfileBackground(itemID)
+                                    }
+                                }
+                            }
+                        }
+
+                        override fun onCancelled(error: DatabaseError) {
+                            Log.e(
+                                "FirebaseError",
+                                "Error querying purchased items: ${error.message}"
+                            )
+                        }
+                    })
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("FirebaseError", "Error loading items: ${error.message}")
+            }
+        })
+    }
+
+    private fun displayUserTitle(itemID: Int) {
+        val database = FirebaseDatabase.getInstance().reference
+        val itemsRef = database.child("Items")
+
+        itemsRef.child(itemID.toString())
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val itemURL = snapshot.child("itemURL").getValue(String::class.java)
+                    //Display the user title
+                    if (itemURL != null) {
+                        Glide.with(requireContext()).load(itemURL)
+                            .into(binding.usertitle)
+                        binding.usertitle.visibility = View.VISIBLE
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Log.e("FirebaseError", "Error fetching user title: ${error.message}")
+                }
+            })
+    }
+
+    private fun displayUserProfileBackground(itemID: Int) {
+        val database = FirebaseDatabase.getInstance().reference
+        val itemsRef = database.child("Items")
+
+        itemsRef.child(itemID.toString())
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val itemURL = snapshot.child("itemURL").getValue(String::class.java)
+                    //Display the user profile background
+                    if (itemURL != null) {
+                        Glide.with(requireContext()).load(itemURL)
+                            .into(binding.userBg)
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Log.e("FirebaseError", "Error fetching user background: ${error.message}")
+                }
+            })
     }
 
 
