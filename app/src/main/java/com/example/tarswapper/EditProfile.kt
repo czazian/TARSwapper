@@ -5,6 +5,7 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
@@ -18,6 +19,10 @@ import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.core.content.FileProvider
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import com.example.tarswapper.data.Items
 import com.example.tarswapper.data.PurchasedItem
 import com.example.tarswapper.data.User
@@ -606,6 +611,11 @@ class EditProfile : Fragment() {
         val userID = getUserID()
         val storageRef = FirebaseStorage.getInstance().getReference("UserProfile/$userID.jpg")
 
+        //Show progress bar
+        binding.progressBar.visibility = View.VISIBLE
+        //Hide Main Content
+        binding.scrollView2.visibility = View.GONE
+
         //Upload the image to Firebase Storage
         storageRef.putFile(imageUri)
             .addOnSuccessListener { taskSnapshot ->
@@ -614,7 +624,37 @@ class EditProfile : Fragment() {
                 storageRef.downloadUrl.addOnSuccessListener { uri ->
                     val imageUrl = uri.toString()
                     hiddenImageURL = imageUrl
-                    Glide.with(requireContext()).load(imageUrl)
+
+                    //Load the image with Glide and handle progress visibility
+                    Glide.with(requireContext())
+                        .load(imageUrl)
+                        .listener(object : RequestListener<Drawable> {
+                            override fun onLoadFailed(
+                                e: GlideException?,
+                                model: Any?,
+                                target: Target<Drawable>,
+                                isFirstResource: Boolean
+                            ): Boolean {
+                                //Hide progress bar in case of failure
+                                binding.progressBar.visibility = View.GONE
+                                binding.scrollView2.visibility = View.VISIBLE
+                                Toast.makeText(requireContext(), "Failed to load image", Toast.LENGTH_SHORT).show()
+                                return false
+                            }
+
+                            override fun onResourceReady(
+                                resource: Drawable,
+                                model: Any,
+                                target: Target<Drawable>?,
+                                dataSource: DataSource,
+                                isFirstResource: Boolean
+                            ): Boolean {
+                                //Hide progress bar when the image is fully loaded
+                                binding.progressBar.visibility = View.GONE
+                                binding.scrollView2.visibility = View.VISIBLE
+                                return false
+                            }
+                        })
                         .into(binding.userLoggedIcon)
                 }
             }

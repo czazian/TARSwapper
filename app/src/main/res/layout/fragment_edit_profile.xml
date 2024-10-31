@@ -8,7 +8,28 @@
     android:focusable="false"
     tools:context=".EditProfile">
 
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/coinShopTopHeader">
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:visibility="gone" />
+    </LinearLayout>
+
+
     <ScrollView
+        android:id="@+id/scrollView2"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -182,12 +203,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:clickable="true"
-                app:tint="#756ab6"
                 app:layout_constraintBottom_toBottomOf="@+id/userLoggedIcon"
                 app:layout_constraintEnd_toEndOf="@+id/userLoggedIcon"
                 app:layout_constraintStart_toStartOf="@+id/userLoggedIcon"
                 app:layout_constraintTop_toTopOf="@+id/userLoggedIcon"
-                app:srcCompat="@drawable/outline_file_upload_24" />
+                app:srcCompat="@drawable/outline_file_upload_24"
+                app:tint="#756ab6" />
 
             <TextView
                 android:id="@+id/textView13"

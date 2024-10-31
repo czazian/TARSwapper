@@ -1,6 +1,9 @@
 package com.example.tarswapper
 
+import android.app.AlertDialog
 import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -23,12 +26,40 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private var isBackPressPrevented = false
 
+    //Check network connectivity - If network connection is not available, close the app
+    private fun isNetworkConnected(): Boolean {
+        val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val network = connectivityManager.activeNetwork
+        val capabilities = connectivityManager.getNetworkCapabilities(network)
+        return capabilities != null && capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         Thread.sleep(1500)
         installSplashScreen()
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+
+        //Check network connection at the start of the activity
+        if (!isNetworkConnected()) {
+            //When no internet connection
+            AlertDialog
+                .Builder(this)
+                .setTitle("Internet Connection Error")
+                .setMessage("No internet connection. Please try again!")
+                .setPositiveButton("OK") { dialog, _ ->
+                    dialog.dismiss()
+                    finish()
+                }
+                .create()
+                .show()
+
+            return
+        }
+
 
 
         //Set initial fragment

@@ -85,6 +85,7 @@ dependencies {
     implementation("androidx.compose.material3:material3-window-size-class:1.2.1")
     implementation("androidx.compose.material3:material3-adaptive-navigation-suite:1.0.0-alpha07")
     implementation("io.coil-kt:coil:2.6.0")
+    implementation("com.google.firebase:firebase-auth-ktx:23.1.0")
 
     // Testing Dependencies
     testImplementation("junit:junit:4.13.2")

@@ -55,14 +55,14 @@
                 app:layout_constraintTop_toTopOf="@+id/backContactListBtn"
                 app:layout_constraintVertical_bias="0.384"
                 app:shapeAppearanceOverlay="@style/circleImageView"
-                app:srcCompat="@drawable/reddot" />
+                app:srcCompat="@drawable/ripple_effect" />
 
             <TextView
                 android:id="@+id/contactNameChat"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
-                android:text="John Tan Yi Yang"
+                android:text=" "
                 android:textColor="#756AB6"
                 android:textSize="17dp"
                 android:textStyle="bold"
@@ -89,75 +89,23 @@
     </androidx.cardview.widget.CardView>
 
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/messageBoxes"
+    <LinearLayout
+        android:id="@+id/messages"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:padding="20dp"
+        android:orientation="vertical"
         app:layout_constraintBottom_toTopOf="@+id/bottomContainerView"
-        app:layout_constraintTop_toBottomOf="@+id/topContainerView"
-        app:layout_constraintVertical_bias="1.0"
-        tools:layout_editor_absoluteX="0dp">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/topContainerView">
 
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/messageRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="visible" />
+    </LinearLayout>
 
-        <!--Message Item-->
-        <ImageView
-            android:id="@+id/readMsgStateIcon"
-            android:layout_width="19dp"
-            android:layout_height="19dp"
-            app:layout_constraintBottom_toBottomOf="@+id/dateTimeMsgOwn"
-            app:layout_constraintEnd_toEndOf="@+id/msgItemOwn"
-            app:srcCompat="@drawable/checkyes" />
-
-        <TextView
-            android:id="@+id/msgItem"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:background="@drawable/message_box"
-            android:elevation="10dp"
-            android:padding="18dp"
-            android:text="What is this product?"
-            android:textColor="#000000"
-            app:layout_constraintBottom_toTopOf="@+id/dateTimeMsg"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_chainStyle="packed" />
-
-        <TextView
-            android:id="@+id/dateTimeMsg"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="22:00 • 24/8/24"
-            app:layout_constraintStart_toStartOf="@+id/msgItem"
-            app:layout_constraintTop_toBottomOf="@+id/msgItem" />
-
-        <!--Own Message Item-->
-        <TextView
-            android:id="@+id/msgItemOwn"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
-            android:background="@drawable/message_box_own"
-            android:elevation="10dp"
-            android:padding="18dp"
-            android:text="This is a bag that I wanted too sell and it has been 5 years with me."
-            android:textColor="@color/white"
-            app:layout_constraintBottom_toTopOf="@+id/dateTimeMsgOwn"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/dateTimeMsg"
-            app:layout_constraintVertical_chainStyle="packed" />
-
-        <TextView
-            android:id="@+id/dateTimeMsgOwn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:text="22:00 • 24/8/24"
-            app:layout_constraintEnd_toStartOf="@+id/readMsgStateIcon"
-            app:layout_constraintTop_toBottomOf="@+id/msgItemOwn" />
-
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.cardview.widget.CardView
         android:id="@+id/bottomContainerView"
@@ -178,14 +126,16 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/bottomContainerSendMsg"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:padding="15dp">
+            android:layout_height="match_parent">
 
             <ImageButton
                 android:id="@+id/sendMsgBtn"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:layout_marginStart="10dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginEnd="15dp"
+                android:layout_marginBottom="15dp"
                 android:background="@drawable/purpledot"
                 android:elevation="5dp"
                 android:foreground="@drawable/ripple_effect"
@@ -203,6 +153,9 @@
                 android:layout_width="0dp"
                 android:layout_height="50dp"
                 android:layout_gravity="center"
+                android:layout_marginLeft="15dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginBottom="15dp"
                 android:background="@drawable/inputbox"
                 android:ems="10"
                 android:hint="Type Here"
