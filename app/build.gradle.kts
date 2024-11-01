@@ -78,6 +78,9 @@ dependencies {
     implementation("org.eclipse.angus:jakarta.mail:2.0.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0")
     implementation("androidx.core:core-splashscreen:1.0.0")
+    implementation("com.google.mlkit:language-id:17.0.0")   //Identify Language
+    implementation("com.google.mlkit:translate:17.0.0")     //Translate Language
+
 
 
     // Compose Dependencies

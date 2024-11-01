@@ -6,7 +6,8 @@ class Message {
     var senderID: String? = null
     var media: String? = null
     var dateTime: String? = null
-    var status: Boolean? = false //Havent handle
+    var status: Boolean? = false
+    var translatedText: String? = null
 
     constructor(){}
     constructor(

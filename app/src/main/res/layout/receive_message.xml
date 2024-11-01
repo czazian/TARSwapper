@@ -9,17 +9,53 @@
     android:paddingRight="20dp"
     android:paddingBottom="10dp">
 
-    <TextView
-        android:id="@+id/msgItem"
-        android:layout_width="0dp"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/msgReceiveBox"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/message_box"
         android:elevation="10dp"
         android:padding="18dp"
-        android:text="What is this product?"
         android:textColor="#000000"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/msgItem"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:elevation="10dp"
+            android:text="What is this product?"
+            android:textColor="#000000"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!--A line-->
+        <View
+            android:id="@+id/view"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_marginTop="5dp"
+            android:background="#c0c0c0"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/msgItem"
+            app:layout_constraintTop_toBottomOf="@+id/msgItem" />
+
+        <TextView
+            android:id="@+id/translatedText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:elevation="10dp"
+            android:textColor="#000000"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="@+id/msgItem"
+            app:layout_constraintTop_toBottomOf="@+id/view" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 
     <TextView
         android:id="@+id/dateTimeMsg"
@@ -27,7 +63,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="3dp"
         android:text="22:00 • 24/8/24"
-        app:layout_constraintStart_toStartOf="@+id/msgItem"
+        app:layout_constraintStart_toStartOf="@+id/msgReceiveBox"
         app:layout_constraintTop_toBottomOf="@+id/messageImage" />
 
     <ImageView
@@ -36,6 +72,6 @@
         android:layout_height="200dp"
         android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/msgItem"
+        app:layout_constraintTop_toBottomOf="@+id/msgReceiveBox"
         app:srcCompat="@drawable/ai" />
 </androidx.constraintlayout.widget.ConstraintLayout>

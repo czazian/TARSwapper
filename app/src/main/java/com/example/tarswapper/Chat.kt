@@ -41,6 +41,7 @@ class Chat() : Fragment() {
     var receiverRoom: String? = null
     var senderID:String? = null
     var receiverID:String? = null
+    private var isInitialScroll = true
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -100,7 +101,7 @@ class Chat() : Fragment() {
 
         //Opposite UserID - Need to change to true value after development + testing
         //TEST FOR INFINIX (Use this when run on the Infinix)
-        val oppositeUserID = "-OAQyscTlsEQdw_3lITE"
+        val oppositeUserID = "-OAMvTvnFh2hqUW_HEdJ"
         //TEST FOR OPPO F9 (Use this when run on OPPO F9)
         //val oppositeUserID = "-OADY-HMy72rY1Mg1Cl5"
 
@@ -155,8 +156,12 @@ class Chat() : Fragment() {
                     }
                     //After finish adding, update the RecyclerView
                     adapter!!.notifyDataSetChanged()
-                    //Scroll to last item
-                    binding.messageRecyclerView.scrollToPosition(adapter!!.itemCount - 1)
+
+                    //Scroll to last item only on initial load
+                    if (isInitialScroll) {
+                        binding.messageRecyclerView.scrollToPosition(adapter!!.itemCount - 1)
+                        isInitialScroll = false
+                    }
                 }
 
                 override fun onCancelled(error: DatabaseError) {
@@ -203,35 +208,30 @@ class Chat() : Fragment() {
                 }
         }
 
+
+
         //Handle Attachment Upload (Image/Video)
-        binding.attachFileBtn.setOnClickListener(){
-            val intent = Intent()
-            intent.action = Intent.ACTION_GET_CONTENT
-            intent.type = "image/*"
-            startActivityForResult(intent,50)
+        binding.attachFileBtn.setOnClickListener {
+            val intent = Intent().apply {
+                action = Intent.ACTION_GET_CONTENT
+                //Specify to allow all types first
+                type = "*/*"
+                //Then pass image and video
+                putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("image/*", "video/*"))
+            }
+            startActivityForResult(intent, 50)
         }
 
         return binding.root
     }
 
-    private fun updateHeaderInfo(oppositeUserID: String, onResult: (User?) -> Unit) {
-        val databaseReference = FirebaseDatabase.getInstance().getReference("User")
-
-        databaseReference.child(oppositeUserID).get().addOnSuccessListener { dataSnapshot ->
-            if (dataSnapshot.exists()) {
-                val user = dataSnapshot.getValue(User::class.java)
-                onResult(user)
-            }
-        }.addOnFailureListener {
-            Log.e("Error Getting Opposite User Info", "Error Getting Opposite User Info")
-        }
-    }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
         if(requestCode == 50 && resultCode == Activity.RESULT_OK) {
             if(data != null){
+                //
                 val image = data.data
                 val calendar = Calendar.getInstance()
 
@@ -275,6 +275,19 @@ class Chat() : Fragment() {
                         }
                     }
             }
+        }
+    }
+
+    private fun updateHeaderInfo(oppositeUserID: String, onResult: (User?) -> Unit) {
+        val databaseReference = FirebaseDatabase.getInstance().getReference("User")
+
+        databaseReference.child(oppositeUserID).get().addOnSuccessListener { dataSnapshot ->
+            if (dataSnapshot.exists()) {
+                val user = dataSnapshot.getValue(User::class.java)
+                onResult(user)
+            }
+        }.addOnFailureListener {
+            Log.e("Error Getting Opposite User Info", "Error Getting Opposite User Info")
         }
     }
 
