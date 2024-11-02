@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.tarswapper.data.ChatRoom
 import com.example.tarswapper.dataAdapter.ChatSelectionAdapter
@@ -72,13 +73,74 @@ class ChatSelection : Fragment(), OnUserContactClick {
                     }
                 }
             }
+
             override fun onCancelled(error: DatabaseError) {
             }
         })
 
+
+        //Handle Contact Search
+        binding.searchbtn.setOnClickListener() {
+            val searchText = binding.searchtext.text.toString()
+
+            //Clear the search text
+            binding.searchtext.setText("")
+
+            getListOfContactBySearch(userID, searchText)
+        }
+
+
         return binding.root
     }
 
+
+    //Get Only Matching Contact List Item
+    private fun getListOfContactBySearch(userID: String?, searchText: String) {
+        val roomsRef = FirebaseDatabase.getInstance().getReference("Message")
+        val usersRef = FirebaseDatabase.getInstance().getReference("User")
+
+        roomsRef.get().addOnSuccessListener { snapshot ->
+            //Check if the fragment is attached before proceeding
+            if (!isAdded) return@addOnSuccessListener
+
+            val userRooms = mutableListOf<ChatRoom>()
+
+            for (roomSnapshot in snapshot.children) {
+                val roomID = roomSnapshot.key ?: ""
+
+                //Check if the roomID starts with the CurrentUserID
+                if (roomID.startsWith(userID!!)) {
+                    val lastMsg = roomSnapshot.child("lastMsg").getValue(String::class.java)
+                    val lastMsgTime = roomSnapshot.child("lastMsgTime").getValue(String::class.java)
+
+                    val oppositeUserId = roomID.removePrefix("$userID")
+
+                    //Now fetch the user's data to match the searchText
+                    usersRef.child(oppositeUserId).get().addOnSuccessListener { userSnapshot ->
+                        val userName = userSnapshot.child("name").getValue(String::class.java) ?: ""
+
+                        //Check if the user's name contains the search text
+                        if (userName.contains(searchText, ignoreCase = true)) {
+                            val chatRoom = ChatRoom(roomID, oppositeUserId, lastMsg, lastMsgTime)
+                            userRooms.add(chatRoom)
+                        }
+
+                        adapter = ChatSelectionAdapter(requireContext(), this)
+                        adapter!!.setData(userRooms)
+                        binding.contactRecyclerView.layoutManager =
+                            LinearLayoutManager(requireContext())
+                        binding.contactRecyclerView.adapter = adapter
+                        binding.contactRecyclerView.setHasFixedSize(true)
+                        adapter!!.notifyDataSetChanged()
+
+                    }
+                }
+            }
+        }
+    }
+
+
+    //Get All Contact List Items
     private fun getListOfContactList(userID: String?) {
         val roomsRef = FirebaseDatabase.getInstance().getReference("Message")
 

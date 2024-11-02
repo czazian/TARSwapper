@@ -215,8 +215,6 @@
                 android:id="@+id/constraintLayout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:paddingTop="20dp"
-                android:paddingBottom="20dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -232,9 +230,9 @@
                     android:foreground="@drawable/ripple_effect"
                     android:hapticFeedbackEnabled="true"
                     android:src="@drawable/outline_send_24"
-                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintBottom_toBottomOf="@+id/sendMsgText"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/sendMsgText"
                     app:tint="@color/white" />
 
                 <EditText
@@ -243,7 +241,9 @@
                     android:layout_height="50dp"
                     android:layout_gravity="center"
                     android:layout_marginStart="20dp"
+                    android:layout_marginTop="20dp"
                     android:layout_marginEnd="10dp"
+                    android:layout_marginBottom="20dp"
                     android:background="@drawable/inputbox"
                     android:ems="10"
                     android:hint="Type Here"

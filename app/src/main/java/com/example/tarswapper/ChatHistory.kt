@@ -11,6 +11,10 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class ChatHistory : Fragment() {
     private lateinit var binding: FragmentChatHistoryBinding
+
+    private lateinit var oppositeUserID: String
+    private lateinit var roomID: String
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -22,24 +26,33 @@ class ChatHistory : Fragment() {
         val bottomNavigation = (activity as MainActivity).findViewById<BottomNavigationView>(R.id.bottomNavigationView)
         bottomNavigation.visibility = View.GONE
 
-        //Go to Chat History Page
-        binding.backChatButton.setOnClickListener() {
-            val fragment = Chat()
 
-            val navigationView =
-                requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigationView)
-            navigationView.selectedItemId = R.id.chat
-
-            //Back to previous page with animation
-            val transaction = activity?.supportFragmentManager?.beginTransaction()
-            transaction?.replace(R.id.frameLayout, fragment)
-            transaction?.setCustomAnimations(
-                R.anim.fade_out,  // Enter animation
-                R.anim.fade_in  // Exit animation
-            )
-            transaction?.addToBackStack(null)
-            transaction?.commit()
+        //Get bundle values
+        arguments?.let {
+            oppositeUserID = it.getString("oppositeUserID") ?: ""
+            roomID = it.getString("roomID") ?: ""
         }
+
+        //Go Back to Chat Page
+        binding.backChatButton.setOnClickListener() {
+            val bundle = Bundle().apply {
+                putString("oppositeUserID", oppositeUserID)
+                putString("roomID", roomID)
+            }
+
+            val fragment = Chat().apply {
+                arguments = bundle
+            }
+
+            activity?.supportFragmentManager?.beginTransaction()?.apply {
+                replace(R.id.frameLayout, fragment)
+                setCustomAnimations(R.anim.fade_out, R.anim.fade_in)
+                commit()
+            }
+        }
+
+
+
 
 
         return binding.root

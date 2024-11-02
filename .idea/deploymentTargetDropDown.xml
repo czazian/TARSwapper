@@ -9,13 +9,13 @@
               <type value="RUNNING_DEVICE_TARGET" />
               <deviceKey>
                 <Key>
-                  <type value="VIRTUAL_DEVICE_PATH" />
-                  <value value="C:\Users\koyas\.android\avd\Oppo_F9_API_34.avd" />
+                  <type value="SERIAL_NUMBER" />
+                  <value value="077982521K100132" />
                 </Key>
               </deviceKey>
             </Target>
           </runningDeviceTargetSelectedWithDropDown>
-          <timeTargetWasSelectedWithDropDown value="2024-11-02T18:36:28.330705800Z" />
+          <timeTargetWasSelectedWithDropDown value="2024-11-02T18:52:45.019166500Z" />
         </State>
       </entry>
     </value>

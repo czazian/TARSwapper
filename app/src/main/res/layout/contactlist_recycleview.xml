@@ -21,15 +21,13 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:shapeAppearanceOverlay="@style/circleImageView"
-        app:srcCompat="@drawable/tarswapper_appicon" />
+        app:shapeAppearanceOverlay="@style/circleImageView" />
 
     <TextView
         android:id="@+id/contactName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="14dp"
-        android:text="Koyasu An"
         android:textColor="#756AB6"
         android:textSize="18dp"
         android:textStyle="bold"
@@ -46,7 +44,6 @@
         android:maxEms="11"
         android:paddingRight="10sp"
         android:singleLine="true"
-        android:text="This item looks good!"
         android:textColor="#858282"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@+id/checkMarkIcon"
@@ -78,6 +75,5 @@
         app:layout_constraintHorizontal_chainStyle="packed"
         app:layout_constraintStart_toEndOf="@+id/userIcn"
         app:layout_constraintStart_toStartOf="@+id/contactName"
-        app:layout_constraintTop_toTopOf="@+id/lastMsg"
-        app:srcCompat="@drawable/checkno" />
+        app:layout_constraintTop_toTopOf="@+id/lastMsg" />
 </androidx.constraintlayout.widget.ConstraintLayout>

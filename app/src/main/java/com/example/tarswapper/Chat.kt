@@ -40,11 +40,12 @@ class Chat() : Fragment() {
     var receiverRoom: String? = null
     var senderID: String? = null
     var receiverID: String? = null
-
+    private var isFirstLoad = true
 
     //Store temporary image
     private var tempImageUrl: String? = null
     private var mediaType: String? = null
+
 
     //From Previous Fragment
     private lateinit var oppositeUserID: String
@@ -104,17 +105,6 @@ class Chat() : Fragment() {
 
         //---------------------------------------------------------------------------------------------------------------------------------
 
-        //Get FCM Token
-        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
-            if (!task.isSuccessful) {
-                Log.w("FCM", "Fetching FCM registration token failed", task.exception)
-                return@addOnCompleteListener
-            }
-            //Get new FCM registration token
-            val token = task.result
-            Log.d("FCM", "FCM Registration Token: $token")
-        }
-
         ////GET SENDER AND RECEIVER////
         //Get User ID - From SharedPreference
         val sharedPreferencesTARSwapper =
@@ -165,7 +155,9 @@ class Chat() : Fragment() {
             oppositeUserID!!,
             roomID!!
         )
-        binding.messageRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+        binding.messageRecyclerView.layoutManager = LinearLayoutManager(requireContext()).apply {
+            stackFromEnd = true
+        }
         binding.messageRecyclerView.adapter = adapter
 
         //Get Messages Recycler View
@@ -188,16 +180,18 @@ class Chat() : Fragment() {
                         messages!!.add(message)
                     }
 
-                    //Scroll to last item only on initial load
-                    val newMessageCount = messages!!.size
-                    if (newMessageCount > previousMessageCount) {
-                        //Scroll to the last item if the message count has increased
-                        binding.messageRecyclerView.scrollToPosition(newMessageCount - 1)
-                    }
-
-
                     //After finish adding, update the RecyclerView
                     adapter!!.notifyDataSetChanged()
+
+                    //Scroll to last item
+                    binding.messageRecyclerView.requestLayout()
+                    if (isFirstLoad || messages!!.size > previousMessageCount) {
+                        //Scroll to the last item if the message count has increased
+                        binding.messageRecyclerView.post {
+                            binding.messageRecyclerView.scrollToPosition(messages!!.size - 1)
+                        }
+                        isFirstLoad = false
+                    }
                 }
 
                 override fun onCancelled(error: DatabaseError) {
@@ -358,7 +352,6 @@ class Chat() : Fragment() {
         }
     }
 
-
     private fun updateHeaderInfo(oppositeUserID: String, onResult: (User?) -> Unit) {
         val databaseReference = FirebaseDatabase.getInstance().getReference("User")
 
@@ -371,7 +364,6 @@ class Chat() : Fragment() {
             Log.e("Error Getting Opposite User Info", "Error Getting Opposite User Info")
         }
     }
-
 
     //Get the Formatted Date Time for Display
     private fun getCurrentDateTime(): String {

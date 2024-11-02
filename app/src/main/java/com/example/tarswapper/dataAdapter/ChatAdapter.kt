@@ -470,7 +470,6 @@ class ChatAdapter(
                             if (mediaType == "image") {
                                 //Display image
                                 viewHolder.binding.messageImage.visibility = View.VISIBLE
-                                viewHolder.binding.messageVideo.visibility = View.GONE
 
                                 Glide.with(context)
                                     .load(media)
@@ -480,7 +479,6 @@ class ChatAdapter(
                                 onResult(true)
                             } else if (mediaType == "video") {
                                 //Display video
-                                viewHolder.binding.messageImage.visibility = View.GONE
                                 viewHolder.binding.messageVideo.visibility = View.VISIBLE
 
                                 //Load video URI into VideoView
@@ -541,17 +539,15 @@ class ChatAdapter(
                             if (mediaType == "image") {
                                 //Display image
                                 viewHolder.binding.ownMessageImage.visibility = View.VISIBLE
-                                viewHolder.binding.ownMessageVideo.visibility = View.GONE
 
                                 Glide.with(context)
                                     .load(media)
                                     .into(viewHolder.binding.ownMessageImage)
 
-
                                 onResult(true)
                             } else if (mediaType == "video") {
                                 //Display video
-                                viewHolder.binding.ownMessageImage.visibility = View.GONE
+
                                 viewHolder.binding.ownMessageVideo.visibility = View.VISIBLE
 
                                 //Load video URI into VideoView
