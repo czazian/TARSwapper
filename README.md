@@ -1,3 +1,6 @@
+User Testing Email: test@gmail.com 
+User Testing Password: 123456
+
 Chew Zi An Part:
 1) Profile Management (Done)
    - Login
