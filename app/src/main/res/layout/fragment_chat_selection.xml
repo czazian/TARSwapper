@@ -8,11 +8,8 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/contactContainer"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingLeft="23dp"
-        android:paddingTop="10dp"
-        android:paddingRight="23dp"
-        android:paddingBottom="10dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/topContainerView">
@@ -22,11 +19,12 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:orientation="vertical"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            tools:layout_editor_absoluteX="23dp"
             tools:listitem="@layout/contactlist_recycleview" />
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 
     <androidx.cardview.widget.CardView
         android:id="@+id/topContainerView"

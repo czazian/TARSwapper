@@ -1,16 +1,17 @@
 package com.example.tarswapper
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
+import android.provider.OpenableColumns
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.example.tarswapper.data.Message
@@ -18,14 +19,12 @@ import com.example.tarswapper.data.User
 import com.example.tarswapper.dataAdapter.ChatAdapter
 import com.example.tarswapper.databinding.FragmentChatBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ServerValue
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.storage.FirebaseStorage
-import java.net.Inet4Address
 import java.text.SimpleDateFormat
 import java.util.ArrayList
 import java.util.Calendar
@@ -37,11 +36,22 @@ class Chat() : Fragment() {
     private lateinit var binding: FragmentChatBinding
     var adapter: ChatAdapter? = null
     var messages: ArrayList<Message>? = null
-    var senderRoom:String? = null
+    var senderRoom: String? = null
     var receiverRoom: String? = null
-    var senderID:String? = null
-    var receiverID:String? = null
-    private var isInitialScroll = true
+    var senderID: String? = null
+    var receiverID: String? = null
+
+
+    //Store temporary image
+    private var tempImageUrl: String? = null
+    private var mediaType: String? = null
+
+    //From Previous Fragment
+    private lateinit var oppositeUserID: String
+    private lateinit var roomID: String
+    private lateinit var lastMessage: String
+    private lateinit var lastMessageTime: String
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -50,7 +60,8 @@ class Chat() : Fragment() {
         binding = FragmentChatBinding.inflate(layoutInflater, container, false)
 
         //Hide Bottom Navigation Bar
-        val bottomNavigation = (activity as MainActivity).findViewById<BottomNavigationView>(R.id.bottomNavigationView)
+        val bottomNavigation =
+            (activity as MainActivity).findViewById<BottomNavigationView>(R.id.bottomNavigationView)
         bottomNavigation.visibility = View.GONE
 
         //Back to Select Contact Page
@@ -74,24 +85,35 @@ class Chat() : Fragment() {
 
         //Go to Chat History Page
         binding.moreOptionChatt.setOnClickListener() {
-            val fragment = ChatHistory()
+            val bundle = Bundle().apply {
+                putString("oppositeUserID", oppositeUserID)
+                putString("roomID", roomID)
+            }
 
-            val navigationView =
-                requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigationView)
-            navigationView.selectedItemId = R.id.chat
+            val fragment = ChatHistory().apply {
+                arguments = bundle
+            }
 
-            //Back to previous page with animation
-            val transaction = activity?.supportFragmentManager?.beginTransaction()
-            transaction?.replace(R.id.frameLayout, fragment)
-            transaction?.setCustomAnimations(
-                R.anim.fade_out,
-                R.anim.fade_in
-            )
-            transaction?.addToBackStack(null)
-            transaction?.commit()
+            activity?.supportFragmentManager?.beginTransaction()?.apply {
+                replace(R.id.frameLayout, fragment)
+                setCustomAnimations(R.anim.fade_out, R.anim.fade_in)
+                addToBackStack(null)
+                commit()
+            }
         }
 
         //---------------------------------------------------------------------------------------------------------------------------------
+
+        //Get FCM Token
+        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+            if (!task.isSuccessful) {
+                Log.w("FCM", "Fetching FCM registration token failed", task.exception)
+                return@addOnCompleteListener
+            }
+            //Get new FCM registration token
+            val token = task.result
+            Log.d("FCM", "FCM Registration Token: $token")
+        }
 
         ////GET SENDER AND RECEIVER////
         //Get User ID - From SharedPreference
@@ -99,15 +121,18 @@ class Chat() : Fragment() {
             requireActivity().getSharedPreferences("TARSwapperPreferences", Context.MODE_PRIVATE)
         val userID = sharedPreferencesTARSwapper.getString("userID", null)
 
-        //Opposite UserID - Need to change to true value after development + testing
-        //TEST FOR INFINIX (Use this when run on the Infinix)
-        val oppositeUserID = "-OAMvTvnFh2hqUW_HEdJ"
-        //TEST FOR OPPO F9 (Use this when run on OPPO F9)
-        //val oppositeUserID = "-OADY-HMy72rY1Mg1Cl5"
+
+        //Get Arguments/Data from Previous Fragment
+        arguments?.let { bundle ->
+            oppositeUserID = bundle.getString("oppositeUserID", "")
+            roomID = bundle.getString("roomID", "")
+            lastMessage = bundle.getString("lastMessage", "")
+            lastMessageTime = bundle.getString("lastMessageTime", "")
+        }
 
         //Update the header info to Opposite User
         updateHeaderInfo(oppositeUserID) { user ->
-            if(user != null){
+            if (user != null) {
                 binding.contactNameChat.text = user.name.toString()
                 Glide.with(requireContext())
                     .load(user.profileImage)
@@ -132,7 +157,14 @@ class Chat() : Fragment() {
         receiverRoom = "$receiverID$senderID"
 
         ////Bind the messages to the RecyclerView////
-        adapter = ChatAdapter(requireContext(), messages, senderRoom!!, receiverRoom!!)
+        adapter = ChatAdapter(
+            requireContext(),
+            messages,
+            senderRoom!!,
+            receiverRoom!!,
+            oppositeUserID!!,
+            roomID!!
+        )
         binding.messageRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.messageRecyclerView.adapter = adapter
 
@@ -140,13 +172,14 @@ class Chat() : Fragment() {
         database.reference.child("Message")
             .child(senderRoom!!)
             .child("message")
-            .addValueEventListener(object : ValueEventListener{
+            .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     //Clear all message to avoid duplication from the previous view
+                    val previousMessageCount = messages!!.size
                     messages!!.clear()
 
                     //Get all messages, add them into the messages list
-                    for(itemSnapshot1 in snapshot.children){
+                    for (itemSnapshot1 in snapshot.children) {
                         //Get each message as Message Obj
                         val message: Message? = itemSnapshot1.getValue(Message::class.java)
                         //Get the messageID under each room
@@ -154,14 +187,17 @@ class Chat() : Fragment() {
                         //Add the every message into messages list one-by-one
                         messages!!.add(message)
                     }
-                    //After finish adding, update the RecyclerView
-                    adapter!!.notifyDataSetChanged()
 
                     //Scroll to last item only on initial load
-                    if (isInitialScroll) {
-                        binding.messageRecyclerView.scrollToPosition(adapter!!.itemCount - 1)
-                        isInitialScroll = false
+                    val newMessageCount = messages!!.size
+                    if (newMessageCount > previousMessageCount) {
+                        //Scroll to the last item if the message count has increased
+                        binding.messageRecyclerView.scrollToPosition(newMessageCount - 1)
                     }
+
+
+                    //After finish adding, update the RecyclerView
+                    adapter!!.notifyDataSetChanged()
                 }
 
                 override fun onCancelled(error: DatabaseError) {
@@ -170,11 +206,27 @@ class Chat() : Fragment() {
 
 
         ////Send Message////
-        binding.sendMsgBtn.setOnClickListener(){
+        binding.sendMsgBtn.setOnClickListener() {
             //Get message text and date => Use them to create Message obj
             val text = binding.sendMsgText.text.toString()
+
+            //Check if text and image URL are valid
+            if (text.isEmpty()) {
+                AlertDialog
+                    .Builder(context)
+                    .setTitle("Error")
+                    .setMessage("Message text cannot be empty")
+                    .setPositiveButton("OK") { dialog, _ ->
+                        dialog.dismiss()
+                    }
+                    .create()
+                    .show()
+
+                return@setOnClickListener
+            }
+
             val dateTime = getCurrentDateTime()
-            val message = Message(text, senderID, dateTime)
+            val message = Message(text, senderID, dateTime, tempImageUrl, mediaType)
 
             //After creating an object, set the text input field to empty
             binding.sendMsgText.setText("")
@@ -183,7 +235,7 @@ class Chat() : Fragment() {
             val randomID = database.reference.push().key
 
             //Update the Last Message & Last DateTime for each Room (Both site of users)
-            val lastMessageObj = HashMap<String,Any>()
+            val lastMessageObj = HashMap<String, Any>()
             lastMessageObj["lastMsg"] = message.message!!
             lastMessageObj["lastMsgTime"] = dateTime
 
@@ -191,24 +243,27 @@ class Chat() : Fragment() {
             database.reference.child("Message").child(receiverRoom!!).updateChildren(lastMessageObj)
 
             //Insert the new message for each Room (Both site of users)
+
             //Insert for SenderRoom
-            database!!.reference.child("Message").child(senderRoom!!)
+            binding.keepImageBox.visibility = View.GONE
+            database!!.reference.child("Message")
+                .child(senderRoom!!)
                 .child("message")
                 .child(randomID!!)
                 .setValue(message).addOnSuccessListener {
-
                     //Insert for ReceiverRoom
                     database.reference.child("Message")
                         .child(receiverRoom!!)
                         .child("message")
                         .child(randomID)
                         .setValue(message)
-                        .addOnSuccessListener {  }
-
+                        .addOnSuccessListener {
+                            binding.messageRecyclerView.smoothScrollToPosition(adapter!!.itemCount - 1)
+                            tempImageUrl = null
+                            mediaType = null
+                        }
                 }
         }
-
-
 
         //Handle Attachment Upload (Image/Video)
         binding.attachFileBtn.setOnClickListener {
@@ -222,6 +277,14 @@ class Chat() : Fragment() {
             startActivityForResult(intent, 50)
         }
 
+        //When user chose to remove selected image
+        binding.removeImageSelect.setOnClickListener() {
+            binding.keepImageBox.visibility = View.GONE
+            tempImageUrl = null
+            mediaType = null
+        }
+
+
         return binding.root
     }
 
@@ -229,54 +292,72 @@ class Chat() : Fragment() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        if(requestCode == 50 && resultCode == Activity.RESULT_OK) {
-            if(data != null){
-                //
-                val image = data.data
+        if (requestCode == 50 && resultCode == Activity.RESULT_OK) {
+            //Show Progress Bar
+            binding.progessLinear.visibility = View.VISIBLE
+            binding.messages.visibility = View.GONE
+            binding.bottomContainerView.visibility = View.GONE
+
+            data?.data?.let { mediaUrl ->
+                //Get Selected Image URI
+                val media = mediaUrl
+
+                // Get MIME type of selected media
+                val mimeType = requireActivity().contentResolver.getType(mediaUrl)
+                mediaType =
+                    if (mimeType?.startsWith("image") == true) {
+                        "image"
+                    } else if (mimeType?.startsWith("video") == true) {
+                        "video"
+                    } else {
+                        null
+                    }
+
+                //Retrieve the file name from the URI
+                val cursor =
+                    requireActivity().contentResolver.query(mediaUrl, null, null, null, null)
+                var fileName = "unknown"
+                cursor?.use {
+                    if (it.moveToFirst()) {
+                        val nameIndex = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                        if (nameIndex != -1) {
+                            fileName = it.getString(nameIndex)
+                        }
+                    }
+                }
+
+                //Define the destination of storage in Firebase
                 val calendar = Calendar.getInstance()
-
                 val storage = FirebaseStorage.getInstance().reference.child("Media")
-                    .child(calendar.timeInMillis.toString()+"")
+                    .child(calendar.timeInMillis.toString())
 
-                storage.putFile(image!!)
-                    .addOnCompleteListener(){ task ->
-                        if(task.isSuccessful){
+                //Store the image in Firebase Storage
+                storage.putFile(media)
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
                             storage.downloadUrl.addOnSuccessListener { uri ->
                                 val filePath = uri.toString()
-                                val text: String = binding.sendMsgText.text.toString()
-                                val dateTime = getCurrentDateTime()
-                                val message = Message(text,senderID, dateTime)
-                                message.message = "photo"
-                                message.media = filePath
-                                binding.sendMsgText.setText("")
+                                tempImageUrl = filePath
 
-                                val database = FirebaseDatabase.getInstance()
-                                val randomID = database.reference.push().key
-                                val lastMessageObj = HashMap<String,Any>()
-                                lastMessageObj["lastMsg"] = message.message!!   //String = Any value
-                                lastMessageObj["lastMsgTime"] = dateTime        //String = Any value
+                                //Update View of Selected Image
+                                binding.keepImageBox.visibility = View.VISIBLE
+                                binding.imageName.text = fileName
 
-                                database.reference.child("Message").updateChildren(lastMessageObj)
-                                database.reference.child("Message").child(receiverRoom!!).updateChildren(lastMessageObj)
-
-                                database.reference.child("Message").child(senderRoom!!)
-                                    .child("messages")
-                                    .child(randomID!!)
-                                    .setValue(message).addOnSuccessListener {
-                                        database.reference.child("Message")
-                                            .child(receiverRoom!!)
-                                            .child("messages")
-                                            .child(randomID)
-                                            .setValue(message)
-                                            .addOnSuccessListener {  }
-                                    }
-
+                                //Disappear the Progress Bar
+                                binding.progessLinear.visibility = View.GONE
+                                binding.messages.visibility = View.VISIBLE
+                                binding.bottomContainerView.visibility = View.VISIBLE
                             }
+                        } else {
+                            binding.keepImageBox.visibility = View.GONE
+                            tempImageUrl = null
+                            mediaType = null
                         }
                     }
             }
         }
     }
+
 
     private fun updateHeaderInfo(oppositeUserID: String, onResult: (User?) -> Unit) {
         val databaseReference = FirebaseDatabase.getInstance().getReference("User")
@@ -293,7 +374,7 @@ class Chat() : Fragment() {
 
 
     //Get the Formatted Date Time for Display
-    private fun getCurrentDateTime(): String{
+    private fun getCurrentDateTime(): String {
         val dateFormat = SimpleDateFormat("HH:mm • dd/M/yy", Locale.getDefault())
         return dateFormat.format(Date())
     }

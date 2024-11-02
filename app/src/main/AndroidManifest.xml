@@ -48,6 +48,16 @@
         </activity>
 
 
+        <service
+            android:name=".api.MyFirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+
+
         <!-- For Camera Take Image -->
         <provider
             android:name="androidx.core.content.FileProvider"

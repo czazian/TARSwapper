@@ -7,6 +7,36 @@
     android:layout_height="match_parent"
     tools:context=".Chat">
 
+    <LinearLayout
+        android:id="@+id/progessLinear"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ProgressBar
+            android:id="@+id/hideChat"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:progressTint="#756AB6" />
+
+        <TextView
+            android:id="@+id/progressBarLoadingImg"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:fontFamily="@font/poppins_bold"
+            android:gravity="center"
+            android:text="Uploading Media..."
+            android:textColor="#756AB6"
+            android:textSize="16dp" />
+    </LinearLayout>
+
     <androidx.cardview.widget.CardView
         android:id="@+id/topContainerView"
         android:layout_width="match_parent"
@@ -128,62 +158,120 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <ImageButton
-                android:id="@+id/sendMsgBtn"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="15dp"
-                android:layout_marginEnd="15dp"
-                android:layout_marginBottom="15dp"
-                android:background="@drawable/purpledot"
-                android:elevation="5dp"
-                android:foreground="@drawable/ripple_effect"
-                android:hapticFeedbackEnabled="true"
-                android:src="@drawable/outline_send_24"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/keepImageBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="-20dp"
+                android:paddingLeft="20dp"
+                android:paddingTop="10dp"
+                android:paddingRight="20dp"
+                android:paddingBottom="-10dp"
+                android:visibility="gone"
+                app:layout_constraintBottom_toTopOf="@+id/constraintLayout"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <ImageView
+                    android:id="@+id/imageView8"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:src="@drawable/outline_image_24"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:tint="#756AB6" />
+
+                <TextView
+                    android:id="@+id/imageName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginTop="3dp"
+                    android:fontFamily="@font/poppins_medium"
+                    android:text=" "
+                    android:textColor="#756AB6"
+                    app:layout_constraintBottom_toBottomOf="@+id/imageView8"
+                    app:layout_constraintStart_toEndOf="@+id/imageView8"
+                    app:layout_constraintTop_toTopOf="@+id/imageView8" />
+
+                <ImageButton
+                    android:id="@+id/removeImageSelect"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="@color/white"
+                    android:foreground="@drawable/ripple_effect"
+                    android:padding="8dp"
+                    android:src="@drawable/round_close_24"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:tint="#756AB6" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/constraintLayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingTop="20dp"
+                android:paddingBottom="20dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toEndOf="@+id/sendMsgText"
-                app:layout_constraintTop_toTopOf="parent"
-                app:tint="@color/white" />
-
-            <EditText
-                android:id="@+id/sendMsgText"
-                android:layout_width="0dp"
-                android:layout_height="50dp"
-                android:layout_gravity="center"
-                android:layout_marginLeft="15dp"
-                android:layout_marginTop="15dp"
-                android:layout_marginBottom="15dp"
-                android:background="@drawable/inputbox"
-                android:ems="10"
-                android:hint="Type Here"
-                android:inputType="text"
-                android:padding="15dp"
-                android:paddingStart="20dp"
-                android:paddingEnd="45dp"
-                android:textColorHint="#4A4A4A"
-                android:textSize="14dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/sendMsgBtn"
-                app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toBottomOf="@+id/keepImageBox">
 
-            <ImageButton
-                android:id="@+id/attachFileBtn"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_marginEnd="15dp"
-                android:background="@drawable/ripple_effect"
-                android:backgroundTint="@color/white"
-                android:src="@drawable/baseline_attach_file_24"
-                app:layout_constraintBottom_toBottomOf="@+id/sendMsgText"
-                app:layout_constraintEnd_toEndOf="@+id/sendMsgText"
-                app:layout_constraintEnd_toStartOf="@+id/sendMsgBtn"
-                app:layout_constraintTop_toTopOf="@+id/sendMsgText"
-                app:tint="#756AB6" />
+                <ImageButton
+                    android:id="@+id/sendMsgBtn"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_marginEnd="20dp"
+                    android:background="@drawable/purpledot"
+                    android:elevation="5dp"
+                    android:foreground="@drawable/ripple_effect"
+                    android:hapticFeedbackEnabled="true"
+                    android:src="@drawable/outline_send_24"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:tint="@color/white" />
+
+                <EditText
+                    android:id="@+id/sendMsgText"
+                    android:layout_width="0dp"
+                    android:layout_height="50dp"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginEnd="10dp"
+                    android:background="@drawable/inputbox"
+                    android:ems="10"
+                    android:hint="Type Here"
+                    android:inputType="text"
+                    android:padding="15dp"
+                    android:paddingStart="20dp"
+                    android:paddingTop="10dp"
+                    android:paddingEnd="45dp"
+                    android:textColorHint="#4A4A4A"
+                    android:textSize="14dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/sendMsgBtn"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ImageButton
+                    android:id="@+id/attachFileBtn"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_marginEnd="3dp"
+                    android:background="@drawable/ripple_effect"
+                    android:backgroundTint="@color/white"
+                    android:src="@drawable/baseline_attach_file_24"
+                    app:layout_constraintBottom_toBottomOf="@+id/sendMsgText"
+                    app:layout_constraintEnd_toEndOf="@+id/sendMsgText"
+                    app:layout_constraintTop_toTopOf="@+id/sendMsgText"
+                    app:tint="#756AB6" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>

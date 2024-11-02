@@ -4,12 +4,16 @@ import android.app.AlertDialog
 import android.content.Context
 import android.graphics.Color
 import android.graphics.Typeface
+import android.net.Uri
+import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.example.tarswapper.EnlargedMedia
 import com.example.tarswapper.R
 import com.example.tarswapper.data.Message
 import com.example.tarswapper.databinding.HideTranslateMessageBinding
@@ -35,7 +39,9 @@ class ChatAdapter(
     private val context: Context,
     messages: ArrayList<Message>?,
     senderRoom: String,
-    receiverRoom: String
+    receiverRoom: String,
+    oppositeUserID: String,
+    roomID: String,
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder?>() {
 
     /*
@@ -52,6 +58,10 @@ class ChatAdapter(
     private val SENT_INDICATOR = 0
     private val RECEIVED_INDICATOR = 1
 
+    //Get From Chat
+    private val oppositeUserID: String
+    private val roomID: String
+
     //Initialize the variables
     init {
         if (messages != null) {
@@ -59,6 +69,8 @@ class ChatAdapter(
         }
         this.senderRoom = senderRoom
         this.receiverRoom = receiverRoom
+        this.oppositeUserID = oppositeUserID
+        this.roomID = roomID
     }
 
     //Get Sender Layout Elements
@@ -120,12 +132,13 @@ class ChatAdapter(
         //Get item one-by-one
         val currentItem = messages[position]
 
+
         ////Determined by getItemViewType & onCreateViewHolder method////
         //If the item uses SendChatViewHolder => Means it is the Current User
         if (holder.javaClass == SendChatViewHolder::class.java) {
             val viewHolder = holder as SendChatViewHolder
 
-            //
+            //Bind the Image if exists for the message - Havent Handle
             if (currentItem.message.equals("photo")) {
                 viewHolder.binding.msgItemOwn.visibility = View.GONE
                 viewHolder.binding.ownMessageImage.visibility = View.VISIBLE
@@ -149,6 +162,58 @@ class ChatAdapter(
 
             //Bind the Message Text
             viewHolder.binding.msgItemOwn.text = currentItem.message
+
+
+            //Bind the Image/Video (IF EXIST)
+            bindImageVideoSender(viewHolder, currentItem) { }
+            //Handle Image Enlarge
+            viewHolder.binding.ownMessageImage.setOnClickListener {
+                //Check if the image is visible before proceeding
+                if (viewHolder.binding.ownMessageImage.visibility == View.VISIBLE) {
+                    val bundle = Bundle().apply {
+                        putString("oppositeUserID", oppositeUserID)
+                        putString("roomID", roomID)
+                        putString("mediaUrl", currentItem.media)
+                        putString("mediaType", currentItem.mediaType)
+                    }
+
+                    val fragment = EnlargedMedia().apply {
+                        arguments = bundle
+                    }
+
+                    (context as? AppCompatActivity)?.supportFragmentManager?.beginTransaction()
+                        ?.apply {
+                            replace(R.id.frameLayout, fragment)
+                            setCustomAnimations(R.anim.fade_out, R.anim.fade_in)
+                            addToBackStack(null)
+                            commit()
+                        }
+                }
+            }
+            //Handle Video Enlarge
+            viewHolder.binding.ownMessageVideo.setOnClickListener {
+                if (viewHolder.binding.ownMessageVideo.visibility == View.VISIBLE) {
+                    val bundle = Bundle().apply {
+                        putString("oppositeUserID", oppositeUserID)
+                        putString("roomID", roomID)
+                        putString("mediaUrl", currentItem.media)
+                        putString("mediaType", currentItem.mediaType)
+                    }
+
+                    val fragment = EnlargedMedia().apply {
+                        arguments = bundle
+                    }
+
+                    (context as? AppCompatActivity)?.supportFragmentManager?.beginTransaction()
+                        ?.apply {
+                            replace(R.id.frameLayout, fragment)
+                            setCustomAnimations(R.anim.fade_out, R.anim.fade_in)
+                            addToBackStack(null)
+                            commit()
+                        }
+                }
+            }
+
 
             //Check weather the message is undone message. If yes, set it to ITALIC Style
             if (currentItem.message == "This message has been withdrawn") {
@@ -181,6 +246,7 @@ class ChatAdapter(
                         if (!it) {
                             //Update the undone Message to "This message has been withdrawn." for both Room (Sender & Receiver) for consistency
                             currentItem.message = "This message has been withdrawn"
+                            currentItem.media = null    //Remove the media
 
                             //Update for Sender Room
                             currentItem.messageID?.let { itOne ->
@@ -229,7 +295,7 @@ class ChatAdapter(
             //Else the item uses ReceiveChatViewHolder => Means it is the Opposite User
             val viewHolder = holder as ReceiveChatViewHolder
 
-            //
+            //Bind the Image if exists for the message - Havent Handle
             if (currentItem.message.equals("photo")) {
                 viewHolder.binding.msgItem.visibility = View.GONE
                 viewHolder.binding.messageImage.visibility = View.VISIBLE
@@ -247,6 +313,58 @@ class ChatAdapter(
             bindTranslatedText(viewHolder, currentItem) {
                 hasTranslation = it
             }
+
+
+            //Bind the Image/Video (IF EXIST)
+            bindImageVideoReceiver(viewHolder, currentItem) { }
+            //Handle Image Enlarge
+            viewHolder.binding.messageImage.setOnClickListener {
+                //Check if the image is visible before proceeding
+                if (viewHolder.binding.messageImage.visibility == View.VISIBLE) {
+                    val bundle = Bundle().apply {
+                        putString("oppositeUserID", oppositeUserID)
+                        putString("roomID", roomID)
+                        putString("mediaUrl", currentItem.media)
+                        putString("mediaType", currentItem.mediaType)
+                    }
+
+                    val fragment = EnlargedMedia().apply {
+                        arguments = bundle
+                    }
+
+                    (context as? AppCompatActivity)?.supportFragmentManager?.beginTransaction()
+                        ?.apply {
+                            replace(R.id.frameLayout, fragment)
+                            setCustomAnimations(R.anim.fade_out, R.anim.fade_in)
+                            addToBackStack(null)
+                            commit()
+                        }
+                }
+            }
+            //Handle Video Enlarge
+            viewHolder.binding.messageVideo.setOnClickListener {
+                if (viewHolder.binding.messageVideo.visibility == View.VISIBLE) {
+                    val bundle = Bundle().apply {
+                        putString("oppositeUserID", oppositeUserID)
+                        putString("roomID", roomID)
+                        putString("mediaUrl", currentItem.media)
+                        putString("mediaType", currentItem.mediaType)
+                    }
+
+                    val fragment = EnlargedMedia().apply {
+                        arguments = bundle
+                    }
+
+                    (context as? AppCompatActivity)?.supportFragmentManager?.beginTransaction()
+                        ?.apply {
+                            replace(R.id.frameLayout, fragment)
+                            setCustomAnimations(R.anim.fade_out, R.anim.fade_in)
+                            addToBackStack(null)
+                            commit()
+                        }
+                }
+            }
+
 
             //Bind the Message Date Time
             viewHolder.binding.dateTimeMsg.text = currentItem.dateTime
@@ -270,7 +388,7 @@ class ChatAdapter(
                     return@setOnLongClickListener true
                 }
 
-                if(!hasTranslation){
+                if (!hasTranslation) {
                     val optionView =
                         LayoutInflater.from(context).inflate(R.layout.translate_message, null)
                     val binding = TranslateMessageBinding.bind(optionView)
@@ -326,7 +444,163 @@ class ChatAdapter(
                 }
             }
         }
+
+
     }
+
+    private fun bindImageVideoReceiver(
+        viewHolder: ChatAdapter.ReceiveChatViewHolder,
+        currentItem: Message,
+        onResult: (Boolean) -> Unit
+    ) {
+        val database = FirebaseDatabase.getInstance().getReference("Message")
+
+        //Retrieve data from Firebase using the senderRoom and messageID
+        database.child(receiverRoom).child("message").child(currentItem.messageID!!)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    //Check if the message exists
+                    if (snapshot.exists()) {
+                        val message = snapshot.getValue(Message::class.java)
+                        val media = message?.media
+                        val mediaType = message?.mediaType
+
+                        if (media != null) {
+                            //Check if media is an image or video based on file extension or MIME type
+                            if (mediaType == "image") {
+                                //Display image
+                                viewHolder.binding.messageImage.visibility = View.VISIBLE
+                                viewHolder.binding.messageVideo.visibility = View.GONE
+
+                                Glide.with(context)
+                                    .load(media)
+                                    .into(viewHolder.binding.messageImage)
+
+
+                                onResult(true)
+                            } else if (mediaType == "video") {
+                                //Display video
+                                viewHolder.binding.messageImage.visibility = View.GONE
+                                viewHolder.binding.messageVideo.visibility = View.VISIBLE
+
+                                //Load video URI into VideoView
+                                viewHolder.binding.messageVideo.setVideoURI(Uri.parse(media))
+                                viewHolder.binding.messageVideo.setOnPreparedListener { mediaPlayer ->
+                                    mediaPlayer.isLooping = true
+                                    viewHolder.binding.messageVideo.start()
+                                }
+
+
+                                onResult(true)
+                            } else {
+                                //Hide both if media type is unsupported
+                                hideMedia(viewHolder)
+                                onResult(false)
+                            }
+                        } else {
+                            //Hide both if media is null
+                            hideMedia(viewHolder)
+                            onResult(false)
+                        }
+                    } else {
+                        //Hide both if snapshot does not exist
+                        hideMedia(viewHolder)
+                        onResult(false)
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Log.e("Getting Media", "Error Getting Media: ${error.message}")
+                    hideMedia(viewHolder)
+                    onResult(false)
+                }
+            })
+    }
+
+
+    //Bind Image/Video for Sender
+    private fun bindImageVideoSender(
+        viewHolder: ChatAdapter.SendChatViewHolder,
+        currentItem: Message,
+        onResult: (Boolean) -> Unit
+    ) {
+        val database = FirebaseDatabase.getInstance().getReference("Message")
+
+        //Retrieve data from Firebase using the senderRoom and messageID
+        database.child(senderRoom).child("message").child(currentItem.messageID!!)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    //Check if the message exists
+                    if (snapshot.exists()) {
+                        val message = snapshot.getValue(Message::class.java)
+                        val media = message?.media
+                        val mediaType = message?.mediaType
+
+                        if (media != null) {
+                            //Check if media is an image or video based on file extension or MIME type
+                            if (mediaType == "image") {
+                                //Display image
+                                viewHolder.binding.ownMessageImage.visibility = View.VISIBLE
+                                viewHolder.binding.ownMessageVideo.visibility = View.GONE
+
+                                Glide.with(context)
+                                    .load(media)
+                                    .into(viewHolder.binding.ownMessageImage)
+
+
+                                onResult(true)
+                            } else if (mediaType == "video") {
+                                //Display video
+                                viewHolder.binding.ownMessageImage.visibility = View.GONE
+                                viewHolder.binding.ownMessageVideo.visibility = View.VISIBLE
+
+                                //Load video URI into VideoView
+                                viewHolder.binding.ownMessageVideo.setVideoURI(Uri.parse(media))
+                                viewHolder.binding.ownMessageVideo.setOnPreparedListener { mediaPlayer ->
+                                    mediaPlayer.isLooping = true
+                                    viewHolder.binding.ownMessageVideo.start()
+                                }
+
+
+                                onResult(true)
+                            } else {
+                                //Hide both if media type is unsupported
+                                hideMedia(viewHolder)
+                                onResult(false)
+                            }
+                        } else {
+                            //Hide both if media is null
+                            hideMedia(viewHolder)
+                            onResult(false)
+                        }
+                    } else {
+                        //Hide both if snapshot does not exist
+                        hideMedia(viewHolder)
+                        onResult(false)
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Log.e("Getting Media", "Error Getting Media: ${error.message}")
+                    hideMedia(viewHolder)
+                    onResult(false)
+                }
+            })
+    }
+
+
+    //Helper function to hide media views - for Sender
+    private fun hideMedia(viewHolder: ChatAdapter.SendChatViewHolder) {
+        viewHolder.binding.ownMessageImage.visibility = View.GONE
+        viewHolder.binding.ownMessageVideo.visibility = View.GONE
+    }
+
+    //Helper function to hide media views - for Receiver
+    private fun hideMedia(viewHolder: ChatAdapter.ReceiveChatViewHolder) {
+        viewHolder.binding.messageImage.visibility = View.GONE
+        viewHolder.binding.messageVideo.visibility = View.GONE
+    }
+
 
     //When Hide Translate Button is clicked
     private fun removeTranslation(currentItem: Message) {
@@ -354,44 +628,52 @@ class ChatAdapter(
         }
     }
 
-    private fun bindTranslatedText(viewHolder: ChatAdapter.ReceiveChatViewHolder, currentItem: Message, onResult: (Boolean) -> Unit) {
+    private fun bindTranslatedText(
+        viewHolder: ChatAdapter.ReceiveChatViewHolder,
+        currentItem: Message,
+        onResult: (Boolean) -> Unit
+    ) {
         val database = FirebaseDatabase.getInstance().getReference("Message")
 
         //Retrieve data from Firebase using the receiverRoom and messageID
-        database.child(receiverRoom).child("message").child(currentItem.messageID!!).addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                //Check if the message exists
-                if (snapshot.exists()) {
-                    val message = snapshot.getValue(Message::class.java)
-                    val translatedText = message?.translatedText
+        database.child(receiverRoom).child("message").child(currentItem.messageID!!)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    //Check if the message exists
+                    if (snapshot.exists()) {
+                        val message = snapshot.getValue(Message::class.java)
+                        val translatedText = message?.translatedText
 
-                    //Update UI based on the availability of translatedText
-                    if (translatedText != null) {
-                        viewHolder.binding.view.visibility = View.VISIBLE
-                        viewHolder.binding.translatedText.visibility = View.VISIBLE
-                        viewHolder.binding.translatedText.text = "Translated: $translatedText"
+                        //Update UI based on the availability of translatedText
+                        if (translatedText != null) {
+                            viewHolder.binding.view.visibility = View.VISIBLE
+                            viewHolder.binding.translatedText.visibility = View.VISIBLE
+                            viewHolder.binding.translatedText.text = "Translated: $translatedText"
 
-                        onResult(true)
+                            onResult(true)
+                        } else {
+                            //Hide the translated text view if not available
+                            viewHolder.binding.view.visibility = View.GONE
+                            viewHolder.binding.translatedText.visibility = View.GONE
+                            onResult(false)
+                        }
                     } else {
-                        //Hide the translated text view if not available
+                        //Handle case where the message snapshot does not exist
                         viewHolder.binding.view.visibility = View.GONE
                         viewHolder.binding.translatedText.visibility = View.GONE
                         onResult(false)
                     }
-                } else {
-                    //Handle case where the message snapshot does not exist
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Log.e(
+                        "Getting Translated Text",
+                        "Error Getting Translated Text: ${error.message}"
+                    )
                     viewHolder.binding.view.visibility = View.GONE
                     viewHolder.binding.translatedText.visibility = View.GONE
-                    onResult(false)
                 }
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                Log.e("Getting Translated Text", "Error Getting Translated Text: ${error.message}")
-                viewHolder.binding.view.visibility = View.GONE
-                viewHolder.binding.translatedText.visibility = View.GONE
-            }
-        })
+            })
     }
 
 

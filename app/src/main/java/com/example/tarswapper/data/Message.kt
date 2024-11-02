@@ -8,16 +8,21 @@ class Message {
     var dateTime: String? = null
     var status: Boolean? = false
     var translatedText: String? = null
+    var mediaType: String? = null
 
     constructor(){}
     constructor(
         message: String?,
         senderID: String?,
-        dateTime: String?
+        dateTime: String?,
+        media: String?,
+        mediaType: String?
     ) {
         this.message = message
         this.senderID = senderID
         this.dateTime = dateTime
+        this.media = media
+        this.mediaType = mediaType
     }
 }
 
