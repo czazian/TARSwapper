@@ -1,5 +1,9 @@
 package com.example.tarswapper
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
@@ -30,6 +34,7 @@ import java.util.ArrayList
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import kotlin.properties.Delegates
 
 
 class Chat() : Fragment() {
@@ -52,6 +57,7 @@ class Chat() : Fragment() {
     private lateinit var roomID: String
     private lateinit var lastMessage: String
     private lateinit var lastMessageTime: String
+    private lateinit var messageID: String
 
 
     override fun onCreateView(
@@ -118,15 +124,24 @@ class Chat() : Fragment() {
             roomID = bundle.getString("roomID", "")
             lastMessage = bundle.getString("lastMessage", "")
             lastMessageTime = bundle.getString("lastMessageTime", "")
+            messageID = bundle.getString("messageID", "")
         }
 
+        Log.e("messageID", "$messageID")
+
+
         //Update the header info to Opposite User
-        updateHeaderInfo(oppositeUserID) { user ->
-            if (user != null) {
-                binding.contactNameChat.text = user.name.toString()
-                Glide.with(requireContext())
-                    .load(user.profileImage)
-                    .into(binding.userIcn)
+        if (isAdded) {  //Update the header info only if the fragment is attached
+            updateHeaderInfo(oppositeUserID) { user ->
+                if (user != null) {
+                    binding.contactNameChat.text = user.name.toString()
+
+                    if (isAdded) {   //Ensure fragment is still attached before loading the image
+                        Glide.with(requireContext())
+                            .load(user.profileImage)
+                            .into(binding.userIcn)
+                    }
+                }
             }
         }
 
@@ -183,16 +198,38 @@ class Chat() : Fragment() {
                     //After finish adding, update the RecyclerView
                     adapter!!.notifyDataSetChanged()
 
+
                     //Scroll to last item
                     binding.messageRecyclerView.requestLayout()
-                    if (isFirstLoad || messages!!.size > previousMessageCount) {
+
+                    //Scroll to the Destination Position when from Chat History
+                    if(messageID != "") {
+                        //Find the position of the message with the given messageID
+                        val targetPosition = messages!!.indexOfFirst { message ->
+                            //If messageID from interface = messageID from the message list, return its index
+                            message.messageID == messageID
+                        }
+
+                        //-1 means nothing, as start with 0
+                        if (targetPosition != -1) {
+                            Log.e("TARGET POS", "targetPosition =$targetPosition")
+                            binding.messageRecyclerView.postDelayed({
+                                binding.messageRecyclerView.smoothScrollToPosition(targetPosition)
+                            }, 100)
+                        } else {
+                            Log.w("ChatScroll", "Message with ID $messageID not found.")
+                        }
+
+                    } else if (isFirstLoad || messages!!.size > previousMessageCount) {
                         //Scroll to the last item if the message count has increased
                         binding.messageRecyclerView.post {
                             binding.messageRecyclerView.scrollToPosition(messages!!.size - 1)
                         }
                         isFirstLoad = false
                     }
+
                 }
+
 
                 override fun onCancelled(error: DatabaseError) {
                 }

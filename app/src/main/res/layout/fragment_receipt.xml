@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
-    android:background="@android:color/white">
+    android:background="#fffafb"
+    android:orientation="vertical">
 
     <!-- Header -->
 
@@ -60,17 +60,17 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center_horizontal">
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
 
             <!-- Success Icon -->
             <ImageView
                 android:id="@+id/ivSuccessIcon"
                 android:layout_width="100dp"
                 android:layout_height="100dp"
+                android:layout_marginBottom="16dp"
                 android:src="@drawable/baseline_check_circle_24"
-                app:tint="#51F44C"
-                android:layout_marginBottom="16dp" />
+                app:tint="#51F44C" />
 
             <!-- Title -->
             <TextView

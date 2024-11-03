@@ -138,15 +138,6 @@ class ChatAdapter(
         if (holder.javaClass == SendChatViewHolder::class.java) {
             val viewHolder = holder as SendChatViewHolder
 
-            //Bind the Image if exists for the message - Havent Handle
-            if (currentItem.message.equals("photo")) {
-                viewHolder.binding.msgItemOwn.visibility = View.GONE
-                viewHolder.binding.ownMessageImage.visibility = View.VISIBLE
-                Glide.with(context)
-                    .load(currentItem.media)
-                    .into(viewHolder.binding.ownMessageImage)
-            }
-
             ////Update Message View Status////
             updateMessageReadStatus(currentItem)
 
@@ -295,14 +286,6 @@ class ChatAdapter(
             //Else the item uses ReceiveChatViewHolder => Means it is the Opposite User
             val viewHolder = holder as ReceiveChatViewHolder
 
-            //Bind the Image if exists for the message - Havent Handle
-            if (currentItem.message.equals("photo")) {
-                viewHolder.binding.msgItem.visibility = View.GONE
-                viewHolder.binding.messageImage.visibility = View.VISIBLE
-                Glide.with(context)
-                    .load(currentItem.media)
-                    .into(viewHolder.binding.messageImage)
-            }
 
             ////Update Message View Status////
             updateMessageReadStatus(currentItem)
@@ -444,8 +427,6 @@ class ChatAdapter(
                 }
             }
         }
-
-
     }
 
     private fun bindImageVideoReceiver(
@@ -470,6 +451,7 @@ class ChatAdapter(
                             if (mediaType == "image") {
                                 //Display image
                                 viewHolder.binding.messageImage.visibility = View.VISIBLE
+                                viewHolder.binding.messageVideo.visibility = View.GONE
 
                                 Glide.with(context)
                                     .load(media)
@@ -480,6 +462,8 @@ class ChatAdapter(
                             } else if (mediaType == "video") {
                                 //Display video
                                 viewHolder.binding.messageVideo.visibility = View.VISIBLE
+                                viewHolder.binding.messageImage.visibility = View.GONE
+
 
                                 //Load video URI into VideoView
                                 viewHolder.binding.messageVideo.setVideoURI(Uri.parse(media))
@@ -539,6 +523,7 @@ class ChatAdapter(
                             if (mediaType == "image") {
                                 //Display image
                                 viewHolder.binding.ownMessageImage.visibility = View.VISIBLE
+                                viewHolder.binding.ownMessageVideo.visibility = View.GONE
 
                                 Glide.with(context)
                                     .load(media)
@@ -549,6 +534,7 @@ class ChatAdapter(
                                 //Display video
 
                                 viewHolder.binding.ownMessageVideo.visibility = View.VISIBLE
+                                viewHolder.binding.ownMessageImage.visibility = View.GONE
 
                                 //Load video URI into VideoView
                                 viewHolder.binding.ownMessageVideo.setVideoURI(Uri.parse(media))

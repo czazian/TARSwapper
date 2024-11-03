@@ -5,28 +5,25 @@
     android:id="@+id/chatHistoryContainer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#fffafb"
     tools:context=".ChatHistory">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/chatHistoryInnerContainer">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/chatHistoryInnerContainer"
+        app:layout_constraintVertical_bias="0.0">
 
-        <TextView
-            android:id="@+id/msgItem"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="25dp"
-            android:layout_marginTop="5dp"
-            android:background="@drawable/message_box"
-            android:elevation="10dp"
-            android:padding="18dp"
-            android:text="What is this product?"
-            android:textColor="#000000"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/chatHistoryRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="10dp" />
+    </LinearLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/chatHistoryInnerContainer"
@@ -50,6 +47,7 @@
             android:inputType="text"
             android:padding="12dp"
             android:paddingStart="18dp"
+            android:paddingEnd="100dp"
             android:textColorHint="#6C6A6A"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -89,34 +87,49 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/chatHistoryResultFilterContainer"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_height="wrap_content"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/chatHistorySearchBox"
             tools:layout_editor_absoluteX="15dp">
 
 
             <TextView
+                android:id="@+id/txtDateSelected"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/poppins_medium"
+                android:paddingLeft="5dp"
+                android:paddingTop="5dp"
+                android:paddingRight="5dp"
+                android:paddingBottom="-5dp"
+                android:textColor="#000000"
+                android:textSize="16dp"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
                 android:id="@+id/noOfResultText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
-                android:text="2 Results"
                 android:textColor="#000000"
                 android:textStyle="bold"
-                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintBottom_toBottomOf="@+id/chatHistorySpinner"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="@+id/chatHistorySpinner" />
 
             <Spinner
                 android:id="@+id/chatHistorySpinner"
-                android:layout_width="wrap_content"
+                android:layout_width="100dp"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
                 android:background="@drawable/inputborder2"
                 android:padding="5dp"
-                android:paddingEnd="40dp"
+                android:paddingEnd="20dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toBottomOf="@+id/txtDateSelected" />
 
             <ImageView
                 android:id="@+id/dropdownIcon"

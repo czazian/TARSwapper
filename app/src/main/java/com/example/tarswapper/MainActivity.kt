@@ -18,7 +18,10 @@ import com.example.tarswapper.Setting
 import com.example.tarswapper.databinding.ActivityMainBinding
 import com.example.tarswapper.game.GameOver
 import com.example.tarswapper.game.GameView
+import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.messaging.FirebaseMessaging
 import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
@@ -59,7 +62,6 @@ class MainActivity : AppCompatActivity() {
 
             return
         }
-
 
 
         //Set initial fragment

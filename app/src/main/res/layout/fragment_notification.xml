@@ -5,7 +5,8 @@
     android:id="@+id/notificationContainer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Notification" >
+    android:background="#fffafb"
+    tools:context=".Notification">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/coinShopTopHeader"

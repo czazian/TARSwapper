@@ -5,6 +5,7 @@
     android:id="@+id/navigationContainer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#fffafb"
     tools:context=".Navigation">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -113,10 +114,10 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:paddingTop="8dp"
                     android:text="Destination"
-                    android:textStyle="bold"
                     android:textColor="@android:color/black"
-                    android:paddingTop="8dp" />
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/fillDestination"
@@ -128,10 +129,10 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:paddingTop="8dp"
                     android:text="Recipient"
-                    android:textStyle="bold"
                     android:textColor="@android:color/black"
-                    android:paddingTop="8dp" />
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/fillName"
@@ -143,10 +144,10 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:paddingTop="8dp"
                     android:text="Scheduled Date &amp; Time"
-                    android:textStyle="bold"
                     android:textColor="@android:color/black"
-                    android:paddingTop="8dp" />
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/fillDateTime"
@@ -158,10 +159,10 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:paddingTop="8dp"
                     android:text="Price"
-                    android:textStyle="bold"
                     android:textColor="@android:color/black"
-                    android:paddingTop="8dp" />
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/fillPrice"

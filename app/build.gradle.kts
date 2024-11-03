@@ -90,6 +90,7 @@ dependencies {
     implementation("io.coil-kt:coil:2.6.0")
     implementation("com.google.firebase:firebase-auth-ktx:23.1.0")
     implementation("com.google.firebase:firebase-messaging-ktx:24.0.3")
+    implementation("com.google.firebase:firebase-messaging:24.0.3")
 
     // Testing Dependencies
     testImplementation("junit:junit:4.13.2")
