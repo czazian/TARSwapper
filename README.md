@@ -24,6 +24,7 @@ Chew Zi An Part:
    - Add Message Attachment - One Message One Attachment (Image/Video)
    - Message Translate - Received Message Only
    - Message Undo - Sent Message within 5 Minutes Only
+   - Enlarge Image/Video
    - ChatHistory - According to Text, Date, Media Type
    - ChatHistory - Redirect to Clicked History Message
 7) AI Chatbot
