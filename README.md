@@ -17,6 +17,14 @@ Chew Zi An Part:
    - Edit Profile - User Title, Profile Background
    - User Profile - Display User Title & Profile Background
 5) Instant-messaging
-   - 
+   - Contact Selection
+   - Contact Search
+   - Chatting Send/Receive
+   - Send Message
+   - Add Message Attachment - One Message One Attachment (Image/Video)
+   - Message Translate - Received Message Only
+   - Message Undo - Sent Message within 5 Minutes Only
+   - ChatHistory - According to Text, Date, Media Type
+   - ChatHistory - Redirect to Clicked History Message
 7) AI Chatbot
 8) Destination Location Navigation & Identity Verification 
