@@ -16,7 +16,7 @@ Chew Zi An Part:
    - Coin Shop - User Title, Profile Background
    - Edit Profile - User Title, Profile Background
    - User Profile - Display User Title & Profile Background
-5) Instant-messaging
+5) Instant-messaging (Done)
    - Contact Selection
    - Contact Search
    - Chatting Send/Receive
@@ -28,4 +28,6 @@ Chew Zi An Part:
    - ChatHistory - According to Text, Date, Media Type
    - ChatHistory - Redirect to Clicked History Message
 7) AI Chatbot
-8) Destination Location Navigation & Identity Verification 
+   - QnA Inquiries
+   - Product Recommendations
+9) Destination Location Navigation & Identity Verification 
