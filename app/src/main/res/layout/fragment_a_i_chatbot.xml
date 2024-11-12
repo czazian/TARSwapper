@@ -5,7 +5,10 @@
     android:id="@+id/aichatbotContainer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_gravity="right"
     android:background="#fffafb"
+    android:foregroundGravity="bottom"
+    app:layout_anchorGravity="bottom"
     tools:context=".AIChatbot">
 
     <androidx.cardview.widget.CardView
@@ -85,14 +88,14 @@
                         android:layout_width="wrap_content"
                         android:layout_height="40dp"
                         android:layout_marginBottom="5dp"
-                        android:text="What can I do?" />
+                        android:text="What is TARSwapper?" />
 
                     <Button
                         android:id="@+id/btnPreQues2"
                         android:layout_width="wrap_content"
                         android:layout_height="40dp"
                         android:layout_marginStart="5dp"
-                        android:text="How to buy item? hahahahahaha Shit fuck" />
+                        android:text="What can you do?" />
                 </LinearLayout>
             </HorizontalScrollView>
 
@@ -178,4 +181,5 @@
         app:layout_constraintEnd_toEndOf="@+id/imageView"
         app:layout_constraintStart_toStartOf="@+id/imageView"
         app:lineHeight="30dp" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

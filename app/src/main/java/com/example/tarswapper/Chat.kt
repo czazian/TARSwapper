@@ -198,7 +198,6 @@ class Chat() : Fragment() {
                     //After finish adding, update the RecyclerView
                     adapter!!.notifyDataSetChanged()
 
-
                     //Scroll to last item
                     binding.messageRecyclerView.requestLayout()
 

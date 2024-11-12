@@ -47,6 +47,8 @@ android {
         resources {
             excludes += "META-INF/LICENSE.md"
             excludes += "META-INF/NOTICE.md"
+            excludes += "META-INF/INDEX.LIST"
+            excludes += "META-INF/DEPENDENCIES"
         }
     }
 }
@@ -71,8 +73,6 @@ dependencies {
     implementation("androidx.legacy:legacy-support-v4:1.0.0")
     implementation("com.google.android.gms:play-services-maps:19.0.0")
     implementation("com.github.bumptech.glide:glide:5.0.0-rc01")
-    implementation("com.squareup.retrofit2:retrofit:2.11.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
     implementation("com.github.bumptech.glide:glide:4.12.0")
     implementation("com.github.yalantis:ucrop:2.2.8")
     implementation("org.eclipse.angus:jakarta.mail:2.0.3")
@@ -80,8 +80,14 @@ dependencies {
     implementation("androidx.core:core-splashscreen:1.0.0")
     implementation("com.google.mlkit:language-id:17.0.0")   //Identify Language
     implementation("com.google.mlkit:translate:17.0.0")     //Translate Language
-
-
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
+    implementation("com.google.cloud:google-cloud-storage:2.15.0")
+    implementation("com.itextpdf:itext7-core:7.2.3")
+    implementation("com.google.cloud:google-cloud-discoveryengine:0.48.0")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.google.cloud:google-cloud-dialogflow:3.2.0")
+    implementation("com.google.cloud:google-cloud-dialogflow-cx:0.6.0")
+    implementation("com.google.auth:google-auth-library-oauth2-http:1.11.0")
 
     // Compose Dependencies
     implementation("androidx.compose.material3:material3:1.2.1")
@@ -91,6 +97,7 @@ dependencies {
     implementation("com.google.firebase:firebase-auth-ktx:23.1.0")
     implementation("com.google.firebase:firebase-messaging-ktx:24.0.3")
     implementation("com.google.firebase:firebase-messaging:24.0.3")
+    implementation("com.google.firebase:firebase-vertexai:16.0.1")
 
     // Testing Dependencies
     testImplementation("junit:junit:4.13.2")

@@ -59,6 +59,7 @@
         app:layout_constraintTop_toBottomOf="@+id/coinShopTopHeader">
 
         <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tabs"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"
@@ -99,7 +100,7 @@
         app:layout_constraintTop_toBottomOf="@+id/notificationTabs">
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/notificationRecyclerVie3"
+            android:id="@+id/notificationRecyclerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:paddingTop="8dp"
