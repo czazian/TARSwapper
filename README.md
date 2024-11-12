@@ -28,6 +28,6 @@ Chew Zi An Part:
    - ChatHistory - According to Text, Date, Media Type
    - ChatHistory - Redirect to Clicked History Message
 7) AI Chatbot
-   - QnA Inquiries
+   - FAQs Inquiries
    - Product Recommendations
 9) Destination Location Navigation & Identity Verification 
