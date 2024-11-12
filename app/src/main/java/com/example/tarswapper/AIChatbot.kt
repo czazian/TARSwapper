@@ -24,34 +24,9 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageMetadata
 import java.io.ByteArrayOutputStream
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
-import com.google.api.client.http.javanet.NetHttpTransport
-import com.google.api.client.json.gson.GsonFactory
-import com.google.cloud.dialogflow.cx.v3.SessionsSettings
-import com.google.cloud.dialogflow.cx.v3beta1.DetectIntentRequest
-import com.google.cloud.dialogflow.cx.v3beta1.DetectIntentResponse
-import com.google.cloud.dialogflow.cx.v3beta1.QueryInput
-import com.google.cloud.dialogflow.cx.v3beta1.SessionName
-import com.google.cloud.dialogflow.cx.v3beta1.SessionsClient
-import com.google.cloud.dialogflow.cx.v3beta1.TextInput
-import com.google.gson.Gson
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.JsonObject
-import okhttp3.Call
-import okhttp3.Callback
-import okhttp3.MediaType
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
+
 import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody
-import okhttp3.RequestBody.Companion.toRequestBody
-import okhttp3.Response
-import org.json.JSONObject
-import java.io.IOException
+
 import java.util.UUID
 
 

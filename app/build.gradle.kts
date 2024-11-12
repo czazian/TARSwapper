@@ -3,6 +3,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp")
     id("com.google.gms.google-services")
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin") version "2.0.1" apply false
 }
 
 android {
@@ -57,12 +58,12 @@ dependencies {
     // Firebase BOM
     implementation(platform("com.google.firebase:firebase-bom:33.5.0"))
 
-    // Firebase Services
+    //Firebase Services
     implementation("com.google.firebase:firebase-database")
     implementation("com.google.firebase:firebase-database-ktx")
     implementation("com.google.firebase:firebase-storage-ktx")
 
-    // Other Dependencies
+    //Other Dependencies
     implementation("com.github.yuriy-budiyev:code-scanner:2.3.0")
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.appcompat:appcompat:1.7.0")
@@ -83,13 +84,11 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
     implementation("com.google.cloud:google-cloud-storage:2.15.0")
     implementation("com.itextpdf:itext7-core:7.2.3")
-    implementation("com.google.cloud:google-cloud-discoveryengine:0.48.0")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
-    implementation("com.google.cloud:google-cloud-dialogflow:3.2.0")
-    implementation("com.google.cloud:google-cloud-dialogflow-cx:0.6.0")
-    implementation("com.google.auth:google-auth-library-oauth2-http:1.11.0")
+    implementation("com.android.volley:volley:1.2.1")
+    implementation("com.google.maps.android:android-maps-utils:2.2.0")
 
-    // Compose Dependencies
+    //Compose Dependencies
     implementation("androidx.compose.material3:material3:1.2.1")
     implementation("androidx.compose.material3:material3-window-size-class:1.2.1")
     implementation("androidx.compose.material3:material3-adaptive-navigation-suite:1.0.0-alpha07")
@@ -98,8 +97,9 @@ dependencies {
     implementation("com.google.firebase:firebase-messaging-ktx:24.0.3")
     implementation("com.google.firebase:firebase-messaging:24.0.3")
     implementation("com.google.firebase:firebase-vertexai:16.0.1")
+    implementation("com.google.android.gms:play-services-location:21.3.0")
 
-    // Testing Dependencies
+    //Testing Dependencies
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")

@@ -1,6 +1,7 @@
 package com.example.tarswapper
 
 import android.Manifest
+import android.app.AlertDialog
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.widget.Button
@@ -39,6 +40,15 @@ class IdentityVerification : Fragment() {
 
 
 
+
+
+        //Temporary Data - Replace with the real verification code
+        val verificationCode = 4406
+
+
+
+
+
         //////QR CODE SCANNER/////
         //Initialize the CodeScannerView
         scannerView = LayoutInflater.from(context)
@@ -57,8 +67,50 @@ class IdentityVerification : Fragment() {
         //Set decode and error callbacks
         codeScanner.decodeCallback = DecodeCallback {
             requireActivity().runOnUiThread {
-                Toast.makeText(requireContext(), it.text, Toast.LENGTH_LONG).show()
                 scannerView.visibility = View.GONE // Hide scanner after scanning
+
+                //If verification code is the same
+                if(it.text == verificationCode.toString()){
+                    val dialogView = layoutInflater.inflate(R.layout.successful_verification, null)
+                    val dialog = AlertDialog.Builder(context)
+                        .setView(dialogView)
+                        .create()
+
+                    val button = dialogView.findViewById<Button>(R.id.btnOk)
+
+                    button.setOnClickListener(){
+                        dialog.dismiss()
+                    }
+
+                    val window = dialog.window
+                    window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+                    dialog.show()
+
+                    binding.afterSuccessful.visibility = View.VISIBLE
+                    binding.identityMainContent.visibility = View.GONE
+
+                } else {
+                    //If verification code is not the same
+                    val dialogView = layoutInflater.inflate(R.layout.unsuccessful_verification, null)
+                    val dialog = AlertDialog.Builder(context)
+                        .setView(dialogView)
+                        .create()
+
+                    val button = dialogView.findViewById<Button>(R.id.btnOkUnsuccess)
+
+                    button.setOnClickListener(){
+                        dialog.dismiss()
+                    }
+
+                    val window = dialog.window
+                    window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+                    dialog.show()
+
+                    binding.afterSuccessful.visibility = View.GONE
+                    binding.identityMainContent.visibility = View.VISIBLE
+                }
             }
         }
         codeScanner.errorCallback = ErrorCallback {
@@ -73,7 +125,6 @@ class IdentityVerification : Fragment() {
 
 
 
-
         //Set up button click listener to start the scanner
         binding.btnScanQR.setOnClickListener {
             scannerView.visibility = View.VISIBLE // Show scanner when button clicked
@@ -82,9 +133,9 @@ class IdentityVerification : Fragment() {
 
 
 
-        //Back to the Navigation Page
+        //Back to the Notification Page
         binding.btnBackNavigation.setOnClickListener() {
-            val fragment = Navigation()
+            val fragment = Notification()
 
             //Bottom Navigation Indicator Update
             val navigationView =
@@ -98,15 +149,42 @@ class IdentityVerification : Fragment() {
                 R.anim.fade_out,  // Enter animation
                 R.anim.fade_in  // Exit animation
             )
-            transaction?.addToBackStack(null)
             transaction?.commit()
         }
 
 
+        //This button will only shown after the verification process is successful
+        binding.btnComplete.setOnClickListener() {
 
+            AlertDialog
+                .Builder(context)
+                .setTitle("Transaction Confirmation")
+                .setMessage("Are you sure you want to complete this transaction?")
+                .setPositiveButton("Yes") { dialog, _ ->
+                    dialog.dismiss()
+
+                    val bundle = Bundle().apply {
+
+                    }
+                    val fragment = Receipt().apply {
+
+                    }
+                    activity?.supportFragmentManager?.beginTransaction()?.apply {
+                        replace(R.id.frameLayout, fragment)
+                        setCustomAnimations(R.anim.fade_out, R.anim.fade_in)
+                        commit()
+                    }
+                }
+                .setNegativeButton("Cancel") { dialog, _ ->
+                    dialog.dismiss()
+                }
+                .create()
+                .show()
+        }
 
         return binding.root
     }
+
 
     private fun checkPermission(permission: String, reqCode: Int) {
         if (ContextCompat.checkSelfPermission(requireContext(), permission) != PackageManager.PERMISSION_GRANTED) {
@@ -116,11 +194,11 @@ class IdentityVerification : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        scannerView.visibility = View.GONE // Hide it initially
+        scannerView.visibility = View.GONE
     }
 
     override fun onPause() {
-        codeScanner.releaseResources() // Release resources on pause
+        codeScanner.releaseResources()
         super.onPause()
     }
 }

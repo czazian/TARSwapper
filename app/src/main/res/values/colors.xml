@@ -6,4 +6,6 @@
     <color name="grey_font">#ff9e9e9e</color>
     <color name="text_shadow">#7F616161</color>
     <color name="text_shadow_white">#FFFFFF</color>
+    <color name="button_gray">#b8b8b8</color>
+    <color name="button_purple">#756AB6</color>
 </resources>

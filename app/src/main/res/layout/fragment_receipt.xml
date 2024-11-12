@@ -184,5 +184,6 @@
         android:padding="16dp"
         android:text="Download PDF"
         android:textColor="@android:color/white"
-        app:icon="@drawable/outline_print_24" />
+        app:icon="@drawable/outline_print_24"
+        app:iconPadding="-10dp" />
 </LinearLayout>

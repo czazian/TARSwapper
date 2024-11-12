@@ -3,7 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/transactionItemLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="5dp"
+    android:layout_marginRight="5dp">
 
     <!-- First Transaction Card -->
 
@@ -11,9 +13,14 @@
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginRight="5dp"
+        android:layout_marginBottom="10dp"
+        android:padding="5dp"
         app:cardCornerRadius="12dp"
         app:cardElevation="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -31,13 +38,16 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/largeroundedcircleborder"
-                android:padding="25dp">
+                android:padding="20dp">
 
                 <ImageView
                     android:id="@+id/transactionIcons"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
                     android:layout_gravity="center"
+                    android:layout_marginTop="-2dp"
+                    android:layout_marginRight="-2dp"
+                    android:rotation="40"
                     android:src="@drawable/outline_navigation_24"
                     app:tint="#000000" />
             </FrameLayout>
@@ -50,6 +60,7 @@
                 android:orientation="vertical">
 
                 <TextView
+                    android:id="@+id/transactionID"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Transaction ID #20241025"
@@ -58,6 +69,7 @@
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/transactionDateTime"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
@@ -67,15 +79,14 @@
                     android:textSize="14sp" />
 
                 <Button
+                    android:id="@+id/transactionBtn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:backgroundTint="#CCCCCC"
                     android:clickable="false"
                     android:enabled="false"
-                    android:paddingStart="8dp"
-                    android:paddingTop="-6dp"
-                    android:paddingEnd="8dp"
-                    android:paddingBottom="-6dp"
+                    android:paddingStart="15dp"
+                    android:paddingEnd="15dp"
                     android:text="Transaction Ended"
                     android:textAllCaps="false"
                     app:cornerRadius="20dp" />
