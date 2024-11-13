@@ -97,35 +97,34 @@
                 app:layout_constraintStart_toStartOf="@+id/addThumbnailImgBtn"
                 app:layout_constraintTop_toBottomOf="@+id/addThumbnailImgBtn" />
 
-            <ImageButton
+            <Button
                 android:id="@+id/addImgBtn"
-                android:layout_width="95dp"
-                android:layout_height="129dp"
-                android:scaleType="centerInside"
-                android:src="@drawable/baseline_add_24"
-                app:layout_constraintStart_toStartOf="@+id/textView20"
-                app:layout_constraintTop_toBottomOf="@+id/textView20" />
+                android:layout_width="wrap_content"
+                android:layout_height="35dp"
+                android:text="Select images"
+                android:textSize="12dp"
+                android:background="@drawable/rounded_background"
+                android:layout_marginLeft="4dp"
+                app:layout_constraintBottom_toBottomOf="@+id/textView20"
+                app:layout_constraintStart_toEndOf="@+id/textView20"
+                app:layout_constraintTop_toTopOf="@+id/textView20" />
 
 
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="wrap_content"
-                android:layout_height="129dp"
-                app:layout_constraintBottom_toBottomOf="@+id/addImgBtn"
-                app:layout_constraintStart_toEndOf="@+id/addImgBtn"
+                android:id="@+id/container_product_images"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="6dp"
+                android:layout_marginEnd="35dp"
                 app:layout_constraintTop_toBottomOf="@+id/textView20">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="horizontal">
-
+>
                     <!-- RecyclerView to display selected images horizontally -->
                     <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/recycler_view_images"
+                        android:id="@+id/multi_images_recycler_view"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        tools:listitem="@layout/product_image" />
-                </LinearLayout>
+                        android:layout_height="match_parent"/>
+
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <EditText
@@ -136,7 +135,7 @@
                 android:background="#F2F2FF"
                 android:hint="Write product name here..."
                 app:layout_constraintStart_toStartOf="@+id/textView20"
-                app:layout_constraintTop_toBottomOf="@+id/addImgBtn" />
+                app:layout_constraintTop_toBottomOf="@+id/container_product_images" />
 
             <EditText
                 android:id="@+id/descriptionED"
@@ -314,6 +313,7 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <Button
+                android:id="@+id/submitBtn"
                 android:layout_width="320dp"
                 android:layout_height="50dp"
                 android:layout_marginTop="20dp"

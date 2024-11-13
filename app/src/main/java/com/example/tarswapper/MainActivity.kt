@@ -105,7 +105,7 @@ class MainActivity : AppCompatActivity() {
             when (item.itemId) {
                 R.id.video -> {
                     val transaction = fragmentManager.beginTransaction()
-                    val fragment = AIChatbot()
+                    val fragment = Video()
                     transaction.replace(binding.frameLayout.id, fragment)
                     transaction.addToBackStack(null)
                     transaction.commit()
@@ -113,7 +113,7 @@ class MainActivity : AppCompatActivity() {
 
                 R.id.community -> {
                     val transaction = fragmentManager.beginTransaction()
-                    val fragment = AIChatbot()
+                    val fragment = Community()
                     transaction.replace(binding.frameLayout.id, fragment)
                     transaction.addToBackStack(null)
                     transaction.commit()
@@ -121,7 +121,7 @@ class MainActivity : AppCompatActivity() {
 
                 R.id.tag -> {
                     val transaction = fragmentManager.beginTransaction()
-                    val fragment = SimulateProductPage()
+                    val fragment = Trade()
                     transaction.replace(binding.frameLayout.id, fragment)
                     transaction.addToBackStack(null)
                     transaction.commit()

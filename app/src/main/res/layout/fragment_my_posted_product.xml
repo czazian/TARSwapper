@@ -73,7 +73,7 @@
         tools:listitem="@layout/product_list_hori" />
 
     <ImageButton
-        android:id="@+id/my_fab"
+        android:id="@+id/addProductBtn"
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:layout_marginEnd="32dp"

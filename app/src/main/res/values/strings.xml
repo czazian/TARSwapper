@@ -30,4 +30,9 @@
         <item>Sale</item>
         <item>Swap</item>
     </string-array>
+
+    <string-array name="product_status">
+        <item>Available</item>
+        <item>Booked</item>
+    </string-array>
 </resources>
