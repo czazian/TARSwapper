@@ -86,7 +86,9 @@ dependencies {
     implementation("com.itextpdf:itext7-core:7.2.3")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.android.volley:volley:1.2.1")
+    implementation("com.google.auth:google-auth-library-oauth2-http:1.4.0")
     implementation("com.google.maps.android:android-maps-utils:2.2.0")
+    //implementation("io.kommunicate.sdk:kommunicateui:2.10.0")
 
     //Compose Dependencies
     implementation("androidx.compose.material3:material3:1.2.1")

@@ -15,7 +15,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import com.android.volley.Request
 import com.android.volley.RequestQueue
@@ -267,6 +266,20 @@ class Navigation : Fragment() {
 
                 //Update the route using the current location
                 updateRoute(currentLatLng)
+            } else {
+                //If no current location is found, use the default location
+                val defaultLocation = LatLng(3.2158649, 101.7304889)
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation, 15f))
+
+                //Add a marker for the default location
+                if (currentLocationMarker == null) {
+                    currentLocationMarker = googleMap.addMarker(
+                        MarkerOptions().position(defaultLocation).title("Default Location")
+                    )
+                }
+
+                //Update the route based on the default location
+                updateRoute(defaultLocation)
             }
         }
 
