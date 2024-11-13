@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/productContainer"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Trade"
+    android:background="@color/white">
+
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/headCV"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        app:cardElevation="12dp"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="10dp">
+
+            <ImageView
+                android:id="@+id/profile_ImgV"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="4dp"
+                android:background="@drawable/circular_image"
+                android:src="@drawable/user"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/welcomeMsg1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="Good morning"
+                android:textSize="20dp"
+                app:layout_constraintStart_toEndOf="@+id/profile_ImgV"
+                app:layout_constraintTop_toTopOf="@+id/profile_ImgV" />
+
+            <TextView
+                android:id="@+id/usernameTV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="User 1"
+                android:textSize="20dp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="@+id/profile_ImgV"
+                app:layout_constraintStart_toStartOf="@+id/welcomeMsg1" />
+
+            <ImageButton
+                android:id="@+id/shopImgBtn"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginEnd="4dp"
+                android:background="@drawable/rounded_button"
+                android:backgroundTint="#AC87C5"
+                android:scaleType="centerInside"
+                android:src="@drawable/baseline_shop_24"
+                app:layout_constraintBottom_toBottomOf="@+id/swapRequestImgBtn"
+                app:layout_constraintEnd_toStartOf="@+id/swapRequestImgBtn"
+                app:layout_constraintTop_toTopOf="@+id/swapRequestImgBtn"
+                app:layout_constraintVertical_bias="0.0" />
+
+            <ImageButton
+                android:id="@+id/swapRequestImgBtn"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginEnd="4dp"
+                android:background="@drawable/rounded_button"
+                android:backgroundTint="#AC87C5"
+                android:src="@drawable/baseline_swap_horiz_24"
+                app:layout_constraintBottom_toBottomOf="@+id/myOrderImgBtn"
+                app:layout_constraintEnd_toStartOf="@+id/myOrderImgBtn"
+                app:layout_constraintTop_toTopOf="@+id/myOrderImgBtn"
+                app:layout_constraintVertical_bias="0.0" />
+
+            <ImageButton
+                android:id="@+id/myOrderImgBtn"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/rounded_button"
+                android:backgroundTint="#AC87C5"
+                android:scaleType="centerInside"
+                android:src="@drawable/baseline_receipt_24"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.6" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/searchCL"
+        android:layout_width="match_parent"
+        android:layout_height="160dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/headCV">
+
+        <Button
+            android:id="@+id/searchBtn"
+            android:layout_width="400dp"
+            android:layout_height="60dp"
+            android:layout_marginTop="20dp"
+            android:backgroundTint="#E0AED0"
+            android:text="Search for..."
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.495"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/SaleBtn"
+            android:layout_width="195dp"
+            android:layout_height="40dp"
+            android:drawableStart="@drawable/baseline_attach_money_24"
+            android:text="Sale"
+            android:textSize="16dp"
+            android:drawablePadding="8dp"
+            app:layout_constraintBottom_toBottomOf="@+id/SwapBtn"
+            app:layout_constraintStart_toStartOf="@+id/searchBtn"
+            app:layout_constraintTop_toTopOf="@+id/SwapBtn"
+            android:backgroundTint="#AC87C5" />
+
+        <Button
+            android:id="@+id/SwapBtn"
+            android:layout_width="195dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="6dp"
+            android:text="Swap"
+            android:textSize="16dp"
+            app:layout_constraintEnd_toEndOf="@+id/searchBtn"
+            app:layout_constraintTop_toBottomOf="@+id/searchBtn"
+            android:backgroundTint="#E8E8E9"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/productRV"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/searchCL"
+        tools:listitem="@layout/product_list"/>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -89,6 +89,10 @@ dependencies {
     implementation("com.google.auth:google-auth-library-oauth2-http:1.4.0")
     implementation("com.google.maps.android:android-maps-utils:2.2.0")
     //implementation("io.kommunicate.sdk:kommunicateui:2.10.0")
+    implementation ("me.relex:circleindicator:2.1.6") //slide indicator
+    implementation ("com.google.android.exoplayer:exoplayer:2.18.1") //video player
+    implementation ("com.github.PhilJay:MPAndroidChart:v3.1.0")      //pie chart
+
 
     //Compose Dependencies
     implementation("androidx.compose.material3:material3:1.2.1")
@@ -100,6 +104,7 @@ dependencies {
     implementation("com.google.firebase:firebase-messaging:24.0.3")
     implementation("com.google.firebase:firebase-vertexai:16.0.1")
     implementation("com.google.android.gms:play-services-location:21.3.0")
+    implementation("androidx.recyclerview:recyclerview:1.3.2")
 
     //Testing Dependencies
     testImplementation("junit:junit:4.13.2")

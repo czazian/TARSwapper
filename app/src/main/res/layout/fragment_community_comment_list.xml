@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/frameLayout6"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    tools:context=".CommunityCommentList"
+    android:background="@color/white">
+
+
+    <ImageView
+        android:id="@+id/profile_ImgV"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:background="@drawable/circular_image"
+        android:src="@drawable/user"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/usernameTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:text="User 1"
+        android:textSize="20dp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@+id/profile_ImgV"
+        app:layout_constraintTop_toTopOf="@+id/profile_ImgV" />
+
+    <TextView
+        android:id="@+id/commentTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="This is comment content!"
+        android:textSize="16dp"
+        app:layout_constraintStart_toStartOf="@+id/usernameTV"
+        app:layout_constraintTop_toBottomOf="@+id/usernameTV" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

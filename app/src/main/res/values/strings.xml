@@ -2,4 +2,32 @@
     <string name="app_name">TARSwapper</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="spinner_prompt">Select an option</string>
+
+    <!-- Array of product categories for spinner -->
+    <string-array name="product_category">
+        <item>Electronics</item>
+        <item>Fashion</item>
+        <item>Books</item>
+        <item>Furniture</item>
+        <item>Stationery</item>
+        <item>Home Appliances</item>
+        <item>Sports Equipment</item>
+        <item>Accessories</item>
+        <item>Food &amp; Beverages</item>
+        <item>Other</item>
+    </string-array>
+
+    <!-- Array of product condition for spinner -->
+    <string-array name="product_condition">
+        <item>Used</item>
+        <item>New</item>
+    </string-array>
+
+    <!-- Array of product condition for spinner -->
+    <string-array name="trade_type">
+        <item>Sale</item>
+        <item>Swap</item>
+    </string-array>
 </resources>
