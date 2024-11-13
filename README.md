@@ -27,7 +27,7 @@ Chew Zi An Part:
    - Enlarge Image/Video
    - ChatHistory - According to Text, Date, Media Type
    - ChatHistory - Redirect to Clicked History Message
-7) AI Chatbot
+7) AI Chatbot (Done) - Need to Improve Accuracy + Integrate with Latest Product Details
    - FAQs Inquiries
    - Product Recommendations
 9) Destination Location Navigation & Identity Verification 
