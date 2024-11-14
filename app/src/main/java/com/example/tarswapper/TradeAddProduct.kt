@@ -48,7 +48,8 @@ class TradeAddProduct : Fragment() {
     private lateinit var binding: FragmentAddProductBinding
     private lateinit var userObj: User
 
-    private val selectedImages: MutableList<Uri> = mutableListOf()  // List to store selected images
+    private val selectedThumbnailImages: MutableList<Uri> = mutableListOf()  // List to store thumbnail images
+    private val selectedImages: MutableList<Uri>          = mutableListOf()  // List to store selected images
     private lateinit var multi_image_adapter: ProductImageListAdapter
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreateView(
@@ -160,30 +161,63 @@ class TradeAddProduct : Fragment() {
 
         binding.submitBtn.setOnClickListener(){
 
-            //push data into firebase
-            var newProduct = Product(
-                name = binding.nameED.text.toString(),
-                description = binding.descriptionED.text.toString(),
-                category = binding.productCategorySpinner.selectedItem.toString(),
-                condition = binding.productConditionSpinner.selectedItem.toString(),
-                tradeType = binding.productTradeTypeSpinner.selectedItem.toString(),
-                //status is available by default
-                status = resources.getStringArray(R.array.product_status)[0],
-                created_at = LocalDateTime.now().toString(),
-                created_by_UserID = userObj.userID,
-            )
-
-            if (newProduct.tradeType == "Sale") {
-                newProduct.price = binding.priceED.text.toString()
-            } else if (newProduct.tradeType == "Swap") {
-                newProduct.swapCategory = binding.productSwapCategorySpinner.selectedItem.toString()
-                newProduct.swapRemark = binding.swapRemarkED.text.toString()
+            var isValid = true
+            // Check if name field is empty
+            if (binding.nameED.text.isNullOrBlank()) {
+                binding.nameED.error = "Product Name is required"
+                isValid = false
             }
 
-            addProductToFirebase(newProduct)
+            if (binding.descriptionED.text.isNullOrBlank()) {
+                binding.descriptionED.error = "Product Description is required"
+                isValid = false
+            }
+
+            if (isValid) {
+                //push data into firebase
+                var newProduct = Product(
+                    name = binding.nameED.text.toString(),
+                    description = binding.descriptionED.text.toString(),
+                    category = binding.productCategorySpinner.selectedItem.toString(),
+                    condition = binding.productConditionSpinner.selectedItem.toString(),
+                    tradeType = binding.productTradeTypeSpinner.selectedItem.toString(),
+                    //status is available by default
+                    status = resources.getStringArray(R.array.product_status)[0],
+                    created_at = LocalDateTime.now().toString(),
+                    created_by_UserID = userObj.userID,
+                )
+
+                if (newProduct.tradeType == "Sale") {
+                    newProduct.price = binding.priceED.text.toString()
+                } else if (newProduct.tradeType == "Swap") {
+                    newProduct.swapCategory = binding.productSwapCategorySpinner.selectedItem.toString()
+                    newProduct.swapRemark = binding.swapRemarkED.text.toString()
+                }
+
+                addProductToFirebase(newProduct)
+                Toast.makeText(context, "Product created successfully", Toast.LENGTH_SHORT).show()
+
+                //back to previous UI
+                val fragment = TradeMyShop()
+                //Bottom Navigation Indicator Update
+                val navigationView =
+                    requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigationView)
+                navigationView.selectedItemId = R.id.setting
+
+                //Back to previous page with animation
+                val transaction = activity?.supportFragmentManager?.beginTransaction()
+                transaction?.replace(R.id.frameLayout, fragment)
+                transaction?.setCustomAnimations(
+                    R.anim.fade_out,  // Enter animation
+                    R.anim.fade_in  // Exit animation
+                )
+                transaction?.addToBackStack(null)
+                transaction?.commit()
+            } else {
+                Toast.makeText(context, "Please fill in all required fields", Toast.LENGTH_SHORT).show()
+            }
 
         }
-
 
         return binding.root
     }
@@ -240,8 +274,26 @@ class TradeAddProduct : Fragment() {
         // Get a reference to Firebase Storage
         val storage = FirebaseStorage.getInstance()
         val storageRef = storage.getReference("ProductImages")
-        val thumbnailImageFolder = storageRef.child(product.productID + "/ThumbnailImage")  // Use productID to organize images in folders
-        val imagesFolder         = storageRef.child(product.productID + "/Images")  // Use productID to organize images in folders
+        val thumbnailImageFolder = storageRef.child(product.productID + "/Thumbnail")  // Use productID to organize images in folders
+        val imagesFolder         = storageRef.child(product.productID + "/Images")     // Use productID to organize images in folders
+
+        selectedThumbnailImages.forEach { imageUri ->
+            val imageRef = thumbnailImageFolder.child(UUID.randomUUID().toString())  // Use a unique name for each image
+
+            // Upload the image
+            imageRef.putFile(imageUri)
+                .addOnSuccessListener {
+                    // Get the download URL
+                    imageRef.downloadUrl.addOnSuccessListener { uri ->
+                        // Update the product with the image URL
+                        //updateProductWithImageUrl(product.productID, uri.toString())
+                    }
+                }
+                .addOnFailureListener { e ->
+                    // Handle image upload failure
+                    println("Image upload failed: ${e.message}")
+                }
+        }
 
         // Iterate over selected images and upload each one
         selectedImages.forEach { imageUri ->
@@ -263,6 +315,7 @@ class TradeAddProduct : Fragment() {
         }
     }
 
+    //not nessasary
     fun updateProductWithImageUrl(product: Product, imageUrl: String) {
         // Get a reference to the product in the Firebase database
         val productRef = FirebaseDatabase.getInstance().getReference("Product").child(product.productID.toString())
@@ -288,6 +341,9 @@ class TradeAddProduct : Fragment() {
                 PICK_IMAGE_REQUEST -> {
                     val selectedImageUri = data?.data
                     binding.addThumbnailImgBtn.setImageURI(selectedImageUri)
+                    if (selectedImageUri != null) {
+                        selectedThumbnailImages.add(selectedImageUri)
+                    }
                 }
                 // Multiple image selection
                 PICK_MULTIPLE_IMAGE_REQUEST -> {

@@ -105,6 +105,7 @@ dependencies {
     implementation("com.google.firebase:firebase-vertexai:16.0.1")
     implementation("com.google.android.gms:play-services-location:21.3.0")
     implementation("androidx.recyclerview:recyclerview:1.3.2")
+    implementation ("com.tbuonomo:dotsindicator:4.2")
 
     //Testing Dependencies
     testImplementation("junit:junit:4.13.2")

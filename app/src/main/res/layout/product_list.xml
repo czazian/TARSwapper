@@ -2,29 +2,31 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="wrap_content"
-    android:layout_height="250dp"
-    android:padding="4dp">
+    android:layout_width="match_parent"
+    android:layout_height="250dp">
 
     <androidx.cardview.widget.CardView
-        android:layout_width="152dp"
+        android:id="@+id/productCV"
+        android:layout_width="180dp"
         android:layout_height="222dp"
         android:backgroundTint="#F8F8FB"
-        app:cardElevation="5dp"
         app:cardCornerRadius="15dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:cardElevation="5dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        android:clickable="true"
+        android:focusable="true">
 
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:paddingTop="8dp">
 
             <ImageView
                 android:id="@id/productImgV"
-                android:layout_width="wrap_content"
+                android:layout_width="160dp"
                 android:layout_height="125dp"
                 android:scaleType="centerCrop"
                 android:src="@drawable/item"
@@ -34,10 +36,12 @@
 
             <TextView
                 android:id="@+id/productNameTV"
-                android:layout_width="wrap_content"
+                android:layout_width="150dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
                 android:layout_marginTop="4dp"
+                android:ellipsize="end"
+                android:maxLines="1"
                 android:text="Item 1"
                 android:textSize="20dp"
                 android:textStyle="bold"
@@ -45,22 +49,21 @@
                 app:layout_constraintTop_toBottomOf="@+id/productImgV" />
 
             <TextView
+                android:id="@+id/tradeDetailTV"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:background="@drawable/rounded_button"
+                android:drawablePadding="4dp"
+                android:paddingRight="8dp"
                 android:text="RM 120"
+                android:textColor="#756AB6"
                 android:textSize="20dp"
                 android:textStyle="bold"
-                android:paddingRight="8dp"
-                android:paddingLeft="8dp"
                 app:layout_constraintStart_toStartOf="@+id/productNameTV"
-                app:layout_constraintTop_toBottomOf="@+id/productNameTV"
-                android:textColor="#756AB6"
-                android:backgroundTint="#D9D9D9"
-                android:background="@drawable/rounded_button"
-                android:drawableStart="@drawable/baseline_wifi_protected_setup_24"
-                android:drawablePadding="4dp"/>
+                app:layout_constraintTop_toBottomOf="@+id/productNameTV" />
 
             <ImageView
+                android:id="@+id/tradeImg"
                 android:layout_width="25dp"
                 android:layout_height="25dp"
                 android:layout_marginEnd="8dp"
