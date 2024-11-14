@@ -59,7 +59,7 @@ class Trade : Fragment() {
         // Set LayoutManager for RecyclerView & Call getProductsFromFirebase to populate the RecyclerView
         binding.ProductRV.layoutManager = GridLayoutManager(requireContext(), 2)
         //by default is filter sale only
-        getProductsFromFirebase(tradeType = "Sale") { productList ->
+        getProductsFromFirebase(tradeType = "Sale", status = "Available") { productList ->
             binding.ProductRV.adapter = TradeAdapter(productList, requireContext())
         }
 
@@ -89,7 +89,7 @@ class Trade : Fragment() {
             binding.SaleBtn.backgroundTintList = ColorStateList.valueOf(Color.parseColor(selectedColor))
             binding.SwapBtn.backgroundTintList = ColorStateList.valueOf(Color.parseColor(unselectedColor))
             //get product sale
-            getProductsFromFirebase(tradeType = "Sale") { productList ->
+            getProductsFromFirebase(tradeType = "Sale", status = "Available") { productList ->
                 binding.ProductRV.adapter = TradeAdapter(productList,  requireContext())
             }
         }
@@ -149,7 +149,7 @@ class Trade : Fragment() {
                     for (productSnapshot in snapshot.children) {
                         val product = productSnapshot.getValue(Product::class.java)
                         //filter out own product
-                        if (product != null && product.created_by_UserID != userID) {
+                        if (product != null && product.created_by_UserID != userID && product.status == status) {
                             productList.add(product) // Add the product to the list
                         }
                     }

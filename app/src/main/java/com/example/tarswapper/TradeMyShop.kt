@@ -139,7 +139,7 @@ class TradeMyShop : Fragment() {
                     for (productSnapshot in snapshot.children) {
                         // Convert each child into a Product object
                         val product = productSnapshot.getValue(Product::class.java)
-                        if (product != null) {
+                        if (product != null && product.status == "Available") {
                             productList.add(product) // Add the product to the list
                         }
                     }

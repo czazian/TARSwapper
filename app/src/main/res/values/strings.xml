@@ -35,4 +35,12 @@
         <item>Available</item>
         <item>Booked</item>
     </string-array>
+
+    <string-array name="tarumt_kl_campus">
+        <item>CITC</item>
+        <item>Yum Yum Canteen</item>
+        <item>Redbricks Canteen</item>
+        <item>Sport Complex</item>
+        <item>Blok K</item>
+    </string-array>
 </resources>

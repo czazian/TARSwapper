@@ -104,6 +104,25 @@ class TradeProductDetail : Fragment() {
 
         binding.submitBtn.setOnClickListener{
             //redirect to meet up detail page
+            val fragment = TradeMeetUp()
+
+            val bundle = Bundle()
+            bundle.putString("ProductID", productID) // Add any data you want to pass
+            fragment.arguments = bundle
+
+            //Bottom Navigation Indicator Update
+            val navigationView =
+                requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigationView)
+            navigationView.selectedItemId = R.id.setting
+
+            val transaction = activity?.supportFragmentManager?.beginTransaction()
+            transaction?.replace(R.id.frameLayout, fragment)
+            transaction?.setCustomAnimations(
+                R.anim.fade_out,  // Enter animation
+                R.anim.fade_in  // Exit animation
+            )
+            transaction?.addToBackStack(null)
+            transaction?.commit()
         }
 
         //check availability before showing
@@ -119,6 +138,9 @@ class TradeProductDetail : Fragment() {
                 binding.conditionTV.text = product.condition
                 binding.tradeTV.text = product.tradeType
 
+                //change the submit button text
+                binding.submitBtn.text = product.tradeType!!.uppercase()
+
                 if (product.tradeType == "Sale"){
                     //is sale
                     binding.tradeDetailTV.text = "RM ${product.price}"
@@ -128,13 +150,14 @@ class TradeProductDetail : Fragment() {
                     binding.swapCateTV2.visibility = View.GONE
                     binding.swapRemarkTV1.visibility = View.GONE
                     binding.swapRemarkTV2.visibility = View.GONE
-
                 } else if (product.tradeType == "Swap"){
                     //is swap
                     binding.swapCateTV1.visibility = View.VISIBLE
                     binding.swapCateTV2.visibility = View.VISIBLE
                     binding.swapRemarkTV1.visibility = View.VISIBLE
                     binding.swapRemarkTV2.visibility = View.VISIBLE
+                    binding.swapCateTV2.text = product.swapCategory
+                    binding.swapRemarkTV2.text = product.swapRemark
                     binding.tradeDetailTV.text = product.swapCategory
                     binding.tradeDetailTV.setCompoundDrawablesWithIntrinsicBounds(R.drawable.baseline_wifi_protected_setup_24, 0, 0, 0)
                 }
@@ -186,7 +209,7 @@ class TradeProductDetail : Fragment() {
         })
     }
 
-    //get product by trade type and not own product
+    //get the matcg product with ID
     fun getProductFromFirebase(productID: String? = null, onResult: (Product) -> Unit) {
 //        val sharedPreferencesTARSwapper =
 //            requireActivity().getSharedPreferences("TARSwapperPreferences", Context.MODE_PRIVATE)
