@@ -339,6 +339,17 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="@+id/textView33" />
 
+                <TextView
+                    android:id="@+id/productSelectErrorMsg"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:text="Please select a product"
+                    android:textColor="#FF0000"
+                    android:textSize="12dp"
+                    android:visibility="invisible"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/textView33" />
+
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/productOfferSwapContainer"
                     android:layout_width="match_parent"
@@ -424,6 +435,15 @@
                                 android:enabled="false"
                                 app:layout_constraintStart_toStartOf="parent"
                                 app:layout_constraintTop_toBottomOf="parent"/>
+
+                            <ImageButton
+                                android:id="@+id/tradeSwapClearBtn"
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
+                                android:src="@drawable/baseline_clear_24"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintStart_toEndOf="@+id/tradeSwapImg"
+                                app:layout_constraintTop_toTopOf="parent" />
 
                         </androidx.constraintlayout.widget.ConstraintLayout>
 

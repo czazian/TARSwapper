@@ -71,12 +71,13 @@
                         app:layout_constraintStart_toStartOf="@+id/usernameTV" />
 
                     <TextView
+                        android:id="@+id/dateTV"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="20dp"
                         android:text="20/8/2024"
                         android:textColor="#868686"
-                        android:textSize="18dp"
+                        android:textSize="12dp"
                         app:layout_constraintBottom_toBottomOf="@+id/usernameTV"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="@+id/usernameTV"
@@ -241,23 +242,23 @@
                         android:drawableStart="@drawable/baseline_lightbulb_24"
                         android:textColor="#FFBB8A"
                         android:visibility="visible"
-                        app:layout_constraintBottom_toTopOf="@+id/button2"
-                        app:layout_constraintStart_toStartOf="@+id/button2" />
+                        app:layout_constraintBottom_toTopOf="@+id/acceptBtn"
+                        app:layout_constraintStart_toStartOf="@+id/acceptBtn" />
 
                     <Button
-                        android:id="@+id/button2"
+                        android:id="@+id/acceptBtn"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="12dp"
                         android:backgroundTint="#4EEE67"
                         android:text="ACCEPT"
-                        app:layout_constraintBottom_toBottomOf="@+id/button"
-                        app:layout_constraintEnd_toStartOf="@+id/button"
-                        app:layout_constraintTop_toTopOf="@+id/button"
+                        app:layout_constraintBottom_toBottomOf="@+id/rejectBtn"
+                        app:layout_constraintEnd_toStartOf="@+id/rejectBtn"
+                        app:layout_constraintTop_toTopOf="@+id/rejectBtn"
                         app:layout_constraintVertical_bias="0.0" />
 
                     <Button
-                        android:id="@+id/button"
+                        android:id="@+id/rejectBtn"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"

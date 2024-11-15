@@ -5,9 +5,9 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_view_SR_received"
+        android:id="@+id/recycler_view_SR_history"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:listitem="@layout/trade_swap_request_received_list"/>
+        tools:listitem="@layout/trade_swap_request_sent_history"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

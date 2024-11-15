@@ -14,8 +14,12 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.annotation.StringRes
 import com.bumptech.glide.Glide
+import com.example.tarswapper.data.MeetUp
+import com.example.tarswapper.data.Order
 import com.example.tarswapper.data.Product
+import com.example.tarswapper.data.SwapRequest
 import com.example.tarswapper.data.User
 import com.example.tarswapper.dataAdapter.TradeMyPostedProductAdapter
 import com.example.tarswapper.dataAdapter.TradeProductDetailImagesAdapter
@@ -40,6 +44,7 @@ class TradeMeetUp : Fragment() {
     //fragment name
     private lateinit var binding: FragmentTradeMeetUpBinding
     private lateinit var userObj: User
+    private lateinit var product_viewing: Product
     val imageUrls = mutableListOf<String>()
 
 
@@ -64,18 +69,6 @@ class TradeMeetUp : Fragment() {
         val sharedPreferencesTARSwapper =
             requireActivity().getSharedPreferences("TARSwapperPreferences", Context.MODE_PRIVATE)
         val userID = sharedPreferencesTARSwapper.getString("userID", null)
-
-        getUserRecord(userID.toString()) {
-            if (it != null) {
-                userObj = it
-                //Meaning to say the user has record, and store as "it"
-                //Display user data
-                binding.usernameTV.text = it.name.toString()
-                Glide.with(requireContext()).load(it.profileImage) // User Icon URL string
-                    .into(binding.profileImgV)
-
-            }
-        }
 
 //        // Set LayoutManager for RecyclerView & Call getProductsFromFirebase to populate the RecyclerView
 //        binding.ProductRV.layoutManager = GridLayoutManager(requireContext(), 2)
@@ -162,6 +155,7 @@ class TradeMeetUp : Fragment() {
         binding.selectProductBtn.setOnClickListener{
 
             getUserProductsFromFirebase { productList ->
+
                 val productNames = productList.map { it.name } // Extract the names from the products
                 val namesArray = productNames.toTypedArray()  // Convert List<String> to Array<String>
 
@@ -175,6 +169,7 @@ class TradeMeetUp : Fragment() {
 
                     //store selected product in hidden field
                     binding.selectedProductID.setText(selectedProduct.productID)
+                    binding.productSelectErrorMsg.visibility = View.INVISIBLE
 
                     //display the container
                     binding.productOfferSwapContainer.visibility = View.VISIBLE
@@ -213,6 +208,13 @@ class TradeMeetUp : Fragment() {
 
         }
 
+        binding.tradeSwapClearBtn.setOnClickListener{
+            //gone the container
+            binding.productOfferSwapContainer.visibility = View.GONE
+            //store empty in hidden field
+            binding.selectedProductID.setText(null)
+        }
+
         binding.submitBtn.setOnClickListener{
             //date and time cannot be null
             var isValid = true
@@ -228,20 +230,108 @@ class TradeMeetUp : Fragment() {
                 isValid = false
             }
 
-            //
 
-            if(isValid && available){
-                //if sale
-                // insert meet up & order
-                //product status -> Booked
-
-                //if swap
-                //insert meet up & swap request with status AwaitingResponse
-
-
+            if(binding.swapContainer.visibility == View.VISIBLE && binding.selectedProductID.text.isNullOrBlank()){
+                binding.productSelectErrorMsg.visibility = View.VISIBLE
+                isValid = false
             }
 
-            //redirect to meet up detail page
+            //all valid, insert and update data
+            if(isValid && available){
+                val viewing_prodID = productID
+
+                getProductFromFirebase(productID = viewing_prodID) { product ->
+                    val database = FirebaseDatabase.getInstance()
+                    val productRef = database.getReference("Product/${product.productID}")
+                    val meetUpRef = database.getReference("MeetUp")
+                    val orderRef = database.getReference("Order")
+                    val swapRequestRef = database.getReference("SwapRequest")
+
+                    // create meet up
+                    //both sale & swap also need to create meetUp
+                    var meetUp = MeetUp(
+                        date = binding.dateTV.text.toString(),
+                        time = binding.timeTV.text.toString(),
+                        location = binding.locationTV.text.toString(),
+                        venue = binding.venueSpinner.selectedItem.toString(),
+                    )
+                    val newMeetUpRef = meetUpRef.push()
+                    meetUp.meetUpID = newMeetUpRef.key
+                    // Push meetUp to Firebase
+                    newMeetUpRef.setValue(meetUp)
+                        .addOnSuccessListener {println("Meet up added successfully") }
+                        .addOnFailureListener { e -> println("Failed to add meet up: ${e.message}")}
+
+                    if (product.tradeType == "Sale"){
+                        //create order
+                        //product status -> Booked
+                        var order = Order(
+                            tradeType = product.tradeType,
+                            status = getString(R.string.ORDER_ONGOING),
+                            createdAt = LocalDateTime.now().toString(),
+                            productID = product.productID,
+                            meetUpID = meetUp.meetUpID,
+                        )
+                        val newOrderRef = orderRef.push()
+                        order.orderID = newOrderRef.key
+                        // Push order to Firebase
+                        newOrderRef.setValue(order)
+                            .addOnSuccessListener {println("Order added successfully") }
+                            .addOnFailureListener { e -> println("Failed to add order: ${e.message}")}
+
+                        //update product to BOOKED
+                        product.status = getString(R.string.PRODUCT_BOOKED)
+                        productRef.setValue(product)
+                            .addOnSuccessListener {println("Product status update to BOOKED successfully") }
+                            .addOnFailureListener { e -> println("Failed to update product: ${e.message}")}
+
+                    }
+                    else if (product.tradeType == "Swap"){
+                        //create swap request
+                        //product
+                        //if swap (involve 2 product)
+                        //swap request with status AwaitingResponse
+
+                        var swapRequest = SwapRequest(
+                            status = getString(R.string.SWAP_REQUEST_AWAITING_RESPONSE),
+                            receiverProductID = viewing_prodID,
+                            //selected product id for swap
+                            senderProductID = binding.selectedProductID.text.toString(),
+                            created_at = LocalDateTime.now().toString(),
+                            meetUpID = meetUp.meetUpID,
+                        )
+
+                        val newSwapRequestRef = swapRequestRef.push()
+                        swapRequest.swapRequestID = newSwapRequestRef.key
+                        // Push swap request to Firebase
+                        newSwapRequestRef.setValue(swapRequest)
+                            .addOnSuccessListener {println("Swap Request added successfully") }
+                            .addOnFailureListener { e -> println("Failed to add Swap Request: ${e.message}")}
+                    }
+                }
+
+                //redirect to puchase successful page
+                val fragment = BuySuccess()
+                val bundle = Bundle()
+                bundle.putString("TradeType", product_viewing.tradeType) // Add any data you want to pass
+                fragment.arguments = bundle
+
+                //Bottom Navigation Indicator Update
+                val navigationView =
+                    requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigationView)
+                navigationView.selectedItemId = R.id.setting
+
+                val transaction = activity?.supportFragmentManager?.beginTransaction()
+                transaction?.replace(R.id.frameLayout, fragment)
+                transaction?.setCustomAnimations(
+                    R.anim.fade_out,  // Enter animation
+                    R.anim.fade_in  // Exit animation
+                )
+                transaction?.addToBackStack(null)
+                transaction?.commit()
+            }
+
+
         }
 
         //check availability before showing
@@ -249,26 +339,34 @@ class TradeMeetUp : Fragment() {
 
         if(available){
 
-//            getUserProductsFromFirebase { productList ->
-//                binding.productHoriRV.adapter = TradeMyPostedProductAdapter(productList)
-//            }
-
+            //set product detail and owner
             getProductFromFirebase(productID = productID) { product ->
-                binding.productNameTV.text = product.name
 
-                //change the submit button text
-                binding.submitBtn.text = product.tradeType!!.uppercase()
+                product_viewing = product
+                //get product owner
+                getUserRecord(product.created_by_UserID.toString()) {
+                    if (it != null) {
+                        userObj = it
+                        //Meaning to say the user has record, and store as "it"
+                        //Display user data
+                        binding.usernameTV.text = it.name.toString()
+                        Glide.with(requireContext()).load(it.profileImage) // User Icon URL string
+                            .into(binding.profileImgV)
+                    }
+                }
+
+                binding.productNameTV.text = product.name
 
                 if (product.tradeType == "Sale"){
                     //is sale
-                    binding.title1TV.text = "Buy"
+                    binding.title1TV.text = "Sale"
                     binding.title2TV.text = "Meet Up"
                     binding.tradeDetailTV.text = "RM ${product.price}"
                     binding.tradeDetailTV.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
                     binding.tradeDetailTV.backgroundTintList = null
                     binding.tradeImg.setImageResource(R.drawable.baseline_attach_money_24)
                     binding.swapContainer.visibility = View.GONE
-                    binding.submitBtn.text = product.tradeType!!.uppercase()
+                    binding.submitBtn.text = "BUY"
 
                 } else if (product.tradeType == "Swap"){
                     //is swap
@@ -279,7 +377,7 @@ class TradeMeetUp : Fragment() {
                     binding.tradeDetailTV.backgroundTintList = null
                     binding.tradeImg.setImageResource(R.drawable.baseline_wifi_protected_setup_24)
                     binding.swapContainer.visibility = View.VISIBLE
-                    binding.submitBtn.text = "Send Swap Request"
+                    binding.submitBtn.text = "Sent Swap Request"
 
                 }
 

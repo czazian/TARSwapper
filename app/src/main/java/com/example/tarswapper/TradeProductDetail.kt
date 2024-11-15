@@ -63,18 +63,6 @@ class TradeProductDetail : Fragment() {
             requireActivity().getSharedPreferences("TARSwapperPreferences", Context.MODE_PRIVATE)
         val userID = sharedPreferencesTARSwapper.getString("userID", null)
 
-        getUserRecord(userID.toString()) {
-            if (it != null) {
-                userObj = it
-                //Meaning to say the user has record, and store as "it"
-                //Display user data
-                binding.usernameTV.text = it.name.toString()
-                Glide.with(requireContext()).load(it.profileImage) // User Icon URL string
-                    .into(binding.profileImgV)
-
-            }
-        }
-
 //        // Set LayoutManager for RecyclerView & Call getProductsFromFirebase to populate the RecyclerView
 //        binding.ProductRV.layoutManager = GridLayoutManager(requireContext(), 2)
 //        //by default is filter sale only
@@ -131,6 +119,18 @@ class TradeProductDetail : Fragment() {
         if(available){
 
             getProductFromFirebase(productID = productID) { product ->
+                //get product owner
+                getUserRecord(product.created_by_UserID.toString()) {
+                    if (it != null) {
+                        userObj = it
+                        //Meaning to say the user has record, and store as "it"
+                        //Display user data
+                        binding.usernameTV.text = it.name.toString()
+                        Glide.with(requireContext()).load(it.profileImage) // User Icon URL string
+                            .into(binding.profileImgV)
+                    }
+                }
+
                 binding.productNameTV.text = product.name
                 binding.dateTV.text = customizeDate(product.created_at.toString())
                 binding.descriptionTV.text = product.description

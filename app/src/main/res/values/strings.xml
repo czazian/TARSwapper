@@ -43,4 +43,21 @@
         <item>Sport Complex</item>
         <item>Blok K</item>
     </string-array>
+
+    <string name="PRODUCT_AVAILABLE">Available</string>
+    <string name="PRODUCT_REMOVED">Removed</string>
+    <string name="PRODUCT_BOOKED">Booked</string>
+    <string name="PRODUCT_NOT_AVAILABLE">NotAvailable</string>
+
+    <string name="ORDER_ONGOING">OnGoing</string>
+    <string name="ORDER_COMPLETED">Completed</string>
+    <string name="ORDER_CANCELLED">Cancelled</string>
+
+    <string name="SWAP_REQUEST_AWAITING_RESPONSE">AwaitingResponse</string>
+    <string name="SWAP_REQUEST_ACCEPTED">Accepted</string>
+    <string name="SWAP_REQUEST_REJECTED">Rejected</string>
+    <string name="SWAP_REQUEST_EXPIRED">Expired</string>
+    <string name="SWAP_REQUEST_PRODUCT_NOT_AVAILABLE">ProductNotAvailable</string>
+
+
 </resources>

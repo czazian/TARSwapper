@@ -28,9 +28,6 @@ import com.example.tarswapper.data.User
 import com.example.tarswapper.dataAdapter.ChatSelectionAdapter
 import com.example.tarswapper.dataAdapter.ProductImageListAdapter
 import com.example.tarswapper.databinding.FragmentAddProductBinding
-import com.example.tarswapper.databinding.FragmentChatSelectionBinding
-import com.example.tarswapper.databinding.FragmentMyPostedProductBinding
-import com.example.tarswapper.databinding.FragmentTradeBinding
 import com.example.tarswapper.interfaces.OnUserContactClick
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.database.DataSnapshot

@@ -1,0 +1,55 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/white"
+    android:gravity="center">
+
+    <!-- Success Icon Animation -->
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/success_animation"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="40dp"
+        app:lottie_autoPlay="true"
+        app:lottie_loop="false"
+        app:lottie_rawRes="@raw/check_animation"/>
+
+    <!-- Success Message -->
+    <TextView
+        android:id="@+id/success_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/success_animation"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="40dp"
+        android:text="Purchase Successful!"
+        android:textColor="@color/black"
+        android:textSize="24sp"
+        android:textStyle="bold" />
+
+    <!-- Thank-You Message -->
+    <TextView
+        android:id="@+id/thank_you_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/success_message"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        android:text="Thank you for your purchase!"
+        android:textSize="16sp" />
+
+
+    <!-- Back to Home Button -->
+    <Button
+        android:id="@+id/back_to_home_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/thank_you_message"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="90dp"
+        android:text="Back to Home"
+        android:textColor="@color/white" />
+
+</RelativeLayout>

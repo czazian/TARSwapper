@@ -10,7 +10,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.example.tarswapper.data.Product
 import com.example.tarswapper.data.User
@@ -83,6 +82,45 @@ class Trade : Fragment() {
             transaction?.commit()
         }
 
+        binding.swapRequestImgBtn.setOnClickListener{
+            val fragment = TradeSwapRequest()
+
+            //Bottom Navigation Indicator Update
+            val navigationView =
+                requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigationView)
+            navigationView.selectedItemId = R.id.setting
+
+            val transaction = activity?.supportFragmentManager?.beginTransaction()
+            transaction?.replace(R.id.frameLayout, fragment)
+            transaction?.setCustomAnimations(
+                R.anim.fade_out,  // Enter animation
+                R.anim.fade_in  // Exit animation
+            )
+            transaction?.addToBackStack(null)
+            transaction?.commit()
+        }
+
+        binding.myOrderImgBtn.setOnClickListener{
+            val fragment = TradeMyShop()
+
+            //Bottom Navigation Indicator Update
+            val navigationView =
+                requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigationView)
+            navigationView.selectedItemId = R.id.setting
+
+            val transaction = activity?.supportFragmentManager?.beginTransaction()
+            transaction?.replace(R.id.frameLayout, fragment)
+            transaction?.setCustomAnimations(
+                R.anim.fade_out,  // Enter animation
+                R.anim.fade_in  // Exit animation
+            )
+            transaction?.addToBackStack(null)
+            transaction?.commit()
+        }
+
+
+
+        //sale and swap button design
         val selectedColor = "#AC87C5" // Selected color
         val unselectedColor = "#E8E8E9" // Unselected color
         binding.SaleBtn.setOnClickListener{

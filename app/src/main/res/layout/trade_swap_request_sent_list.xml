@@ -71,12 +71,13 @@
                         app:layout_constraintStart_toStartOf="@+id/usernameTV" />
 
                     <TextView
+                        android:id="@+id/dateTV"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="20dp"
                         android:text="20/8/2024"
                         android:textColor="#868686"
-                        android:textSize="18dp"
+                        android:textSize="12dp"
                         app:layout_constraintBottom_toBottomOf="@+id/usernameTV"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="@+id/usernameTV"
