@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import com.bumptech.glide.Glide
 import com.example.tarswapper.data.Product
@@ -36,6 +37,7 @@ class TradeProductDetail : Fragment() {
 
     // A variable to keep track of the number of fetched URLs
     var fetchedImageCount = 0
+
     // Total expected images (You can count the number of images you expect from both folders)
     var totalExpectedImages = 0
 
@@ -57,6 +59,7 @@ class TradeProductDetail : Fragment() {
             (activity as MainActivity).findViewById<BottomNavigationView>(R.id.bottomNavigationView)
         bottomNavigation.visibility = View.VISIBLE
 
+
         ////User IDs////
         //Get User ID - From SharedPreference
         val sharedPreferencesTARSwapper =
@@ -72,13 +75,13 @@ class TradeProductDetail : Fragment() {
 
         //on click
 
-        binding.btnBackMyPostedProduct.setOnClickListener{
+        binding.btnBackMyPostedProduct.setOnClickListener {
             val fragment = Trade()
 
             //Bottom Navigation Indicator Update
             val navigationView =
                 requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigationView)
-            navigationView.selectedItemId = R.id.setting
+            navigationView.selectedItemId = R.id.tag
 
             val transaction = activity?.supportFragmentManager?.beginTransaction()
             transaction?.replace(R.id.frameLayout, fragment)
@@ -90,7 +93,7 @@ class TradeProductDetail : Fragment() {
             transaction?.commit()
         }
 
-        binding.submitBtn.setOnClickListener{
+        binding.submitBtn.setOnClickListener {
             //redirect to meet up detail page
             val fragment = TradeMeetUp()
 
@@ -101,7 +104,7 @@ class TradeProductDetail : Fragment() {
             //Bottom Navigation Indicator Update
             val navigationView =
                 requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigationView)
-            navigationView.selectedItemId = R.id.setting
+            navigationView.selectedItemId = R.id.tag
 
             val transaction = activity?.supportFragmentManager?.beginTransaction()
             transaction?.replace(R.id.frameLayout, fragment)
@@ -116,7 +119,7 @@ class TradeProductDetail : Fragment() {
         //check availability before showing
         var available = true
 
-        if(available){
+        if (available) {
 
             getProductFromFirebase(productID = productID) { product ->
                 //get product owner
@@ -141,7 +144,7 @@ class TradeProductDetail : Fragment() {
                 //change the submit button text
                 binding.submitBtn.text = product.tradeType!!.uppercase()
 
-                if (product.tradeType == "Sale"){
+                if (product.tradeType == "Sale") {
                     //is sale
                     binding.tradeDetailTV.text = "RM ${product.price}"
                     binding.tradeDetailTV.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
@@ -150,7 +153,7 @@ class TradeProductDetail : Fragment() {
                     binding.swapCateTV2.visibility = View.GONE
                     binding.swapRemarkTV1.visibility = View.GONE
                     binding.swapRemarkTV2.visibility = View.GONE
-                } else if (product.tradeType == "Swap"){
+                } else if (product.tradeType == "Swap") {
                     //is swap
                     binding.swapCateTV1.visibility = View.VISIBLE
                     binding.swapCateTV2.visibility = View.VISIBLE
@@ -159,19 +162,41 @@ class TradeProductDetail : Fragment() {
                     binding.swapCateTV2.text = product.swapCategory
                     binding.swapRemarkTV2.text = product.swapRemark
                     binding.tradeDetailTV.text = product.swapCategory
-                    binding.tradeDetailTV.setCompoundDrawablesWithIntrinsicBounds(R.drawable.baseline_wifi_protected_setup_24, 0, 0, 0)
+                    binding.tradeDetailTV.setCompoundDrawablesWithIntrinsicBounds(
+                        R.drawable.baseline_wifi_protected_setup_24,
+                        0,
+                        0,
+                        0
+                    )
                 }
 
             }
-        }else{
+        } else {
             //not available; prompt error message
         }
+
+
+        //Chat button on click
+        binding.btnChatStart.setOnClickListener() {
+
+            getProductFromFirebase(productID = productID) { product ->
+                //Check if the product is posted by the current user itself
+                if(product.created_by_UserID != userID){
+                    product.created_by_UserID?.let { it1 -> startChat(it1) }
+                } else {
+                    //Created by the current user itself
+                    Toast.makeText(requireContext(), "Sorry, this product is posted by yourself.", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
 
         return binding.root
     }
 
+
     //set slider page
-    private fun setupViewPager(productID : String?) {
+    private fun setupViewPager(productID: String?) {
         // Reference to Firebase Storage
         val storageRef = FirebaseStorage.getInstance().reference
 
@@ -217,7 +242,8 @@ class TradeProductDetail : Fragment() {
         // Reference to the "Product" node in Firebase Database
 
         val databaseRef = FirebaseDatabase.getInstance().getReference("Product")
-        val query = databaseRef.child(productID.toString()) // Query for a specific product by its productID
+        val query =
+            databaseRef.child(productID.toString()) // Query for a specific product by its productID
 
         query.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -229,7 +255,10 @@ class TradeProductDetail : Fragment() {
                         Log.d("product found", product.toString())
                     } else {
                         // If the product doesn't match criteria
-                        Log.d("No matching product", "Product either doesn't exist or is created by the user.")
+                        Log.d(
+                            "No matching product",
+                            "Product either doesn't exist or is created by the user."
+                        )
                     }
                 } else {
                     // Handle if the product is not found in the database
@@ -291,7 +320,31 @@ class TradeProductDetail : Fragment() {
     }
 
 
+    ////Chat Function////
+    private fun startChat(oppositeUserID: String) {
 
+        ////TO BE INTEGRATED IN PRODUCT PAGE////
+        //This is to simulate the "Chat" button in Product Page
+        //When ready to integrate replace this to the Product Owner User ID (It is the Opposite User ID)
+        //val oppositeUserID = "-OAQyscTlsEQdw_3lITE"
+
+        val bundle = Bundle().apply {
+            putString("oppositeUserID", oppositeUserID)
+        }
+
+        val fragment = Chat().apply {
+            arguments = bundle
+        }
+
+        activity?.supportFragmentManager?.beginTransaction()?.apply {
+            replace(R.id.frameLayout, fragment)
+            setCustomAnimations(R.anim.fade_out, R.anim.fade_in)
+            addToBackStack(null)
+            commit()
+        }
+        ////END OF TO BE INTEGRATED IN PRODUCT PAGE////
+
+    }
 
 
 }

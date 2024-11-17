@@ -371,7 +371,7 @@ class AIChatbot : Fragment() {
                     product?.let { products.add(it) }
                 }
 
-                val csvData = createPDFWithTable(products)
+                val csvData = createPDFWithIndividualTables(products)
                 storeToFirebaseStorage(csvData)
             }
 
@@ -380,77 +380,77 @@ class AIChatbot : Fragment() {
             }
         })
     }
-
-    private fun createPDFWithTable(products: List<Product>): ByteArray {
+    private fun createPDFWithIndividualTables(products: List<Product>): ByteArray {
         val outputStream = ByteArrayOutputStream()
         val document = PdfDocument()
 
-        val pageInfo = PdfDocument.PageInfo.Builder(595, 842, 1).create() // A4 size
-        val page = document.startPage(pageInfo)
+        //Page settings (adjust page size if necessary)
+        val pageInfo = PdfDocument.PageInfo.Builder(2384, 1684, 1).create() //A1 size
+        var currentPage = document.startPage(pageInfo)
+        var canvas = currentPage.canvas
 
-        val canvas = page.canvas
-        val paint = Paint().apply { textSize = 12f }
+        val paint = Paint().apply { textSize = 40f } //Use appropriate font size
+        val startX = 100f
+        var currentY = 150f //Start position for content
+        val rowSpacing = 70f //Spacing between rows
+        val extraSpacing = 100f //Space between tables
+        val maxWidth = 1800f //Maximum width for wrapping (adjust as needed)
 
-        val columnWidths = arrayOf(60f, 80f, 150f, 70f, 60f, 60f, 90f)
-        val startX = 40f
-        var currentY = 60f
-
-        paint.isFakeBoldText = true
-        val headers = listOf(
-            "Product ID",
-            "Product Name",
-            "Description",
-            "Category",
-            "Status",
-            "Trade Type",
-            "Created At"
-        )
-
-        headers.forEachIndexed { i, header ->
-            canvas.drawText(header, startX + columnWidths.take(i).sum(), currentY, paint)
-        }
-        currentY += 30f
-        paint.isFakeBoldText = false
-
-        products.forEach { product ->
-            val rowData = listOf(
-                product.productID ?: "",
-                product.name ?: "",
-                product.description ?: "",
-                product.category ?: "",
-                product.status ?: "",
-                product.tradeType ?: "",
-                product.created_at ?: ""
+        products.forEachIndexed { index, product ->
+            //Define product details with an index
+            val productDetails = listOf(
+                "Product ID" to (product.productID ?: ""),
+                "Product Name" to (product.name ?: ""),
+                "Product Description" to (product.description ?: ""),
+                "Category" to (product.category ?: ""),
+                "Condition" to (product.condition ?: ""),
+                "Status" to (product.status ?: ""),
+                "Trade Type" to (product.tradeType ?: ""),
+                "Created At" to formatDateTime(product.created_at ?: "")
             )
 
-            // Calculate the maximum height required for this row based on text wrapping
-            var rowHeight = 0f
-            val wrappedTextLines = rowData.mapIndexed { i, text ->
-                wrapTextToWidth(text, paint, columnWidths[i])
-            }
-
-            //Calculate the maximum row height from all wrapped text
-            rowHeight = wrappedTextLines.maxOf { it.size } * (paint.textSize + 4f)
-
-            //Draw each cell's text in this row
-            wrappedTextLines.forEachIndexed { i, lines ->
-                val cellX = startX + columnWidths.take(i).sum()
-                var cellY = currentY
-
-                lines.forEach { line ->
-                    canvas.drawText(line, cellX, cellY, paint)
-                    cellY += paint.textSize + 4f
+            productDetails.forEach { (key, value) ->
+                //Wrap text for fields like Product Description
+                val wrappedLines = if (key == "Product Description") {
+                    wrapTextToWidth(value, paint, maxWidth - 20)
+                } else {
+                    listOf(value) //No wrapping needed for other fields
                 }
+
+                //Check if we need a new page
+                if (currentY + (rowSpacing * wrappedLines.size) > pageInfo.pageHeight) {
+                    document.finishPage(currentPage)
+                    currentPage = document.startPage(pageInfo)
+                    canvas = currentPage.canvas
+                    currentY = 150f
+                }
+
+                //Draw key
+                canvas.drawText("$key:", startX, currentY, paint)
+
+                //Draw wrapped value
+                var lineY = currentY
+                wrappedLines.forEach { line ->
+                    canvas.drawText(line, startX + 600f, lineY, paint) //Indent for values
+                    lineY += rowSpacing / 2 //Reduce spacing for wrapped lines
+                }
+
+                currentY += rowSpacing * wrappedLines.size //Adjust for multiple lines
             }
-            currentY += rowHeight + 10f
+
+            currentY += extraSpacing //Add extra space between tables
         }
 
-        document.finishPage(page)
+        //Finish the last page
+        document.finishPage(currentPage)
+
+        //Write PDF to output stream
         document.writeTo(outputStream)
         document.close()
 
         return outputStream.toByteArray()
     }
+
 
     private fun wrapTextToWidth(text: String, paint: Paint, maxWidth: Float): List<String> {
         val words = text.split(" ")
@@ -485,9 +485,24 @@ class AIChatbot : Fragment() {
         val uploadTask = pdfRef.putBytes(pdfData, metadata)
 
         uploadTask.addOnSuccessListener {
-            Log.d("Upload PDF", "PDF file with table successfully uploaded.")
+            Log.d("Upload PDF", "PDF file with individual tables successfully uploaded.")
         }.addOnFailureListener { exception ->
             Log.e("Upload PDF Error", "Upload failed: ${exception.message}")
+        }
+    }
+
+    fun formatDateTime(input: String): String {
+        try {
+            //Parse the ISO 8601 datetime string (2024-11-14T01:47:10.044941)
+            val originalFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS", Locale.getDefault())
+            val date = originalFormat.parse(input)
+
+            //Format it into a more readable format (e.g., "November 14, 2024, 01:47 AM")
+            val newFormat = SimpleDateFormat("MMMM dd, yyyy, hh:mm a", Locale.getDefault())
+            return newFormat.format(date)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return input
         }
     }
 }
