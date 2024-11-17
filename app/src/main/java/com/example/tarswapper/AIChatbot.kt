@@ -11,7 +11,9 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.android.volley.DefaultRetryPolicy
 import com.android.volley.RequestQueue
+import com.android.volley.RetryPolicy
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.example.tarswapper.data.Message
@@ -228,7 +230,6 @@ class AIChatbot : Fragment() {
             }
         }
 
-
         return binding.root
     }
 
@@ -250,12 +251,12 @@ class AIChatbot : Fragment() {
         val requestBody = JSONObject().apply {
             put("queryInput", JSONObject().apply {
                 put("text", JSONObject().apply {
-                    put("text", inputText)  //User input text
+                    put("text", inputText)  // User input text
                 })
-                put("languageCode", "en")  //Language code
+                put("languageCode", "en")  // Language code
             })
 
-            //Adding the queryParams with timeZone
+            // Adding the queryParams with timeZone
             put("queryParams", JSONObject().apply {
                 put("timeZone", "America/Los_Angeles")
             })
@@ -276,36 +277,38 @@ class AIChatbot : Fragment() {
                             val responseText = response.toString()
                             Log.d("API Response", responseText)
 
-                            val responseMessages = response.getJSONObject("queryResult")
-                                .getJSONArray("responseMessages")
+                            val queryResult = response.optJSONObject("queryResult")
+                            if (queryResult != null) {
+                                val responseMessages = queryResult.optJSONArray("responseMessages")
 
-                            //Check if the responseMessages array contains a text response
-                            if (responseMessages.length() > 0) {
-                                val fulfillmentText = responseMessages.getJSONObject(0)
-                                    .optJSONObject("text")?.optJSONArray("text")?.optString(0)
+                                // Check if responseMessages is not null and contains data
+                                if (responseMessages != null && responseMessages.length() > 0) {
+                                    val fulfillmentText = responseMessages.getJSONObject(0)
+                                        .optJSONObject("text")?.optJSONArray("text")?.optString(0)
 
-                                if (!fulfillmentText.isNullOrEmpty()) {
-                                    // Add the answer from AI to the conversation
-                                    val message = Message(
-                                        fulfillmentText,
-                                        "AI",
-                                        SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Calendar.getInstance().time),
-                                        null,
-                                        null
-                                    )
-                                    listOfConversation.add(message)
+                                    if (!fulfillmentText.isNullOrEmpty()) {
+                                        // Add the answer from AI to the conversation
+                                        val message = Message(
+                                            fulfillmentText,
+                                            "AI",
+                                            SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Calendar.getInstance().time),
+                                            null,
+                                            null
+                                        )
+                                        listOfConversation.add(message)
 
-                                    // Notify the adapter and scroll to the new message
-                                    adapter?.notifyItemInserted(listOfConversation.size - 1)
-                                    binding.aiRecyclerView.scrollToPosition(listOfConversation.size - 1)
+                                        // Notify the adapter and scroll to the new message
+                                        adapter?.notifyItemInserted(listOfConversation.size - 1)
+                                        binding.aiRecyclerView.scrollToPosition(listOfConversation.size - 1)
+                                    } else {
+                                        Log.e("Dialogflow Error", "No text response found.")
+                                    }
                                 } else {
-                                    // Handle case where no text response was found
-                                    Log.e("Dialogflow Error", "No text response found.")
+                                    Log.e("Dialogflow Error", "Response messages are empty or null.")
                                 }
                             } else {
-                                Log.e("Dialogflow Error", "Response messages are empty.")
+                                Log.e("Dialogflow Error", "queryResult is null.")
                             }
-
 
                         },
                         { error ->
@@ -316,7 +319,6 @@ class AIChatbot : Fragment() {
                             Toast.makeText(requireContext(), error.toString(), Toast.LENGTH_LONG).show()
                         }) {
 
-
                         override fun getHeaders(): MutableMap<String, String> {
                             val headers = mutableMapOf<String, String>()
                             headers["Authorization"] = "Bearer ${getAccessToken()}"
@@ -324,7 +326,18 @@ class AIChatbot : Fragment() {
                             Log.d("RequestHeaders", headers.toString())
                             return headers
                         }
+
+                        override fun getRetryPolicy(): RetryPolicy {
+                            //Retry policy example with exponential backoff
+                            return DefaultRetryPolicy(
+                                DefaultRetryPolicy.DEFAULT_TIMEOUT_MS,
+                                3,
+                                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+                            )
+                        }
                     }
+
+
                     requestQueue.add(jsonObjectRequest)
                 }
             } catch (e: Exception) {
@@ -339,9 +352,9 @@ class AIChatbot : Fragment() {
             .createScoped(listOf("https://www.googleapis.com/auth/dialogflow"))
 
         credentials.refreshIfExpired()
-
-        Log.d("AccessToken", credentials.accessToken.tokenValue)
-        return credentials.accessToken.tokenValue
+        val token = credentials.accessToken.tokenValue
+        Log.d("AccessToken", token)
+        return token
     }
     ////END OF AI CHAT BOT////
 

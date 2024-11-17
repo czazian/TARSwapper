@@ -1,21 +1,32 @@
 package com.example.tarswapper
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.VectorDrawable
 import android.location.Address
 import android.location.Geocoder
 import android.location.Location
+import android.location.LocationManager
 import android.net.Uri
 import android.os.Bundle
 import android.os.Looper
+import android.provider.Settings
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.android.volley.Request
 import com.android.volley.RequestQueue
 import com.android.volley.toolbox.JsonObjectRequest
@@ -40,9 +51,11 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.Polyline
 import com.google.maps.android.SphericalUtil
+import java.io.IOException
 
 class Navigation : Fragment() {
     private lateinit var binding: FragmentNavigationBinding
@@ -56,6 +69,38 @@ class Navigation : Fragment() {
     private var currentPolyline: Polyline? = null
     private var currentLocationMarker: Marker? = null
     private var hasReachedDestination = false
+
+    private var mapMode: String = "driving"
+
+
+    //Check if location services are enabled
+    private fun isLocationServicesEnabled(context: Context): Boolean {
+        val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
+                locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+    }
+
+    //Prompt user to enable location services
+    private fun promptEnableLocationServices() {
+        Toast.makeText(
+            requireContext(),
+            "Please enable location service before proceeding.",
+            Toast.LENGTH_LONG
+        ).show()
+        val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+        startActivity(intent)  // Opens the location settings
+    }
+
+    //Check if both location services and permission are enabled, else request
+    private fun checkLocationAndPermission() {
+        if (!isLocationServicesEnabled(requireContext())) {
+            //If location services are not enabled, prompt the user to enable them
+            promptEnableLocationServices()
+        } else {
+            //Location services and permission are both enabled, proceed
+            startLocationUpdates()
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -99,6 +144,8 @@ class Navigation : Fragment() {
 
 
         //Processing
+        checkLocationAndPermission()
+
         //Get Current User ID
         val sharedPreferencesTARSwapper =
             requireActivity().getSharedPreferences("TARSwapperPreferences", Context.MODE_PRIVATE)
@@ -156,15 +203,42 @@ class Navigation : Fragment() {
         }
 
 
+        //Set Driving as Default
+        binding.toggleButton.check(R.id.btnDrive)
+
+        //Control walking or driving
+        binding.toggleButton.addOnButtonCheckedListener { group, checkedId, isChecked ->
+            when (checkedId) {
+                R.id.btnWalk -> {
+                    if (isChecked) {
+                        //"Walking" button is selected
+                        mapMode = "walking"
+
+                        startLocationUpdates()
+                    }
+                }
+
+                R.id.btnDrive -> {
+                    if (isChecked) {
+                        //"Driving" button is selected
+                        mapMode = "driving"
+
+                        startLocationUpdates()
+                    }
+                }
+            }
+        }
+
+
         return binding.root
     }
 
     private fun startLocationUpdates() {
+
         if (!this::googleMap.isInitialized) {
             Log.e("Navigation", "googleMap is not yet initialized. Skipping startLocationUpdates.")
             return
         }
-
 
         if (ActivityCompat.checkSelfPermission(
                 requireContext(),
@@ -183,27 +257,29 @@ class Navigation : Fragment() {
                 override fun onLocationResult(locationResult: LocationResult) {
                     super.onLocationResult(locationResult)
                     locationResult?.let {
-                        for (location in it.locations) {
-                            currentLocation = LatLng(location.latitude, location.longitude)
-                            Log.d("Navigation", "Current Location: $currentLocation")
+                        if (isAdded) {
+                            for (location in it.locations) {
+                                currentLocation = LatLng(location.latitude, location.longitude)
+                                Log.d("Navigation", "Current Location: $currentLocation")
 
-                            // Check if currentLocationMarker exists
-                            if (currentLocationMarker == null) {
-                                // If it doesn't exist, create it
-                                currentLocationMarker = googleMap.addMarker(
-                                    MarkerOptions().position(currentLocation!!).title("Current Location")
-                                )
-                            } else {
-                                // If it exists, just update its position
-                                currentLocationMarker?.position = currentLocation!!
+                                // Check if currentLocationMarker exists
+                                if (currentLocationMarker == null) {
+                                    // If it doesn't exist, create it
+                                    currentLocationMarker = googleMap.addMarker(
+                                        MarkerOptions().position(currentLocation!!)
+                                            .title("Current Location")
+                                    )
+                                } else {
+                                    // If it exists, just update its position
+                                    currentLocationMarker?.position = currentLocation!!
+                                }
+
+                                updateRoute(currentLocation!!)  // Use the updated current location
                             }
-
-                            updateRoute(currentLocation!!)  // Use the updated current location
                         }
                     }
                 }
             }
-
 
             //Start receiving location updates
             fusedLocationClient.requestLocationUpdates(
@@ -222,14 +298,28 @@ class Navigation : Fragment() {
 
     private fun getLatLngFromAddress(context: Context, addressString: String): LatLng? {
         val geocoder = Geocoder(context, Locale.getDefault())
-        val addressList: List<Address> = geocoder.getFromLocationName(addressString, 1)!!
-
-        if (addressList.isNotEmpty()) {
-            val address: Address = addressList[0]
-            val latLng = LatLng(address.latitude, address.longitude)
-            return latLng
+        return try {
+            val addressList: MutableList<Address>? = geocoder.getFromLocationName(addressString, 1)
+            if (addressList!!.isNotEmpty()) {
+                val address: Address = addressList[0]
+                LatLng(address.latitude, address.longitude)
+            } else {
+                null
+            }
+        } catch (e: IOException) {
+            Log.e("GeocoderError", "Geocoding failed: ${e.message}")
+            null
         }
-        return null
+    }
+
+    private fun getBitmapFromVectorDrawable(drawable: VectorDrawable): Bitmap {
+        val width = drawable.intrinsicWidth
+        val height = drawable.intrinsicHeight
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        drawable.setBounds(0, 0, canvas.width, canvas.height)
+        drawable.draw(canvas)
+        return bitmap
     }
 
     private fun onMapReady(map: GoogleMap) {
@@ -259,8 +349,14 @@ class Navigation : Fragment() {
 
                 //Add a marker for the current location (only once)
                 if (currentLocationMarker == null) {
+                    val vectorDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.round_person_pin_circle_24) as VectorDrawable
+                    val bitmap = getBitmapFromVectorDrawable(vectorDrawable)
                     currentLocationMarker = googleMap.addMarker(
-                        MarkerOptions().position(currentLatLng).title("Current Location")
+                        MarkerOptions()
+                            .position(currentLatLng)
+                            .title("Current Location")
+                            .icon(BitmapDescriptorFactory.fromBitmap(bitmap))
+                            .snippet("You are here")
                     )
                 }
 
@@ -310,8 +406,11 @@ class Navigation : Fragment() {
             val url: String = Uri.parse("https://maps.googleapis.com/maps/api/directions/json")
                 .buildUpon()
                 .appendQueryParameter("origin", "${origin.latitude},${origin.longitude}")
-                .appendQueryParameter("destination", "${destination.latitude},${destination.longitude}")
-                .appendQueryParameter("mode", "driving")
+                .appendQueryParameter(
+                    "destination",
+                    "${destination.latitude},${destination.longitude}"
+                )
+                .appendQueryParameter("mode", mapMode)
                 .appendQueryParameter("key", "AIzaSyBma5DDvejfQXrM8VWrZtf-EmQUjgzp9eM")
                 .toString()
 
@@ -329,7 +428,6 @@ class Navigation : Fragment() {
                     currentPolyline = drawRoute(route)
 
 
-
                     ////Check Distance every 5 seconds////
                     //Check the distance between current location and destination
                     val distance = SphericalUtil.computeDistanceBetween(origin, destination)
@@ -338,7 +436,11 @@ class Navigation : Fragment() {
                     //Check if the distance is less than a threshold (like 50 meters)
                     if (distance < 50 && !hasReachedDestination) {
                         Log.d("Navigation", "You are close to the destination!")
-                        Toast.makeText(requireContext(), "You reached the destination!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            requireContext(),
+                            "You reached the destination!",
+                            Toast.LENGTH_SHORT
+                        ).show()
 
 
                         hasReachedDestination = true
@@ -463,7 +565,10 @@ class Navigation : Fragment() {
 
     override fun onPause() {
         super.onPause()
-        stopLocationUpdates()
+
+        if (::locationCallback.isInitialized) {
+            stopLocationUpdates()
+        }
         mapView.onPause()
     }
 

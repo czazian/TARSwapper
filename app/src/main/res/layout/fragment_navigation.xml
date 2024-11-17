@@ -8,6 +8,7 @@
     android:background="#fffafb"
     tools:context=".Navigation">
 
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/coinShopTopHeader"
         android:layout_width="match_parent"
@@ -59,6 +60,37 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/coinShopTopHeader">
+
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/toggleButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="5dp"
+            android:elevation="20dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:singleSelection="true">
+
+            <Button
+                android:id="@+id/btnWalk"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Walking"
+                android:textStyle="bold"
+                app:icon="@drawable/baseline_directions_walk_24" />
+
+            <Button
+                android:id="@+id/btnDrive"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Driving"
+                android:textStyle="bold"
+                app:icon="@drawable/baseline_drive_eta_24" />
+
+        </com.google.android.material.button.MaterialButtonToggleGroup>
 
         <com.google.android.gms.maps.MapView
             android:id="@+id/mapViewElement"

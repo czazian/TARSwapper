@@ -186,7 +186,7 @@ class Notification : Fragment() {
     //When Transaction Tab is Selected
     private fun bindTransaction() {
         //Temporary Data
-        var date = "2024-11-12"
+        var date = "2024-11-19"
         var time = "23:50"
         var ownUserID = "-OAQyscTlsEQdw_3lITE"
         var oppositeUserID = "-OADY-HMy72rY1Mg1Cl5"

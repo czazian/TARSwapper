@@ -60,7 +60,9 @@
 
         </com.google.android.material.tabs.TabLayout>
 
+
     </androidx.cardview.widget.CardView>
+
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/coinShopTopHeader"
