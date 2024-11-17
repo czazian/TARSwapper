@@ -13,8 +13,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
 
-class TradeMyPostedProductAdapter(private val productList: List<Product>) :
-    RecyclerView.Adapter<TradeMyPostedProductAdapter.ProductViewHolder>() {
+class TradeMyPostedProductAdapter(private val productList: List<Product>) : RecyclerView.Adapter<TradeMyPostedProductAdapter.ProductViewHolder>() {
 
     class ProductViewHolder(val binding: ProductListHoriBinding) : RecyclerView.ViewHolder(binding.root){}
 

@@ -6,17 +6,19 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     tools:context=".CommunityCommentList"
-    android:background="@color/white">
+    android:background="@color/white"
+    android:paddingTop="15dp">
 
 
-    <ImageView
+    <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/profile_ImgV"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:background="@drawable/circular_image"
         android:src="@drawable/user"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:shapeAppearanceOverlay="@style/circleImageView"/>
 
     <TextView
         android:id="@+id/usernameTV"

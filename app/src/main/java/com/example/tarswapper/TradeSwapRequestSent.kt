@@ -135,4 +135,5 @@ class TradeSwapRequestSent : Fragment() {
             }
         })
     }
+
 }

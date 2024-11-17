@@ -59,5 +59,8 @@
     <string name="SWAP_REQUEST_EXPIRED">Expired</string>
     <string name="SWAP_REQUEST_PRODUCT_NOT_AVAILABLE">ProductNotAvailable</string>
 
+    <string name="COMMUNITY_POST_PUBLIC">Public</string>
+    <string name="COMMUNITY_POST_HIDE">Hide</string>
+
 
 </resources>

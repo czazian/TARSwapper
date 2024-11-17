@@ -46,7 +46,6 @@ class TradeSwapRequestHistoryAdapter(private val swapRequestList: List<SwapReque
         with(holder.binding) {
 
             //set upper sender detail
-
             getUserByReceiverProductId(swapRequest.receiverProductID.toString()){
                 if (it != null) {
                     //display user data

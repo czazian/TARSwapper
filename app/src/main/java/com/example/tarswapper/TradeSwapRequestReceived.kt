@@ -63,10 +63,12 @@ class TradeSwapRequestReceived : Fragment() {
                         }
                     }
 
+                    Log.d("result found is...", "received is executed")
                     // Step 2: Fetch swap requests where receiverProductID matches any of user's product IDs and status is "AwaitingResponse"
                     fetchSwapRequestsForUserProducts(userProductIds) {swapRequestList ->
                         binding.recyclerViewSRReceived.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
                         binding.recyclerViewSRReceived.adapter = TradeSwapRequestReceivedAdapter(swapRequestList)
+                        Log.d("result found is...", swapRequestList.size.toString())
                     }
                 }
 
@@ -162,7 +164,7 @@ class TradeSwapRequestReceived : Fragment() {
                         }
                     }
                 }
-
+                onResult(matchingSwapRequests)
             }
 
             override fun onCancelled(error: DatabaseError) {

@@ -36,8 +36,8 @@ class TradeSwapRequest : Fragment(){
             // Set tab text from TabItem
             tab.text = when (position) {
                 0 -> "Received"
-                1 -> "Sent"
-                2 -> "History"
+                1 -> "Waiting"
+                2 -> "Response"
                 else -> null
             }
         }.attach()

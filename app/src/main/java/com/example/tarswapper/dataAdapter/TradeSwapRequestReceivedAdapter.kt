@@ -11,6 +11,7 @@ import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.tarswapper.R
+import com.example.tarswapper.data.Order
 import com.example.tarswapper.data.Product
 import com.example.tarswapper.data.SwapRequest
 import com.example.tarswapper.data.User
@@ -22,11 +23,12 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
 
-class TradeSwapRequestReceivedAdapter(private val swapRequestList: List<SwapRequest>) :
+class TradeSwapRequestReceivedAdapter(private var swapRequestList: List<SwapRequest>) :
     RecyclerView.Adapter<TradeSwapRequestReceivedAdapter.SwapRequestViewHolder>() {
 
     class SwapRequestViewHolder(val binding: TradeSwapRequestReceivedListBinding) : RecyclerView.ViewHolder(binding.root){}
@@ -97,11 +99,54 @@ class TradeSwapRequestReceivedAdapter(private val swapRequestList: List<SwapRequ
 
             holder.binding.acceptBtn.setOnClickListener{
                 //update status
-                updateSwapRequestStatus(swapRequest.swapRequestID.toString(), "Accepted")
+                updateSwapRequestStatus(swapRequest.swapRequestID.toString(), "Accepted", position)
+                //insert order record
+                val order = Order(
+                    tradeType = "Swap",
+                    status = "OnGoing",
+                    createdAt = LocalDateTime.now(ZoneId.of("Asia/Kuala_Lumpur")).toString(),
+                    productID = swapRequest.senderProductID,
+                    meetUpID = swapRequest.meetUpID,
+                    swapRequestID = swapRequest.swapRequestID,
+                )
+                val database = FirebaseDatabase.getInstance()
+                val orderRef = database.getReference("Order")
+                val senderProductRef = database.getReference("Product/${swapRequest.senderProductID}")
+                val receiverProductRef = database.getReference("Product/${swapRequest.receiverProductID}")
+
+                val newOrderRef = orderRef.push()
+                order.orderID = newOrderRef.key
+
+                // Push order to Firebase
+                newOrderRef.setValue(order)
+                    .addOnSuccessListener {println("Order added successfully") }
+                    .addOnFailureListener { e -> println("Failed to add order: ${e.message}")}
+
+                //update both product into booked
+                val bookedStatus = "Booked"
+                // Update the sender product
+                senderProductRef.child("status").setValue(bookedStatus)
+                    .addOnSuccessListener {
+                        println("Sender product status updated to Booked successfully.")
+                    }
+                    .addOnFailureListener { e ->
+                        println("Failed to update sender product status: ${e.message}")
+                    }
+
+                // Update the receiver product
+                receiverProductRef.child("status").setValue(bookedStatus)
+                    .addOnSuccessListener {
+                        println("Receiver product status updated to Booked successfully.")
+                    }
+                    .addOnFailureListener { e ->
+                        println("Failed to update receiver product status: ${e.message}")
+                    }
+
             }
+
             holder.binding.rejectBtn.setOnClickListener{
                 //update status
-                updateSwapRequestStatus(swapRequest.swapRequestID.toString(), "Rejected")
+                updateSwapRequestStatus(swapRequest.swapRequestID.toString(), "Rejected", position)
             }
 
 
@@ -239,7 +284,7 @@ class TradeSwapRequestReceivedAdapter(private val swapRequestList: List<SwapRequ
     }
 
     // Function to update swap request status -> Accepted or Rejected
-    fun updateSwapRequestStatus(swapRequestID: String, newStatus: String) {
+    fun updateSwapRequestStatus(swapRequestID: String, newStatus: String, position : Int) {
         val databaseRef = FirebaseDatabase.getInstance().getReference("SwapRequest/$swapRequestID")
 
         // Updating only the status field of the swap request
@@ -250,6 +295,10 @@ class TradeSwapRequestReceivedAdapter(private val swapRequestList: List<SwapRequ
             .addOnSuccessListener {
                 // Success
                 Log.d("SwapRequest", "Status updated successfully")
+                swapRequestList = swapRequestList.toMutableList().apply {
+                    removeAt(position)  // Remove the item at the current position
+                }
+                notifyItemRemoved(position) // Update the RecyclerView
             }
             .addOnFailureListener { e ->
                 // Handle error

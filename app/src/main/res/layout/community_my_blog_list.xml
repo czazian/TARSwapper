@@ -2,21 +2,25 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/frameLayout7"
-    android:layout_width="190dp"
+    android:id="@+id/myPostLayout"
+    android:layout_width="match_parent"
     android:layout_height="200dp"
-    tools:context=".CommunityMyBlogList"
+    tools:context=".CommunityMyPost"
     android:background="@color/white"
-    android:layout_marginTop="4dp">
+    android:layout_marginTop="6dp"
+    android:clickable="true"
+    android:focusable="true">
 
     <TextView
         android:id="@+id/titleTV"
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:text="haha this is title testing"
-        android:textSize="20dp"
+        android:textSize="16dp"
         android:textStyle="bold"
         android:padding="5dp"
+        android:ellipsize="end"
+        android:maxLines="2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -30,6 +34,7 @@
         app:layout_constraintTop_toBottomOf="@+id/titleTV">
 
         <ImageView
+            android:id="@+id/imgV"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="center"
@@ -59,10 +64,11 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/textView29"
+                android:id="@+id/viewnumTV"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="30"
+                android:paddingLeft="5dp"
                 android:textColor="#868686"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/imageView9"

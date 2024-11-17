@@ -8,7 +8,7 @@
     tools:context=".Community">
 
     <com.google.android.material.tabs.TabLayout
-        android:id="@+id/tabLayout"
+        android:id="@+id/headerTab"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
@@ -20,15 +20,10 @@
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/viewPager"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="@+id/viewPager"
-        app:layout_constraintEnd_toEndOf="@+id/viewPager"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tabLayout"
-        tools:listitem="@layout/community_blog_list"
-        android:background="#C8C8C8"/>
+        app:layout_constraintTop_toBottomOf="@+id/headerTab" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

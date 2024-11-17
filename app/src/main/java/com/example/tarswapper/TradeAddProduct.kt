@@ -37,6 +37,7 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.util.Date
 import java.util.UUID
 
@@ -91,9 +92,9 @@ class TradeAddProduct : Fragment() {
         productConditionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.productConditionSpinner.adapter = productConditionAdapter
 
-        val productTypeTypeAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, resources.getStringArray(R.array.trade_type))
-        productTypeTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        binding.productTradeTypeSpinner.adapter = productTypeTypeAdapter
+        val productTradeTypeAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, resources.getStringArray(R.array.trade_type))
+        productTradeTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.productTradeTypeSpinner.adapter = productTradeTypeAdapter
 
         // Set up an item selected listener for the Spinner
         binding.productTradeTypeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -180,7 +181,7 @@ class TradeAddProduct : Fragment() {
                     tradeType = binding.productTradeTypeSpinner.selectedItem.toString(),
                     //status is available by default
                     status = resources.getStringArray(R.array.product_status)[0],
-                    created_at = LocalDateTime.now().toString(),
+                    created_at = LocalDateTime.now(ZoneId.of("Asia/Kuala_Lumpur")).toString(),
                     created_by_UserID = userObj.userID,
                 )
 
@@ -310,21 +311,6 @@ class TradeAddProduct : Fragment() {
                     println("Image upload failed: ${e.message}")
                 }
         }
-    }
-
-    //not nessasary
-    fun updateProductWithImageUrl(product: Product, imageUrl: String) {
-        // Get a reference to the product in the Firebase database
-        val productRef = FirebaseDatabase.getInstance().getReference("Product").child(product.productID.toString())
-
-        // Update the product with the image URL (assuming there's an "images" field in the product model)
-        productRef.child("images").push().setValue(imageUrl)
-            .addOnSuccessListener {
-                println("Image URL added to product successfully")
-            }
-            .addOnFailureListener { e ->
-                println("Failed to update product with image URL: ${e.message}")
-            }
     }
 
     // Handle the result after image selection

@@ -34,6 +34,7 @@ import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Date
@@ -95,11 +96,6 @@ class TradeMeetUp : Fragment() {
             val bundle = Bundle()
             bundle.putString("ProductID", productID) // Add any data you want to pass
             fragment.arguments = bundle
-
-            //Bottom Navigation Indicator Update
-            val navigationView =
-                requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigationView)
-            navigationView.selectedItemId = R.id.setting
 
             val transaction = activity?.supportFragmentManager?.beginTransaction()
             transaction?.replace(R.id.frameLayout, fragment)
@@ -173,6 +169,7 @@ class TradeMeetUp : Fragment() {
 
                     //display the container
                     binding.productOfferSwapContainer.visibility = View.VISIBLE
+                    binding.productSwapNameTV.text = selectedProduct.name
                     if (selectedProduct.tradeType == "Sale"){
                         //is sale
                         binding.tradeSwapDetailTV.text = "RM ${selectedProduct.price}"
@@ -191,7 +188,7 @@ class TradeMeetUp : Fragment() {
 
                     getFirebaseImageUrl(selectedProduct) { url ->
                         if (url != null) {
-                            Glide.with(binding.productImgV.context)
+                            Glide.with(binding.productSwapImgV.context)
                                 .load(url)
                                 .into(binding.productSwapImgV)
                         } else {
@@ -268,7 +265,7 @@ class TradeMeetUp : Fragment() {
                         var order = Order(
                             tradeType = product.tradeType,
                             status = getString(R.string.ORDER_ONGOING),
-                            createdAt = LocalDateTime.now().toString(),
+                            createdAt = LocalDateTime.now(ZoneId.of("Asia/Kuala_Lumpur")).toString(),
                             productID = product.productID,
                             meetUpID = meetUp.meetUpID,
                         )
@@ -297,7 +294,7 @@ class TradeMeetUp : Fragment() {
                             receiverProductID = viewing_prodID,
                             //selected product id for swap
                             senderProductID = binding.selectedProductID.text.toString(),
-                            created_at = LocalDateTime.now().toString(),
+                            created_at = LocalDateTime.now(ZoneId.of("Asia/Kuala_Lumpur")).toString(),
                             meetUpID = meetUp.meetUpID,
                         )
 

@@ -4,6 +4,7 @@ import android.net.Uri
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.tarswapper.databinding.MultiImagesListBinding
 
 class ProductImageListAdapter(private val imageUris: List<Uri>) : RecyclerView.Adapter<ProductImageListAdapter.ImageViewHolder>() {
@@ -17,7 +18,12 @@ class ProductImageListAdapter(private val imageUris: List<Uri>) : RecyclerView.A
 
     override fun onBindViewHolder(holder: ImageViewHolder, position: Int) {
         val imageUri = imageUris[position]
-        holder.binding.imageView.setImageURI(imageUri) // Set image to ImageView
+        //originally using this no problem
+        //holder.binding.imageView.setImageURI(imageUri) // Set image to ImageView
+
+        Glide.with(holder.itemView.context)
+            .load(imageUri)
+            .into(holder.binding.imageView)
     }
 
     override fun getItemCount(): Int = imageUris.size

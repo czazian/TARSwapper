@@ -158,7 +158,7 @@ class TradeSwapRequestHistory : Fragment() {
                     val swapRequestStatus = swapSnapshot.child("status").value as? String
 
                     // Check if receiverProductID matches any product ID owned by the user and status is "accept" or reject
-                    if (receiverProductID != null && userProductIds.contains(receiverProductID) && swapRequestStatus in listOf(getString(R.string.SWAP_REQUEST_ACCEPTED), getString(R.string.SWAP_REQUEST_REJECTED))) {
+                    if (receiverProductID != null && userProductIds.contains(receiverProductID) && swapRequestStatus in listOf(getString(R.string.SWAP_REQUEST_ACCEPTED), getString(R.string.SWAP_REQUEST_REJECTED), getString(R.string.SWAP_REQUEST_EXPIRED), getString(R.string.SWAP_REQUEST_PRODUCT_NOT_AVAILABLE))) {
                         if (swapRequest != null) {
                             matchingSwapRequests.add(swapRequest)
                         }
