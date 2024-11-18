@@ -2,6 +2,8 @@ package com.example.tarswapper
 
 import android.content.Context
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -88,6 +90,22 @@ class ChatSelection : Fragment(), OnUserContactClick {
 
             getListOfContactBySearch(userID, searchText)
         }
+
+        binding.searchtext.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                //Not used, but required to override
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                //Trigger event whenever a character is entered or removed
+                val searchText = s.toString()
+                getListOfContactBySearch(userID, searchText)
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                //Not used, but required to override
+            }
+        })
 
 
         return binding.root

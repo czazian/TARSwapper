@@ -2,8 +2,11 @@ package com.example.tarswapper
 
 import android.Manifest
 import android.app.AlertDialog
+import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
@@ -13,18 +16,36 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.lifecycle.lifecycleScope
 import com.budiyev.android.codescanner.AutoFocusMode
 import com.budiyev.android.codescanner.CodeScanner
 import com.budiyev.android.codescanner.CodeScannerView
 import com.budiyev.android.codescanner.DecodeCallback
 import com.budiyev.android.codescanner.ErrorCallback
+import com.example.tarswapper.data.MeetUp
+import com.example.tarswapper.data.SwapRequest
 import com.example.tarswapper.databinding.FragmentIdentityVerificationBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.EncodeHintType
+import com.google.zxing.WriterException
+import com.google.zxing.qrcode.QRCodeWriter
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 class IdentityVerification : Fragment() {
     private lateinit var binding: FragmentIdentityVerificationBinding
     private lateinit var codeScanner: CodeScanner
     private lateinit var scannerView: CodeScannerView
+
+    private var verificationCode: String? = ""
+    private var meetUpIDGlobal: String? = ""
+    private var successDialog: AlertDialog? = null
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -39,13 +60,56 @@ class IdentityVerification : Fragment() {
         bottomNavigation.visibility = View.GONE
 
 
+        //Get Current User ID
+        val sharedPreferencesTARSwapper =
+            requireActivity().getSharedPreferences("TARSwapperPreferences", Context.MODE_PRIVATE)
+        val userID = sharedPreferencesTARSwapper.getString("userID", null)
 
 
 
-        //Temporary Data - Replace with the real verification code
-        val verificationCode = 4406
 
+        //Get received data from previous fragment
+        val transaction = arguments?.getSerializable("swap") as? SwapRequest
 
+        if(transaction != null){
+            listenForMeetUpUpdates(transaction.meetUpID.toString())
+        }
+
+        //Get sender product user id and receive product user id
+        lifecycleScope.launch {
+            transaction?.let {
+                val senderUserID = it.senderProductID?.let { id -> getSenderUserID(id) }
+                val receiverUserID = it.receiverProductID?.let { id -> getReceiverUserID(id) }
+
+                Log.e("UserID", "Current User ID is $userID")
+                Log.e("UserID", "Sender User ID is $senderUserID")
+                Log.e("UserID", "Receiver User ID is $receiverUserID")
+
+                //Get Verification Code - Ensure the correct parties are involves in the same transaction
+                if (senderUserID == userID || receiverUserID == userID) {
+                    transaction!!.meetUpID?.let { meetUpID ->
+                        getMeetUpObject(meetUpID) { meetUp ->
+                            if (meetUp != null) {
+                                //Store meetup id
+                                meetUpIDGlobal = transaction!!.meetUpID
+
+                                //Proceed only if the meetup is valid
+                                verificationCode = meetUp.verificationCode.toString()
+                                val qrBitmap = generateQRCode(verificationCode!!)
+                                qrBitmap?.let {
+                                    binding.qrcode.setImageBitmap(qrBitmap)
+                                }
+                            } else {
+                                Log.e("MeetUp", "MeetUp does not exist or is not authorized.")
+                            }
+                        }
+                    }
+                } else {
+                    Log.e("Authorization", "Transaction does not belong to this user.")
+                    Toast.makeText(context, "Unauthorized access!", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
 
 
 
@@ -67,62 +131,59 @@ class IdentityVerification : Fragment() {
         //Set decode and error callbacks
         codeScanner.decodeCallback = DecodeCallback {
             requireActivity().runOnUiThread {
-                scannerView.visibility = View.GONE // Hide scanner after scanning
+                scannerView.visibility = View.GONE
 
                 //If verification code is the same
-                if(it.text == verificationCode.toString()){
-                    val dialogView = layoutInflater.inflate(R.layout.successful_verification, null)
-                    val dialog = AlertDialog.Builder(context)
-                        .setView(dialogView)
-                        .create()
+                if (verificationCode != "") {
+                    if (it.text == verificationCode.toString()) {
 
-                    val button = dialogView.findViewById<Button>(R.id.btnOk)
+                        if(meetUpIDGlobal != null){
+                            updateMeetUpStatus(meetUpIDGlobal!!, verified = true, completed = false)
+                        }
 
-                    button.setOnClickListener(){
-                        dialog.dismiss()
+                    } else {
+
+                        if(meetUpIDGlobal != null){
+                            updateMeetUpStatus(meetUpIDGlobal!!, verified = false, completed = false)
+                        }
+
+                        //If verification code is not the same
+                        val dialogView =
+                            layoutInflater.inflate(R.layout.unsuccessful_verification, null)
+                        val dialog = AlertDialog.Builder(context)
+                            .setView(dialogView)
+                            .create()
+
+                        val button = dialogView.findViewById<Button>(R.id.btnOkUnsuccess)
+
+                        button.setOnClickListener() {
+                            dialog.dismiss()
+                        }
+
+                        val window = dialog.window
+                        window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+                        dialog.show()
+
+                        binding.afterSuccessful.visibility = View.GONE
+                        binding.identityMainContent.visibility = View.VISIBLE
+
                     }
-
-                    val window = dialog.window
-                    window?.setBackgroundDrawableResource(android.R.color.transparent)
-
-                    dialog.show()
-
-                    binding.afterSuccessful.visibility = View.VISIBLE
-                    binding.identityMainContent.visibility = View.GONE
-
-                } else {
-                    //If verification code is not the same
-                    val dialogView = layoutInflater.inflate(R.layout.unsuccessful_verification, null)
-                    val dialog = AlertDialog.Builder(context)
-                        .setView(dialogView)
-                        .create()
-
-                    val button = dialogView.findViewById<Button>(R.id.btnOkUnsuccess)
-
-                    button.setOnClickListener(){
-                        dialog.dismiss()
-                    }
-
-                    val window = dialog.window
-                    window?.setBackgroundDrawableResource(android.R.color.transparent)
-
-                    dialog.show()
-
-                    binding.afterSuccessful.visibility = View.GONE
-                    binding.identityMainContent.visibility = View.VISIBLE
                 }
             }
         }
         codeScanner.errorCallback = ErrorCallback {
             requireActivity().runOnUiThread {
-                Toast.makeText(requireContext(), "Camera initialization error: ${it.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    requireContext(),
+                    "Camera initialization error: ${it.message}",
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
-        // Request camera permission
+
+        //Request camera permission
         checkPermission(Manifest.permission.CAMERA, 200)
-
-
-
 
 
         //Set up button click listener to start the scanner
@@ -130,7 +191,6 @@ class IdentityVerification : Fragment() {
             scannerView.visibility = View.VISIBLE // Show scanner when button clicked
             codeScanner.startPreview() // Start the scanning process
         }
-
 
 
         //Back to the Notification Page
@@ -185,9 +245,156 @@ class IdentityVerification : Fragment() {
         return binding.root
     }
 
+    private fun listenForMeetUpUpdates(meetUpID: String) {
+        val database = FirebaseDatabase.getInstance()
+        val meetUpRef = database.getReference("MeetUp").child(meetUpID)
+
+        meetUpRef.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val meetUp = snapshot.getValue(MeetUp::class.java)
+                if (meetUp != null) {
+                    //Update UI based on verification status
+                    if (meetUp.verifiedStatus) {
+                        showSuccessUI()
+                    }
+
+                    //Handle the completion status
+                    if (meetUp.completeStatus) {
+                        showCompletionUI()
+                    }
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("Firebase", "Failed to listen for MeetUp updates: ${error.message}")
+            }
+        })
+    }
+
+
+    private fun showSuccessUI() {
+        // Dismiss the existing dialog (if any)
+        successDialog?.dismiss()
+        successDialog = null  // Clear the reference
+
+        // Create and show the new dialog
+        val dialogView = layoutInflater.inflate(R.layout.successful_verification, null)
+        successDialog = AlertDialog.Builder(context)
+            .setView(dialogView)
+            .create()
+
+        // Set up the button listener
+        val button = dialogView.findViewById<Button>(R.id.btnOk)
+        button.setOnClickListener {
+            successDialog?.dismiss()
+            successDialog = null  // Ensure dialog reference is nullified after dismissal
+        }
+
+        // Set background transparency
+        val window = successDialog?.window
+        window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+        // Show the dialog
+        successDialog?.show()
+        binding.afterSuccessful.visibility = View.VISIBLE
+        binding.identityMainContent.visibility = View.GONE
+    }
+
+    private fun showCompletionUI() {
+
+    }
+
+    private fun updateMeetUpStatus(meetUpID: String, verified: Boolean, completed: Boolean) {
+        val database = FirebaseDatabase.getInstance()
+        val meetUpRef = database.getReference("MeetUp").child(meetUpID)
+
+        //Update verification and completion statuses
+        meetUpRef.child("verifiedStatus").setValue(verified)
+        meetUpRef.child("completeStatus").setValue(completed)
+    }
+
+
+    private suspend fun getSenderUserID(senderProductID: String): String? {
+        return try {
+            val database = FirebaseDatabase.getInstance()
+            val productRef = database.getReference("Product").child(senderProductID)
+            val dataSnapshot = productRef.get().await()
+            dataSnapshot.child("created_by_UserID").value as? String
+        } catch (e: Exception) {
+            Log.e("Error", "Failed to fetch sender user ID: ${e.message}")
+            null
+        }
+    }
+
+    private suspend fun getReceiverUserID(receiverProductID: String): String? {
+        return try {
+            val database = FirebaseDatabase.getInstance()
+            val productRef = database.getReference("Product").child(receiverProductID)
+            val dataSnapshot = productRef.get().await()
+            dataSnapshot.child("created_by_UserID").value as? String
+        } catch (e: Exception) {
+            Log.e("Error", "Failed to fetch receiver user ID: ${e.message}")
+            null
+        }
+    }
+
+    private fun generateQRCode(content: String): Bitmap? {
+        try {
+            val writer = QRCodeWriter()
+            val hints = mutableMapOf<EncodeHintType, Any>()
+            hints[EncodeHintType.MARGIN] = 1
+
+            //Generate QR Code matrix
+            val bitMatrix = writer.encode(content, BarcodeFormat.QR_CODE, 180, 180, hints)
+
+            //Convert bitMatrix to Bitmap
+            val width = bitMatrix.width
+            val height = bitMatrix.height
+            val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565)
+
+            for (x in 0 until width) {
+                for (y in 0 until height) {
+                    bitmap.setPixel(
+                        x,
+                        y,
+                        if (bitMatrix.get(
+                                x,
+                                y
+                            )
+                        ) android.graphics.Color.BLACK else android.graphics.Color.WHITE
+                    )
+                }
+            }
+
+            return bitmap
+        } catch (e: WriterException) {
+            e.printStackTrace()
+        }
+        return null
+    }
+
+
+    private fun getMeetUpObject(meetUpID: String, onResult: (MeetUp?) -> Unit) {
+        val database = FirebaseDatabase.getInstance()
+        val meetUpRef = database.getReference("MeetUp").child(meetUpID)
+
+        meetUpRef.get().addOnSuccessListener { dataSnapshot ->
+            val meetUp = dataSnapshot.getValue(MeetUp::class.java)
+            Log.e("MeetUp Object", meetUp.toString())
+            onResult(meetUp)
+        }.addOnFailureListener { e ->
+            println("Error fetching MeetUp: ${e.message}")
+            onResult(null)
+        }
+    }
+
 
     private fun checkPermission(permission: String, reqCode: Int) {
-        if (ContextCompat.checkSelfPermission(requireContext(), permission) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(
+                requireContext(),
+                permission
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
             ActivityCompat.requestPermissions(requireActivity(), arrayOf(permission), reqCode)
         }
     }
@@ -198,7 +405,42 @@ class IdentityVerification : Fragment() {
     }
 
     override fun onPause() {
-        codeScanner.releaseResources()
         super.onPause()
+
+        codeScanner.releaseResources()
+
+        successDialog?.dismiss()
+        successDialog = null
+
+        //Check if a MeetUp is currently being verified and reset the verification status
+        if (meetUpIDGlobal != null) {
+            resetVerificationStatus(meetUpIDGlobal!!)
+        }
     }
+
+    override fun onStop() {
+        super.onStop()
+
+        successDialog?.dismiss()
+        successDialog = null
+
+        //Optionally handle resetting the status here as well, depending on your needs
+        if (meetUpIDGlobal != null) {
+            resetVerificationStatus(meetUpIDGlobal!!)
+        }
+    }
+
+    private fun resetVerificationStatus(meetUpID: String) {
+        val database = FirebaseDatabase.getInstance()
+        val meetUpRef = database.getReference("MeetUp").child(meetUpID)
+
+        meetUpRef.child("verifiedStatus").setValue(false).addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                Log.d("Firebase", "Verification status reset successfully.")
+            } else {
+                Log.e("Firebase", "Failed to reset verification status.")
+            }
+        }
+    }
+
 }

@@ -4,38 +4,40 @@ import android.content.Context
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.compose.ui.graphics.Color
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
-import com.example.tarswapper.Notification
 import com.example.tarswapper.R
-import com.example.tarswapper.data.Message
-import com.example.tarswapper.databinding.NotificationMessageLayoutBinding
+import com.example.tarswapper.data.MeetUp
+import com.example.tarswapper.data.SwapRequest
 import com.example.tarswapper.databinding.NotificationTransactionLayoutBinding
+import com.google.firebase.database.FirebaseDatabase
+import java.text.ParseException
 import java.text.SimpleDateFormat
+import java.time.format.DateTimeFormatter
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
 class TransactionAdapter(
     private val context: Context,
-    private val onTransactionClick: (Notification.Temp) -> Unit
+    private val onTransactionClick: (SwapRequest) -> Unit
 ) : RecyclerView.Adapter<TransactionAdapter.TransactionViewHolder>() {
 
-    private var transactions = listOf<Notification.Temp>()
+    private var transactions = listOf<SwapRequest>()
 
-    fun setData(transactions: List<Notification.Temp>) {
+    fun setData(transactions: List<SwapRequest>) {
         //Sort transactions by datetime before binding data, in descending order (latest to oldest)
-        val sortedTransactions = transactions.sortedByDescending { transaction ->
-            val combinedDateTime = "${transaction.date}|${transaction.time}"
-            val dateFormat = SimpleDateFormat("yyyy-MM-dd|HH:mm", Locale.getDefault())
-            try {
-                dateFormat.parse(combinedDateTime) ?: Date(0)
-            } catch (e: Exception) {
-                Log.e("TransactionAdapter", "Error parsing date: $combinedDateTime", e)
-                Date(0)
-            }
-        }
-        this.transactions = sortedTransactions
+//        val sortedTransactions = transactions.sortedByDescending { transaction ->
+//            val combinedDateTime = "${transaction.date}|${transaction.time}"
+//            val dateFormat = SimpleDateFormat("yyyy-MM-dd|HH:mm", Locale.getDefault())
+//            try {
+//                dateFormat.parse(combinedDateTime) ?: Date(0)
+//            } catch (e: Exception) {
+//                Log.e("TransactionAdapter", "Error parsing date: $combinedDateTime", e)
+//                Date(0)
+//            }
+//        }
+        this.transactions = transactions
         notifyDataSetChanged()
     }
 
@@ -60,43 +62,97 @@ class TransactionAdapter(
     inner class TransactionViewHolder(private val binding: NotificationTransactionLayoutBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(transaction: Notification.Temp) {
-            binding.transactionID.text = "Transaction ID: #123123"
-            binding.transactionDateTime.text =
-                "reached the scheduled date and time of ${transaction.date}, ${transaction.time}."
+        fun bind(transaction: SwapRequest) {
+            getMeetUpObj(transaction.meetUpID!!) {
+                if(it != null){
+                    //Date Time
+                    val inputFormatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                    val outputFormatter = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
 
-            val dateTime = "${transaction.time}|${transaction.date}"
-            if (dateTime.isNotEmpty()) {
-                val combinedDateTime = "${transaction.date}|${transaction.time}"
-                val dateFormat = SimpleDateFormat("yyyy-MM-dd|HH:mm", Locale.getDefault())
-                val transactionDate = dateFormat.parse(combinedDateTime)
-                val currentDate = Date()
+                    try {
+                        val dateString = it.date!!.trim()
+                        val parsedDate = inputFormatter.parse(dateString)
 
-                if (transactionDate != null && transactionDate.before(currentDate)) {
-                    //Transaction date is in the past, so disable the button and update the UI
-                    binding.transactionBtn.text = "Transaction Ended"
-                    binding.transactionBtn.isEnabled = false
+                        val formattedDate = outputFormatter.format(parsedDate!!)
 
-                    val grayColor = ContextCompat.getColor(context, R.color.button_gray)
-                    binding.transactionBtn.setBackgroundColor(grayColor)
-                } else {
-                    //Transaction date is not in the past, so allow starting navigation
-                    binding.transactionBtn.text = "Start Navigation"
-                    binding.transactionBtn.isEnabled = true
+                        binding.transactionDateTime.text = "the scheduled date and time is $formattedDate, ${it.time}."
+                    } catch (e: ParseException) {
+                        Log.e("TransactionAdapter", "Failed to parse date: ${e.message}")
+                        binding.transactionDateTime.text = "Invalid date format"
+                    }
 
-                    val purpleColor = ContextCompat.getColor(context, R.color.button_purple)
-                    binding.transactionBtn.setBackgroundColor(purpleColor)
+
+
+                    //HAVEN'T HANDLE CHECK IF THIS TRANSACTION IS ALREADY SUCCESSFUL
+                    //Handle Button Status - If the Transaction is Over Transaction Date, or Already Successful, it should be Transaction Ended
+                    val dateItem = "${it.date}"
+                    if (dateItem.isNotEmpty()) {
+                        try {
+                            val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                            val transactionDate = dateFormat.parse(dateItem)
+                            val currentDate = Date()
+
+                            // Remove time part from both dates to compare only the date
+                            val calendar = Calendar.getInstance()
+                            calendar.time = currentDate
+                            calendar.set(Calendar.HOUR_OF_DAY, 0)
+                            calendar.set(Calendar.MINUTE, 0)
+                            calendar.set(Calendar.SECOND, 0)
+                            calendar.set(Calendar.MILLISECOND, 0)
+                            val currentDateOnly = calendar.time
+
+                            if (transactionDate != null && transactionDate.before(currentDateOnly)) {
+                                binding.transactionBtn.text = "Transaction Ended"
+                                binding.transactionBtn.isEnabled = false
+
+                                val grayColor = ContextCompat.getColor(context, R.color.button_gray)
+                                binding.transactionBtn.setBackgroundColor(grayColor)
+                            } else {
+                                binding.transactionBtn.text = "Start Navigation"
+                                binding.transactionBtn.isEnabled = true
+
+                                val purpleColor = ContextCompat.getColor(context, R.color.button_purple)
+                                binding.transactionBtn.setBackgroundColor(purpleColor)
+                            }
+                        } catch (e: ParseException) {
+                            Log.e("TransactionAdapter", "Error parsing date: ${e.message}")
+                            binding.transactionBtn.text = "Invalid Date"
+                            binding.transactionBtn.isEnabled = false
+                        }
+                    }
+
                 }
             }
 
-            //Only the future date time can be shown
-            if (binding.transactionBtn.isEnabled) {
-                binding.transactionBtn.setOnClickListener {
+
+            //Transaction ID
+            binding.transactionID.text = "Transaction ID: ${transaction.swapRequestID}"
+
+
+            //Only the future date time can be shown - On Click Event of Start Navigation
+            binding.transactionBtn.setOnClickListener {
+                if (binding.transactionBtn.isEnabled) {
+                    Log.d("TransactionAdapter", "Button clicked for transaction ID: ${transaction.swapRequestID}")
                     onTransactionClick(transaction)
+                } else {
+                    Log.d("TransactionAdapter", "Button is disabled, click ignored")
                 }
-            } else {
-                binding.transactionBtn.setOnClickListener(null)
             }
+
+
+        }
+    }
+
+    private fun getMeetUpObj(meetUpID: String, onResult: (MeetUp?) -> Unit) {
+        val database = FirebaseDatabase.getInstance()
+        val meetUpRef = database.getReference("MeetUp").child(meetUpID)
+
+        meetUpRef.get().addOnSuccessListener { dataSnapshot ->
+            val meetUp = dataSnapshot.getValue(MeetUp::class.java)
+            onResult(meetUp)
+        }.addOnFailureListener { e ->
+            println("Error fetching MeetUp: ${e.message}")
+            onResult(null)
         }
     }
 }

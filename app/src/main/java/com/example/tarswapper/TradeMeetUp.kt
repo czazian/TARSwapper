@@ -39,6 +39,8 @@ import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import java.util.concurrent.ThreadLocalRandom
+import kotlin.random.Random
 
 class TradeMeetUp : Fragment() {
 
@@ -251,6 +253,9 @@ class TradeMeetUp : Fragment() {
                         time = binding.timeTV.text.toString(),
                         location = binding.locationTV.text.toString(),
                         venue = binding.venueSpinner.selectedItem.toString(),
+                        verificationCode = generateRandom4DigitNumber(),
+                        verifiedStatus = false,
+                        completeStatus = false
                     )
                     val newMeetUpRef = meetUpRef.push()
                     meetUp.meetUpID = newMeetUpRef.key
@@ -536,7 +541,10 @@ class TradeMeetUp : Fragment() {
     }
 
 
-
+    //Create random 4-digit number for identity verification
+    private fun generateRandom4DigitNumber(): Int {
+        return Random.nextInt(1000, 10000)
+    }
 
 
 }

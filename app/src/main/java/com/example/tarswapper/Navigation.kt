@@ -31,6 +31,10 @@ import com.android.volley.Request
 import com.android.volley.RequestQueue
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
+import com.example.tarswapper.data.MeetUp
+import com.example.tarswapper.data.Product
+import com.example.tarswapper.data.SwapRequest
+import com.example.tarswapper.data.User
 import com.example.tarswapper.databinding.FragmentNavigationBinding
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
@@ -54,6 +58,7 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.Polyline
+import com.google.firebase.database.FirebaseDatabase
 import com.google.maps.android.SphericalUtil
 import java.io.IOException
 
@@ -71,6 +76,7 @@ class Navigation : Fragment() {
     private var hasReachedDestination = false
 
     private var mapMode: String = "driving"
+    private var swap: SwapRequest? = null
 
 
     //Check if location services are enabled
@@ -152,39 +158,88 @@ class Navigation : Fragment() {
         val userID = sharedPreferencesTARSwapper.getString("userID", null)
 
         //Get Value from Bundle
-        val transaction = arguments?.getSerializable("transaction") as? Notification.Temp
+        val transaction = arguments?.getSerializable("transaction") as? SwapRequest
         transaction?.let {
-            //Transaction ID
-            binding.fillTransactionID.text = "Transaction ID: #123123"
+            //Store swap
+            swap = transaction
 
-            //Location
-            binding.fillDestination.text = transaction.location.toString()
-            destinationLocation = transaction.location.toString()
+            //Transaction ID
+            binding.fillTransactionID.text = "Transaction ID: ${transaction.swapRequestID}"
+
+            transaction.meetUpID?.let { it1 ->
+                getMeetUpObject(it1){ meetUp ->
+                    if(meetUp != null){
+                        //Location
+                        binding.fillDestination.text = meetUp!!.location.toString()
+                        destinationLocation = meetUp!!.location.toString()
+
+                        //Scheduled Date & Time
+                        //Original Date & Time
+                        val originalDateFormat = SimpleDateFormat("dd/MM/yyyy hh:mm a", Locale.getDefault())
+                        val dateToFormat = "${meetUp.date} ${meetUp.time}"
+
+                        //Parse the date and time
+                        val date: Date? = try {
+                            originalDateFormat.parse(dateToFormat)
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            null
+                        }
+
+                        //Desired output format
+                        val desiredDateFormat = SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault())
+                        val dateTime = date?.let { desiredDateFormat.format(it) } ?: ""
+
+                        //Set the formatted date and time to the TextView
+                        binding.fillDateTime.text = dateTime
+                    }
+                }
+            }
 
             //Recipient
-            if (userID == transaction.ownUserID) {
-                binding.fillName.text = transaction.ownUserID
-            } else {
-                binding.fillName.text = transaction.oppositeUserID
+            getSenderProduct(transaction.senderProductID!!){ product ->
+                if(product != null){
+                    getSenderUser(product.created_by_UserID!!) { user ->
+                        if(user != null){
+                            if (userID == user.userID) {
+                                //Item to Send
+                                binding.fillItemToSend.text = product.name
+                            } else {
+                                binding.fillName.text = user.name
+
+                                //Item to Receive
+                                binding.fillItemToReceive.text = product.name
+                            }
+                        }
+                    }
+
+                    //Trade Type
+                    if(product.tradeType != null){
+                        binding.fillTradeType.text = product.tradeType
+                    }
+                }
             }
 
-            //Scheduled Date & Time
-            val originalDateFormat = SimpleDateFormat("yyyy-MM-dd|HH:mm", Locale.getDefault())
-            val dateToFormat = "${transaction.date}|${transaction.time}"
+            getReceiverProduct(transaction.receiverProductID!!){ product ->
+                if(product != null){
+                    getReceiverUser(product.created_by_UserID!!) { user ->
+                        if(user != null){
+                            if (userID == user.userID) {
+                                //Item to Send
+                                binding.fillItemToSend.text = product.name
+                            } else {
+                                binding.fillName.text = user.name
 
-            val date: Date? = try {
-                originalDateFormat.parse(dateToFormat)
-            } catch (e: Exception) {
-                e.printStackTrace()
-                null
+                                //Item to Receive
+                                binding.fillItemToReceive.text = product.name
+                            }
+                        }
+                    }
+
+                    //Item to Receive
+                    binding.fillItemToReceive.text = product.name
+                }
             }
-            val desiredDateFormat = SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault())
-            val dateTime = date?.let { desiredDateFormat.format(it) } ?: ""
-
-            binding.fillDateTime.text = dateTime
-
-            //Price
-            //?????????
         }
 
 
@@ -233,6 +288,71 @@ class Navigation : Fragment() {
         return binding.root
     }
 
+    private fun getSenderUser(createdByUserid: String, onResult: (User?) -> Unit) {
+        val database = FirebaseDatabase.getInstance()
+        val userRef = database.getReference("User").child(createdByUserid)
+
+        userRef.get().addOnSuccessListener { dataSnapshot ->
+            val user = dataSnapshot.getValue(User::class.java)
+            onResult(user)
+        }.addOnFailureListener { e ->
+            println("Error fetching MeetUp: ${e.message}")
+            onResult(null)
+        }
+    }
+
+    private fun getReceiverUser(createdByUserid: String, onResult: (User?) -> Unit) {
+        val database = FirebaseDatabase.getInstance()
+        val userRef = database.getReference("User").child(createdByUserid)
+
+        userRef.get().addOnSuccessListener { dataSnapshot ->
+            val user = dataSnapshot.getValue(User::class.java)
+            onResult(user)
+        }.addOnFailureListener { e ->
+            println("Error fetching MeetUp: ${e.message}")
+            onResult(null)
+        }
+    }
+
+    private fun getReceiverProduct(receiverProductID: String, onResult: (Product?) -> Unit) {
+        val database = FirebaseDatabase.getInstance()
+        val productRef = database.getReference("Product").child(receiverProductID)
+
+        productRef.get().addOnSuccessListener { dataSnapshot ->
+            val product = dataSnapshot.getValue(Product::class.java)
+            onResult(product)
+        }.addOnFailureListener { e ->
+            println("Error fetching MeetUp: ${e.message}")
+            onResult(null)
+        }
+    }
+
+    private fun getSenderProduct(senderProductID: String, onResult: (Product?) -> Unit) {
+        val database = FirebaseDatabase.getInstance()
+        val productRef = database.getReference("Product").child(senderProductID)
+
+        productRef.get().addOnSuccessListener { dataSnapshot ->
+            val product = dataSnapshot.getValue(Product::class.java)
+            onResult(product)
+        }.addOnFailureListener { e ->
+            println("Error fetching MeetUp: ${e.message}")
+            onResult(null)
+        }
+    }
+
+    private fun getMeetUpObject(meetUpID: String, onResult: (MeetUp?) -> Unit) {
+        val database = FirebaseDatabase.getInstance()
+        val meetUpRef = database.getReference("MeetUp").child(meetUpID)
+
+        meetUpRef.get().addOnSuccessListener { dataSnapshot ->
+            val meetUp = dataSnapshot.getValue(MeetUp::class.java)
+            onResult(meetUp)
+        }.addOnFailureListener { e ->
+            println("Error fetching MeetUp: ${e.message}")
+            onResult(null)
+        }
+    }
+
     private fun startLocationUpdates() {
 
         if (!this::googleMap.isInitialized) {
@@ -248,8 +368,8 @@ class Navigation : Fragment() {
 
             //Define the LocationRequest
             locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 10000)
-                .setMinUpdateIntervalMillis(5000) // 5 seconds update interval
-                .setMaxUpdateDelayMillis(10000)   // Max 10 seconds delay
+                .setMinUpdateIntervalMillis(5000) //5 seconds update interval
+                .setMaxUpdateDelayMillis(10000)   //Max 10 seconds delay
                 .build()
 
             //Define the LocationCallback
@@ -262,19 +382,19 @@ class Navigation : Fragment() {
                                 currentLocation = LatLng(location.latitude, location.longitude)
                                 Log.d("Navigation", "Current Location: $currentLocation")
 
-                                // Check if currentLocationMarker exists
+                                //Check if currentLocationMarker exists
                                 if (currentLocationMarker == null) {
-                                    // If it doesn't exist, create it
+                                    //If it doesn't exist, create it
                                     currentLocationMarker = googleMap.addMarker(
                                         MarkerOptions().position(currentLocation!!)
                                             .title("Current Location")
                                     )
                                 } else {
-                                    // If it exists, just update its position
+                                    //If it exists, just update its position
                                     currentLocationMarker?.position = currentLocation!!
                                 }
 
-                                updateRoute(currentLocation!!)  // Use the updated current location
+                                updateRoute(currentLocation!!)  //Use the updated current location
                             }
                         }
                     }
@@ -448,17 +568,21 @@ class Navigation : Fragment() {
 
                         //If the threshold is reached, redirect to identity verification page
                         val bundle = Bundle().apply {
-
+                            if (swap != null) {
+                                putSerializable("swap", swap)
+                                Log.e("Navigation", "Swap object is not null")
+                            } else {
+                                Log.e("Navigation", "Swap object is null")
+                            }
                         }
                         val fragment = IdentityVerification().apply {
-
+                            arguments = bundle
                         }
                         activity?.supportFragmentManager?.beginTransaction()?.apply {
                             replace(R.id.frameLayout, fragment)
                             setCustomAnimations(R.anim.fade_out, R.anim.fade_in)
                             commit()
                         }
-
                     }
                 },
                 { error ->

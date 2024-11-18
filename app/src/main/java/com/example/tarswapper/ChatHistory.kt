@@ -2,6 +2,8 @@ package com.example.tarswapper
 
 import android.content.Context
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -122,74 +124,24 @@ class ChatHistory : Fragment(), OnChatHistoryItemClickListener {
 
         ////Processing////
         binding.charHistorySearch.setOnClickListener() {
-            //Get Search Text
-            val searchText = binding.chatHistorySearchBox.text.toString()
-
-            //Get Messages Recycler View
-            database.reference.child("Message")
-                .child(senderRoom!!)
-                .child("message")
-                .addValueEventListener(object : ValueEventListener {
-                    override fun onDataChange(snapshot: DataSnapshot) {
-                        //Clear all messages to avoid duplication from the previous view
-                        val previousMessageCount = messages!!.size
-                        messages!!.clear()
-
-                        //Get all messages, add them into the messages list
-                        for (itemSnapshot1 in snapshot.children) {
-                            //Get each message as Message Obj
-                            val message: Message? = itemSnapshot1.getValue(Message::class.java)
-
-                            //Ensure message is not null
-                            if (message != null) {
-                                //Get the messageID under each room
-                                message.messageID = itemSnapshot1.key
-
-                                var includeMessage = true
-
-                                //Check if searchText filter is applied and matches
-                                if (searchText.isNotEmpty()) {
-                                    includeMessage = includeMessage && message.message!!.contains(searchText, ignoreCase = true)
-                                }
-
-                                //Check if media filter is applied and matches
-                                if (!media.isNullOrEmpty()) {
-                                    val matchesMediaType = when (media) {
-                                        "Image" -> message.mediaType.equals("image", ignoreCase = true)
-                                        "Video" -> message.mediaType.equals("video", ignoreCase = true)
-                                        else -> false
-                                    }
-                                    includeMessage = includeMessage && matchesMediaType
-                                }
-
-                                //Check if date filter is applied and matches
-                                if (!date.isNullOrEmpty()) {
-                                    val messageDate = message.dateTime?.split(" • ")?.getOrNull(1) ?: ""
-                                    val matchesDate = messageDate == date
-                                    includeMessage = includeMessage && matchesDate
-                                }
-
-                                //Add message if it meets all applied filters
-                                if (includeMessage) {
-                                    messages!!.add(message)
-                                }
-
-                                Log.e("History Message", messages.toString())
-                            }
-                        }
-
-                        //After finishing adding, update the RecyclerView
-                        adapter!!.notifyDataSetChanged()
-
-
-                        //Update the total number of result count
-                        binding.noOfResultText.text = messages!!.size.toString() + " Results"
-                    }
-
-                    override fun onCancelled(error: DatabaseError) {
-                    }
-                })
+            search()
         }
+
+        binding.chatHistorySearchBox.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                //Not used, but required to override
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                //Trigger event whenever a character is entered or removed
+                search()
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                //Not used, but required to override
+            }
+        })
+
 
 
         //Calender View
@@ -222,6 +174,8 @@ class ChatHistory : Fragment(), OnChatHistoryItemClickListener {
             val formattedDate = dateFormat.format(selectedDate)
             date = formattedDate
 
+            search()
+
             binding.txtDateSelected.visibility = View.VISIBLE
             binding.txtDateSelected.text = "Picked Date: ${date.toString()}"
         }
@@ -230,10 +184,12 @@ class ChatHistory : Fragment(), OnChatHistoryItemClickListener {
         datePicker.addOnNegativeButtonClickListener {
             date = null
             binding.txtDateSelected.visibility = View.GONE
+
+            search()
         }
 
         //Add option to spinner
-        val options = listOf("", "Image", "Video")
+        val options = listOf("All", "Image", "Video")
         val spinnerAdapter =
             ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, options)
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -249,7 +205,14 @@ class ChatHistory : Fragment(), OnChatHistoryItemClickListener {
                 id: Long
             ) {
                 val selectedItem = parent.getItemAtPosition(position) as String
-                media = selectedItem
+
+                if(selectedItem == "All") {
+                    media = ""
+                } else {
+                    media = selectedItem
+                }
+
+                search()
             }
 
             override fun onNothingSelected(parent: AdapterView<*>) {
@@ -277,6 +240,78 @@ class ChatHistory : Fragment(), OnChatHistoryItemClickListener {
             addToBackStack(null)
             commit()
         }
+    }
+
+    private fun search(){
+        val database = FirebaseDatabase.getInstance()
+
+        //Get Search Text
+        var searchText = binding.chatHistorySearchBox.text.toString()
+
+        //Get Messages Recycler View
+        database.reference.child("Message")
+            .child(senderRoom!!)
+            .child("message")
+            .addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    //Clear all messages to avoid duplication from the previous view
+                    val previousMessageCount = messages!!.size
+                    messages!!.clear()
+
+                    //Get all messages, add them into the messages list
+                    for (itemSnapshot1 in snapshot.children) {
+                        //Get each message as Message Obj
+                        val message: Message? = itemSnapshot1.getValue(Message::class.java)
+
+                        //Ensure message is not null
+                        if (message != null) {
+                            //Get the messageID under each room
+                            message.messageID = itemSnapshot1.key
+
+                            var includeMessage = true
+
+                            //Check if searchText filter is applied and matches
+                            if (searchText.isNotEmpty()) {
+                                includeMessage = includeMessage && message.message!!.contains(searchText, ignoreCase = true)
+                            }
+
+                            //Check if media filter is applied and matches
+                            if (!media.isNullOrEmpty()) {
+                                val matchesMediaType = when (media) {
+                                    "Image" -> message.mediaType.equals("image", ignoreCase = true)
+                                    "Video" -> message.mediaType.equals("video", ignoreCase = true)
+                                    else -> false
+                                }
+                                includeMessage = includeMessage && matchesMediaType
+                            }
+
+                            //Check if date filter is applied and matches
+                            if (!date.isNullOrEmpty()) {
+                                val messageDate = message.dateTime?.split(" • ")?.getOrNull(1) ?: ""
+                                val matchesDate = messageDate == date
+                                includeMessage = includeMessage && matchesDate
+                            }
+
+                            //Add message if it meets all applied filters
+                            if (includeMessage) {
+                                messages!!.add(message)
+                            }
+
+                            Log.e("History Message", messages.toString())
+                        }
+                    }
+
+                    //After finishing adding, update the RecyclerView
+                    adapter!!.notifyDataSetChanged()
+
+
+                    //Update the total number of result count
+                    binding.noOfResultText.text = messages!!.size.toString() + " Results"
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                }
+            })
     }
 
 }

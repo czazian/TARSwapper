@@ -93,6 +93,8 @@ dependencies {
     implementation ("com.google.android.exoplayer:exoplayer:2.18.1") //video player
     implementation ("com.github.PhilJay:MPAndroidChart:v3.1.0")      //pie chart
     implementation ("com.airbnb.android:lottie:3.4.0") //lottie animation
+    implementation("com.google.zxing:zxing-parent:3.5.3")
+
 
 
     //Compose Dependencies

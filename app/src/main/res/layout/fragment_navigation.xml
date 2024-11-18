@@ -155,7 +155,7 @@
                     android:id="@+id/fillDestination"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="DK A, Jalan Malinja, 53100 Kuala Lumpur, Federal Territory of Kuala Lumpur."
+                    android:text=""
                     android:textColor="@android:color/black" />
 
                 <TextView
@@ -170,7 +170,7 @@
                     android:id="@+id/fillName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="John Tan Yi Yang"
+                    android:text=""
                     android:textColor="@android:color/black" />
 
                 <TextView
@@ -185,22 +185,53 @@
                     android:id="@+id/fillDateTime"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="26 Aug 2024, 13:14"
+                    android:text=""
                     android:textColor="@android:color/black" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingTop="8dp"
-                    android:text="Price"
+                    android:text="Item To Send"
                     android:textColor="@android:color/black"
                     android:textStyle="bold" />
 
                 <TextView
-                    android:id="@+id/fillPrice"
+                    android:id="@+id/fillItemToSend"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="RM 150.00"
+                    android:text=""
+                    android:textColor="@android:color/black" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="8dp"
+                    android:text="Item To Receive"
+                    android:textColor="@android:color/black"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/fillItemToReceive"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:textColor="@android:color/black" />
+
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="8dp"
+                    android:text="Trade Type"
+                    android:textColor="@android:color/black"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/fillTradeType"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=""
                     android:textColor="@android:color/black" />
 
             </LinearLayout>

@@ -2,12 +2,16 @@ package com.example.tarswapper
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.tarswapper.data.Message
+import com.example.tarswapper.data.Product
+import com.example.tarswapper.data.SwapRequest
 import com.example.tarswapper.dataAdapter.MessageAdapter
 import com.example.tarswapper.dataAdapter.TransactionAdapter
 import com.example.tarswapper.databinding.FragmentNotificationBinding
@@ -77,7 +81,7 @@ class Notification : Fragment() {
                     }
                     //Transaction
                     3 -> {
-                        bindTransaction()
+                        bindTransaction(userID!!)
                     }
                 }
             }
@@ -184,53 +188,72 @@ class Notification : Fragment() {
 
 
     //When Transaction Tab is Selected
-    private fun bindTransaction() {
-        //Temporary Data
-        var date = "2024-11-19"
-        var time = "23:50"
-        var ownUserID = "-OAQyscTlsEQdw_3lITE"
-        var oppositeUserID = "-OADY-HMy72rY1Mg1Cl5"
-        var senderProductID = "P01"
-        var receiveProductID = "P02"
-        var location = "TAR UMT Dewan Tunku Abdul Rahman (DTAR), 53100 Kuala Lumpur, Selangor"
-        var tradeType = "swap"
+    private fun bindTransaction(currentUserID: String) {
 
-        val tempItem = Temp(date, time, ownUserID, oppositeUserID, senderProductID, receiveProductID, location, tradeType)
-        val tempItem2 = Temp("2024-11-12", "12:20", "-OAQyscTlsEQdw_3lITE", "-OADY-HMy72rY1Mg1Cl5", "P01", "P02", "3357, Jalan 18/31, Taman Sri Serdang, 43300 Seri Kembangan, Selangor", "swap")
+        fetchData(currentUserID) { list ->
+            //If the result is not null or empty
+            if (list.isNullOrEmpty()) {
+                Toast.makeText(requireContext(), "No transactions available", Toast.LENGTH_SHORT).show()
+            } else {
+                Log.e("RESULT", list.toString())
 
-        val tempList = mutableListOf<Temp>()
-        tempList.add(tempItem)
-        tempList.add(tempItem2)
+                //Set up adapter
+                val adapter = TransactionAdapter(requireContext()) { transaction ->
 
-        val adapter = TransactionAdapter(requireContext()) {
-            val bundle = Bundle().apply {
-                putSerializable("transaction", tempItem)
-            }
-            val fragment = Navigation().apply {
-                arguments = bundle
-            }
-            activity?.supportFragmentManager?.beginTransaction()?.apply {
-                replace(R.id.frameLayout, fragment)
-                setCustomAnimations(R.anim.fade_out, R.anim.fade_in)
-                addToBackStack(null)
-                commit()
+                    Log.d("TransactionAdapter", "Button clicked for transaction: ${transaction.swapRequestID}")
+
+                    val bundle = Bundle().apply {
+                        //Pass all data need to be used in Navigation
+                        putSerializable("transaction", transaction)
+                    }
+                    val fragment = Navigation().apply {
+                        arguments = bundle
+                    }
+                    activity?.supportFragmentManager?.beginTransaction()?.apply {
+                        replace(R.id.frameLayout, fragment)
+                        setCustomAnimations(R.anim.fade_out, R.anim.fade_in)
+                        addToBackStack(null)
+                        commit()
+                    }
+                }
+                adapter.setData(list)
+                binding.notificationRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+                binding.notificationRecyclerView.adapter = adapter
+                binding.notificationRecyclerView.setHasFixedSize(true)
             }
         }
-        adapter.setData(tempList)
-        binding.notificationRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-        binding.notificationRecyclerView.adapter = adapter
-        binding.notificationRecyclerView.setHasFixedSize(true)
     }
 
-    data class Temp(
-        var date: String? = null,
-        var time: String? = null,
-        var ownUserID: String? = null,
-        var oppositeUserID: String? = null,
-        var senderProductID: String? = null,
-        var receiveProductID: String? = null,
-        val location: String? = null,
-        var tradeType: String? = null,
-    ) : Serializable
+    private fun fetchData(currentUserID: String, onResult: (List<SwapRequest>) -> Unit) {
+        val database = FirebaseDatabase.getInstance()
+        val swapRequestsRef = database.getReference("SwapRequest")
+        val productsRef = database.getReference("Product")
+
+        productsRef.get().addOnSuccessListener { productSnapshot ->
+            val products = productSnapshot.children.mapNotNull { it.getValue(Product::class.java) }
+            val userProductIDs = products
+                .filter { it.created_by_UserID == currentUserID }
+                .map { it.productID }
+
+            swapRequestsRef.get().addOnSuccessListener { swapRequestSnapshot ->
+                val swapRequests = swapRequestSnapshot.children.mapNotNull { it.getValue(SwapRequest::class.java) }
+
+                //Filter SwapRequests
+                val userSwapRequests = swapRequests.filter { swapRequest ->
+                    swapRequest.status == "Accepted" &&
+                            (swapRequest.senderProductID in userProductIDs ||
+                                    swapRequest.receiverProductID in userProductIDs)
+                }
+
+                //Print the results
+                onResult(userSwapRequests)
+
+            }.addOnFailureListener { e ->
+                Log.e("Error", "Error fetching SwapRequest: ${e.message}")
+            }
+        }.addOnFailureListener { e ->
+            Log.e("Error", "Error fetching Product: ${e.message}")
+        }
+    }
 
 }
