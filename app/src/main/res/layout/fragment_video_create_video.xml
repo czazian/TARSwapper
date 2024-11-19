@@ -78,17 +78,54 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <ImageButton
-                android:id="@+id/addThumbnailImgBtn"
-                android:layout_width="95dp"
-                android:layout_height="129dp"
+                android:id="@+id/uploadVideoBtn"
+                android:layout_width="250dp"
+                android:layout_height="280dp"
+                android:clickable="true"
+                android:focusable="true"
                 android:scaleType="centerInside"
                 android:src="@drawable/baseline_upload_24"
                 app:layout_constraintStart_toStartOf="@+id/textView19"
                 app:layout_constraintTop_toBottomOf="@+id/textView19" />
 
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/progressContainer"
+                android:layout_width="250dp"
+                android:layout_height="280dp"
+                android:background="#40000000"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="@+id/uploadVideoBtn"
+                app:layout_constraintEnd_toEndOf="@+id/uploadVideoBtn"
+                app:layout_constraintStart_toStartOf="@+id/uploadVideoBtn"
+                app:layout_constraintTop_toBottomOf="@+id/textView19">
 
-            <EditText
-                android:id="@+id/videoTitleED"
+                <ProgressBar
+                    android:id="@+id/uploadProgressBar"
+                    style="@android:style/Widget.DeviceDefault.Light.ProgressBar.Large"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/progressPercentage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0%"
+                    android:textColor="@color/black"
+                    android:textSize="12dp"
+                    app:layout_constraintEnd_toEndOf="@id/uploadProgressBar"
+                    app:layout_constraintStart_toStartOf="@id/uploadProgressBar"
+                    app:layout_constraintTop_toBottomOf="@id/uploadProgressBar" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+    <EditText
+                android:id="@+id/titleED"
                 android:layout_width="360dp"
                 android:layout_height="39dp"
                 android:layout_marginTop="16dp"
@@ -97,7 +134,7 @@
                 android:hint="Write video title here..."
                 android:paddingLeft="8dp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/addThumbnailImgBtn" />
+                app:layout_constraintTop_toBottomOf="@+id/uploadVideoBtn" />
 
             <TextView
                 android:id="@+id/textView22"
@@ -107,12 +144,12 @@
                 android:text="Product Tag: "
                 android:textSize="16dp"
                 android:textStyle="bold"
-                app:layout_constraintStart_toStartOf="@+id/videoTitleED"
-                app:layout_constraintTop_toBottomOf="@+id/videoTitleED" />
+                app:layout_constraintStart_toStartOf="@+id/titleED"
+                app:layout_constraintTop_toBottomOf="@+id/titleED" />
 
 
             <Button
-                android:id="@+id/button3"
+                android:id="@+id/selectProductBtn"
                 android:layout_width="90dp"
                 android:layout_height="35dp"
                 android:text="Select"
@@ -122,29 +159,117 @@
                 app:layout_constraintStart_toEndOf="@+id/textView22"
                 app:layout_constraintTop_toTopOf="@+id/textView22" />
 
-            <androidx.recyclerview.widget.RecyclerView
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/productTagContainerContainer"
                 android:layout_width="wrap_content"
                 android:layout_height="100dp"
+                android:padding="4dp"
+                android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textView22"
-                tools:listitem="@layout/product_list_hori" />
+                app:layout_constraintTop_toBottomOf="@+id/textView22">
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="360dp"
+                    android:layout_height="90dp"
+                    android:backgroundTint="#F8F8FB"
+                    app:cardCornerRadius="15dp"
+                    app:cardElevation="5dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="358dp"
+                        android:layout_height="match_parent">
+
+                        <ImageView
+                            android:id="@+id/productTagImgV"
+                            android:layout_width="80dp"
+                            android:layout_height="69dp"
+                            android:layout_marginStart="16dp"
+                            android:scaleType="centerCrop"
+                            android:src="@drawable/item"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintVertical_bias="0.523" />
+
+                        <TextView
+                            android:id="@+id/productTagNameTV"
+                            android:layout_width="160dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:text="Item 1"
+                            android:textSize="20dp"
+                            android:textStyle="bold"
+                            app:layout_constraintStart_toEndOf="@+id/productTagImgV"
+                            app:layout_constraintTop_toTopOf="@+id/productTagImgV" />
+
+                        <TextView
+                            android:id="@+id/tradeDetailTV"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/rounded_button"
+                            android:drawablePadding="4dp"
+                            android:paddingRight="8dp"
+                            android:text="RM 120"
+                            android:textColor="#756AB6"
+                            android:textSize="20dp"
+                            android:textStyle="bold"
+                            app:layout_constraintStart_toStartOf="@+id/productTagNameTV"
+                            app:layout_constraintTop_toBottomOf="@+id/productTagNameTV" />
+
+                        <ImageView
+                            android:id="@+id/tradeImg"
+                            android:layout_width="25dp"
+                            android:layout_height="25dp"
+                            android:layout_marginEnd="36dp"
+                            android:src="@drawable/baseline_attach_money_24"
+                            app:layout_constraintBottom_toBottomOf="@+id/tradeDetailTV"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="@+id/tradeDetailTV"
+                            app:layout_constraintVertical_bias="1.0" />
+
+                        <EditText
+                            android:id="@+id/selectedProductID"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:enabled="false"
+                            android:visibility="gone"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="parent" />
+
+                        <ImageButton
+                            android:id="@+id/tradeClearBtn"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:src="@drawable/baseline_clear_24"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toEndOf="@+id/tradeImg"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                </androidx.cardview.widget.CardView>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <Button
-                android:id="@+id/btnCreatePost"
+                android:id="@+id/submitBtn"
                 android:layout_width="320dp"
                 android:layout_height="50dp"
-                android:layout_marginTop="112dp"
                 android:backgroundTint="#AC87C5"
-                android:text="Post"
+                android:text="Add"
                 android:textSize="20dp"
                 android:textStyle="bold"
+                android:layout_marginTop="25dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.533"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textView22" />
-
-
+                app:layout_constraintTop_toBottomOf="@+id/productTagContainerContainer" />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

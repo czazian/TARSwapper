@@ -83,9 +83,9 @@ class TradeMeetUp : Fragment() {
         //on click
 
         //bind the spinner
-        val adapter1 = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, resources.getStringArray(R.array.tarumt_kl_campus))
+        val adapter1 = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, resources.getStringArray(R.array.meetUp_location))
         adapter1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        binding.venueSpinner.adapter = adapter1
+        binding.locationSpinner.adapter = adapter1
 
         //bind product spinner
 //        val adapter2 = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, resources.getStringArray(R.array.tarumt_kl_campus))
@@ -252,10 +252,11 @@ class TradeMeetUp : Fragment() {
                         date = binding.dateTV.text.toString(),
                         time = binding.timeTV.text.toString(),
                         location = binding.locationTV.text.toString(),
-                        venue = binding.venueSpinner.selectedItem.toString(),
                         verificationCode = generateRandom4DigitNumber(),
                         verifiedStatus = false,
-                        completeStatus = false
+                        completeStatus = false,
+                        location = binding.locationSpinner.selectedItem.toString(),
+                        venue = binding.venue.text.toString(),
                     )
                     val newMeetUpRef = meetUpRef.push()
                     meetUp.meetUpID = newMeetUpRef.key

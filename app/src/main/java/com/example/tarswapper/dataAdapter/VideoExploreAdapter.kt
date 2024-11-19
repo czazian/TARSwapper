@@ -1,0 +1,290 @@
+package com.example.tarswapper.dataAdapter
+
+import VideoCommentBottomSheet
+import android.content.Context
+import android.graphics.Color
+import android.net.Uri
+import android.os.Bundle
+import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.fragment.app.FragmentManager
+import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.example.tarswapper.CommunityEditPost
+import com.example.tarswapper.R
+import com.example.tarswapper.data.Product
+import com.example.tarswapper.data.ShortVideo
+import com.example.tarswapper.databinding.VideoCommentBottomSheetBinding
+import com.example.tarswapper.databinding.VideoExploreVideoListBinding
+import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.SimpleExoPlayer
+import com.google.android.exoplayer2.source.MediaSource
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
+import com.google.firebase.storage.FirebaseStorage
+
+class VideoExploreAdapter(private val videoList: List<ShortVideo>, private val fragmentManager: FragmentManager, private val context : Context) :
+    RecyclerView.Adapter<VideoExploreAdapter.VideoViewHolder>() {
+
+    class VideoViewHolder(val binding: VideoExploreVideoListBinding) : RecyclerView.ViewHolder(binding.root){}
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VideoViewHolder {
+        val binding = VideoExploreVideoListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return VideoViewHolder(binding)
+    }
+
+    override fun onBindViewHolder(holder: VideoViewHolder, position: Int) {
+        val shortVideo = videoList[position]
+
+        val sharedPreferencesTARSwapper =
+            context.getSharedPreferences("TARSwapperPreferences", Context.MODE_PRIVATE)
+        val userID = sharedPreferencesTARSwapper.getString("userID", null)
+
+        with(holder.binding){
+
+            holder.binding.titleTV.text = shortVideo.title
+            // Setup ExoPlayer
+            val player = SimpleExoPlayer.Builder(holder.itemView.context).build()
+            holder.binding.videoPlayerView.player = player
+
+            //like, comment, product tag
+            val database = FirebaseDatabase.getInstance()
+            val shortVideoRef = database.getReference("ShortVideo")
+            val commentRef = shortVideoRef.child(shortVideo.shortVideoID.toString()).child("Comment")
+            val likeRef = shortVideoRef.child(shortVideo.shortVideoID.toString()).child("Like")
+            val productTagRef = shortVideoRef.child(shortVideo.shortVideoID.toString()).child("ShortVideo_ProductTag")
+
+            // Count the number of comments
+            commentRef.addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if (snapshot.exists()) {
+                        val commentCount = snapshot.childrenCount.toInt()
+                        holder.binding.commentNumTV.text = commentCount.toString()
+                    } else {
+                        holder.binding.commentNumTV.text = "0"
+                    }
+                }
+                override fun onCancelled(error: DatabaseError) {
+                    println("Error: ${error.message}")
+                }
+            })
+
+            likeRef.addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if (snapshot.exists()) {
+                        val likeCount = snapshot.childrenCount.toInt()
+                        holder.binding.likeNumTV.text = likeCount.toString()
+                    } else {
+                        holder.binding.likeNumTV.text = "0"
+                    }
+                }
+                override fun onCancelled(error: DatabaseError) {
+                    println("Error: ${error.message}")
+                }
+            })
+
+            likeRef.orderByValue().equalTo(userID).addListenerForSingleValueEvent(object :
+                ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if (snapshot.exists()) {
+                        // If userID exists in Likes, set the button tint to red
+                        holder.binding.likeBtn.setColorFilter(Color.parseColor("#FF0000"))
+                    } else {
+                        // If userID does not exist in Likes, set the button tint to default (e.g., black)
+                        holder.binding.likeBtn.setColorFilter(Color.parseColor("#FFFFFF"))
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Log.e("Firebase", "Error checking Likes: ${error.message}")
+                }
+            })
+
+            productTagRef.get().addOnSuccessListener { snapshot ->
+                if (snapshot.exists()) {
+                    // Iterate over the children if it's a list of tags
+                    for (tagSnapshot in snapshot.children) {
+                        val productTag = tagSnapshot.value.toString()
+                        Log.d("Firebase", "Community Product Tag: $productTag")
+                        holder.binding.productTagContainer.visibility = View.VISIBLE
+
+                        getProductFromFirebase(productID = productTag) { product ->
+                            holder.binding.productTagNameTV.text = product.name
+                            getFirebaseImageUrl(product) { url ->
+                                if (url != null) {
+                                    Glide.with(holder.binding.productTagImgV.context)
+                                        .load(url)
+                                        .into(holder.binding.productTagImgV)
+                                } else {
+                                    // Handle the case where the image URL is not retrieved
+                                    holder.binding.productTagImgV.setImageResource(R.drawable.ai) // Set a placeholder
+                                }
+                            }
+                            if(product.tradeType == "Sale"){
+                                holder.binding.tradeDetailTV.text = "RM ${product.price}"
+                                holder.binding.tradeImg.setImageResource(R.drawable.baseline_attach_money_24)
+                            } else{
+                                holder.binding.tradeDetailTV.text = product.swapCategory
+                                holder.binding.tradeDetailTV.setCompoundDrawablesWithIntrinsicBounds(
+                                    R.drawable.baseline_wifi_protected_setup_24, 0, 0, 0)
+                                holder.binding.tradeImg.setImageResource(R.drawable.baseline_wifi_protected_setup_24)
+                            }
+                        }
+
+                    }
+                } else {
+                    Log.d("Firebase", "No product tags found for this community.")
+                    holder.binding.productTagContainer.visibility = View.GONE
+                }
+            }.addOnFailureListener { e ->
+                Log.e("Firebase", "Error fetching data: ${e.message}")
+            }
+
+            holder.binding.likeBtn.setOnClickListener {
+                // Check if the current user has already liked the post
+                likeRef.orderByValue().equalTo(userID).addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        if (snapshot.exists()) {
+                            // If user ID matches, remove the like
+                            for (likeSnapshot in snapshot.children) {
+                                likeSnapshot.ref.removeValue()
+                                    .addOnSuccessListener {
+                                        Log.d("Firebase", "Like removed successfully.")
+                                        holder.binding.likeBtn.setColorFilter(Color.parseColor("#000000")) // Turn button color to black
+                                    }
+                                    .addOnFailureListener { e ->
+                                        Log.e("Firebase", "Failed to remove Like: ${e.message}")
+                                    }
+                            }
+                        } else {
+                            // If no match, add the like
+                            likeRef.push().setValue(userID)
+                                .addOnSuccessListener {
+                                    Log.d("Firebase", "Like added successfully.")
+                                    holder.binding.likeBtn.setColorFilter(Color.parseColor("#FF0000")) // Turn button color to red
+                                }
+                                .addOnFailureListener { e ->
+                                    Log.e("Firebase", "Failed to add Like: ${e.message}")
+                                }
+                        }
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        Log.e("Firebase", "Error checking Likes: ${error.message}")
+                    }
+                })
+            }
+
+            holder.binding.commentBtn.setOnClickListener{
+                //show bottom sheet
+                val bottomSheet = VideoCommentBottomSheet(shortVideo.shortVideoID.toString())
+                bottomSheet.show(fragmentManager, bottomSheet.tag)
+            }
+
+            // Set the video URI
+            getVideoUri(shortVideo.shortVideoID.toString()) { uri ->
+                if (uri != null) {
+                    val mediaItem = MediaItem.fromUri(uri)
+                    player.setMediaItem(mediaItem)
+                    player.prepare()
+                    player.playWhenReady = true
+                } else {
+                    Log.e("VideoAdapter", "Failed to retrieve video URI")
+                }
+            }
+
+        // Release the player when the view is recycled
+        holder.itemView.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
+            override fun onViewAttachedToWindow(v: View) {
+                player.playWhenReady = true
+            }
+
+            override fun onViewDetachedFromWindow(v: View) {
+                player.release()
+            }
+        })
+    }
+
+    }
+
+    override fun getItemCount(): Int = videoList.size
+
+
+    fun getVideoUri(shortVideoID: String, onComplete: (Uri?) -> Unit) {
+        val storage = FirebaseStorage.getInstance()
+        val videoRef = storage.reference.child("ShortVideo/$shortVideoID/video.mp4")
+
+        videoRef.downloadUrl
+            .addOnSuccessListener { uri ->
+                // Successfully retrieved the URI
+                onComplete(uri)
+            }
+            .addOnFailureListener { exception ->
+                // Handle the error
+                exception.printStackTrace()
+                onComplete(null)
+            }
+    }
+
+    fun getProductFromFirebase(productID: String? = null, onResult: (Product) -> Unit) {
+        val databaseRef = FirebaseDatabase.getInstance().getReference("Product")
+        val query = databaseRef.child(productID.toString()) // Query for a specific product by its productID
+
+        query.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    // Retrieve the product from the snapshot
+                    val product = snapshot.getValue(Product::class.java)
+                    if (product != null) {
+                        onResult(product) // Wrap it in a list to match the expected result format
+                        Log.d("product found", product.toString())
+                    } else {
+                        // If the product doesn't match criteria
+                        Log.d("No matching product", "Product either doesn't exist or is created by the user.")
+                    }
+                } else {
+                    // Handle if the product is not found in the database
+                    Log.d("Product not found", "No product exists for the given productID.")
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                // Handle errors
+                println("Error fetching data: ${error.message}")
+            }
+        })
+    }
+
+    fun getFirebaseImageUrl(product: Product, onResult: (String?) -> Unit) {
+        val storageReference = FirebaseStorage.getInstance().getReference("ProductImages/" + product.productID + "/Thumbnail")
+
+        // List all items in the folder
+        storageReference.listAll()
+            .addOnSuccessListener { listResult ->
+                if (listResult.items.isNotEmpty()) {
+                    // Get the first file from the list of items
+                    val firstImageRef = listResult.items[0]
+
+                    // Get the download URL for the first image
+                    firstImageRef.downloadUrl
+                        .addOnSuccessListener { uri ->
+                            onResult(uri.toString())  // Return the URL of the first image
+                        }
+                        .addOnFailureListener { e ->
+                            onResult(null)  // In case of failure, return null
+                        }
+                } else {
+                    // If no images exist in the folder
+                    onResult(null)
+                }
+            }
+            .addOnFailureListener { e ->
+                onResult(null)  // Handle any failure when listing items
+            }
+    }
+}

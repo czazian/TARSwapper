@@ -15,11 +15,11 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <com.google.android.exoplayer2.ui.PlayerView
-            android:id="@+id/video_playerView"
+            android:id="@+id/videoPlayerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:keepScreenOn="true"
-            android:background="#000000" />
+            android:background="#000000"
+            android:keepScreenOn="true" />
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -31,7 +31,7 @@
             app:layout_constraintEnd_toEndOf="parent">
 
             <ImageButton
-                android:id="@+id/loveBtn"
+                android:id="@+id/likeBtn"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_gravity="center"
@@ -42,7 +42,7 @@
                 app:tint="@color/white" />
 
             <TextView
-                android:id="@+id/loveTV"
+                android:id="@+id/likeNumTV"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
@@ -61,11 +61,12 @@
                 android:background="@null"
                 android:contentDescription="Image Button"
                 android:scaleType="fitCenter"
+                android:layout_marginTop="15dp"
                 android:src="@drawable/baseline_chat_bubble_24"
                 app:tint="@color/white" />
 
             <TextView
-                android:id="@+id/commentTV"
+                android:id="@+id/commentNumTV"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
@@ -77,35 +78,114 @@
 
         </LinearLayout>
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/titleTV"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="16dp"
+            android:text="title"
+            android:layout_marginLeft="25dp"
+            android:textSize="25dp"
+            android:textColor="@color/white"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:layout_marginBottom="140dp"
+            app:layout_constraintBottom_toBottomOf="@+id/videoPlayerView"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/productTagContainer"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_marginBottom="40dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="4dp"
+            android:visibility="visible"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
 
-            <TextView
-                android:id="@+id/titleTV"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Title"
-                android:textColor="@color/white"
+            <androidx.cardview.widget.CardView
+                android:id="@+id/productCV"
+                android:layout_width="360dp"
+                android:layout_height="90dp"
+                android:backgroundTint="#F8F8FB"
+                android:clickable="true"
+                android:focusable="true"
+                android:visibility="visible"
+                app:cardCornerRadius="15dp"
+                app:cardElevation="5dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent">
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/productTagListView"
-                android:layout_width="match_parent"
-                android:layout_height="100dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/titleTV"
-                tools:listitem="@layout/video_explore_product_list" />
 
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <ImageView
+                        android:id="@+id/productTagImgV"
+                        android:layout_width="80dp"
+                        android:layout_height="69dp"
+                        android:layout_marginStart="16dp"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/item"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintVertical_bias="0.523" />
+
+                    <TextView
+                        android:id="@+id/productTagNameTV"
+                        android:layout_width="160dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:text="Item 1"
+                        android:textSize="20dp"
+                        android:textStyle="bold"
+                        app:layout_constraintStart_toEndOf="@+id/productTagImgV"
+                        app:layout_constraintTop_toTopOf="@+id/productTagImgV" />
+
+                    <TextView
+                        android:id="@+id/tradeDetailTV"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/rounded_button"
+                        android:drawablePadding="4dp"
+                        android:paddingRight="8dp"
+                        android:text="RM 120"
+                        android:textColor="#756AB6"
+                        android:textSize="20dp"
+                        android:textStyle="bold"
+                        app:layout_constraintStart_toStartOf="@+id/productTagNameTV"
+                        app:layout_constraintTop_toBottomOf="@+id/productTagNameTV" />
+
+                    <ImageView
+                        android:id="@+id/tradeImg"
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:layout_marginEnd="36dp"
+                        android:src="@drawable/baseline_attach_money_24"
+                        app:layout_constraintBottom_toBottomOf="@+id/tradeDetailTV"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="@+id/tradeDetailTV"
+                        app:layout_constraintVertical_bias="1.0" />
+
+                    <EditText
+                        android:id="@+id/selectedProductID"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:enabled="false"
+                        android:visibility="gone"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="parent" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </androidx.cardview.widget.CardView>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -62,5 +62,16 @@
     <string name="COMMUNITY_POST_PUBLIC">Public</string>
     <string name="COMMUNITY_POST_HIDE">Hide</string>
 
+    <string-array name="meetUp_location">
+        <item>TAR UMT Cyber Centre (CITC), Jalan Malinja, Taman Bunga Raya, 53000 Kuala Lumpur, Wilayah Persekutuan Kuala Lumpur</item>
+        <item>TAR UMT Block H, Jalan Genting Kelang, 53100 Kuala Lumpur, Wilayah Persekutuan Kuala Lumpur</item>
+        <item>TAR UMT Block B, Tunku Abdul Rahman University College, 53100, 53100, Federal Territory of Kuala Lumpur</item>
+        <item>TAR UMT Block C, 30, Jalan Malinja, Taman Bunga Raya, 53000 Kuala Lumpur, Wilayah Persekutuan Kuala Lumpur</item>
+        <item>TAR UMT Dewan Tunku Abdul Rahman (DTAR), 53100 Kuala Lumpur, Selangor</item>
+        <item>TAR UMT Sports Complex, Jalan Genting Kelang, Tunku Abdul Rahman University College, 53300 Kuala Lumpur, Wilayah Persekutuan Kuala Lumpur</item>
+        <item>TAR UMT Library, 53100 Kuala Lumpur, Federal Territory of Kuala Lumpur</item>
+        <item>TAR UMT Block PA, University College, Block PA, Tunku Abdul Rahman, Tunku Abdul Rahman University College, 53100 Kuala Lumpur, Federal Territory of Kuala Lumpur</item>
+    </string-array>
+
 
 </resources>
