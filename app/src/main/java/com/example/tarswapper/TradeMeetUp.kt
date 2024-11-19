@@ -251,7 +251,6 @@ class TradeMeetUp : Fragment() {
                     var meetUp = MeetUp(
                         date = binding.dateTV.text.toString(),
                         time = binding.timeTV.text.toString(),
-                        location = binding.locationTV.text.toString(),
                         verificationCode = generateRandom4DigitNumber(),
                         verifiedStatus = false,
                         completeStatus = false,
@@ -274,6 +273,8 @@ class TradeMeetUp : Fragment() {
                             createdAt = LocalDateTime.now(ZoneId.of("Asia/Kuala_Lumpur")).toString(),
                             productID = product.productID,
                             meetUpID = meetUp.meetUpID,
+                            sellerID = product.created_by_UserID,
+                            buyerID = userID
                         )
                         val newOrderRef = orderRef.push()
                         order.orderID = newOrderRef.key

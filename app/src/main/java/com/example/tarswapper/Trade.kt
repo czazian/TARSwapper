@@ -101,7 +101,7 @@ class Trade : Fragment() {
         }
 
         binding.myOrderImgBtn.setOnClickListener{
-            val fragment = TradeMyShop()
+            val fragment = TradeOrder()
 
             //Bottom Navigation Indicator Update
             val navigationView =
