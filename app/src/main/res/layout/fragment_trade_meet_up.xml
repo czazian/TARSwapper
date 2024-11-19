@@ -273,8 +273,8 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/timeTV" />
 
-            <TextView
-                android:id="@+id/locationTV"
+            <Spinner
+                android:id="@+id/locationSpinner"
                 android:layout_width="360dp"
                 android:layout_height="39dp"
                 android:layout_marginTop="10dp"
@@ -282,7 +282,6 @@
                 android:textSize="18dp"
                 android:paddingLeft="8dp"
                 android:gravity="center_vertical"
-                android:text="TARUMT - KL Campus"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/textView32" />
 
@@ -295,11 +294,11 @@
                 android:textSize="18dp"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/locationTV" />
+                app:layout_constraintTop_toBottomOf="@+id/locationSpinner" />
 
 
-            <Spinner
-                android:id="@+id/venue_spinner"
+            <EditText
+                android:id="@+id/venue"
                 android:layout_width="360dp"
                 android:layout_height="39dp"
                 android:layout_marginTop="10dp"
@@ -316,7 +315,7 @@
                 android:paddingTop="12dp"
                 android:visibility="visible"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/venue_spinner">
+                app:layout_constraintTop_toBottomOf="@+id/venue">
 
                 <TextView
                     android:id="@+id/textView33"

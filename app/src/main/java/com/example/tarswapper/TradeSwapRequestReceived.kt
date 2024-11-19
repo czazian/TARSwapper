@@ -66,6 +66,7 @@ class TradeSwapRequestReceived : Fragment() {
                     Log.d("result found is...", "received is executed")
                     // Step 2: Fetch swap requests where receiverProductID matches any of user's product IDs and status is "AwaitingResponse"
                     fetchSwapRequestsForUserProducts(userProductIds) {swapRequestList ->
+                        Log.d("Swap request received: ", swapRequestList.toString())
                         binding.recyclerViewSRReceived.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
                         binding.recyclerViewSRReceived.adapter = TradeSwapRequestReceivedAdapter(swapRequestList)
                         Log.d("result found is...", swapRequestList.size.toString())
@@ -99,48 +100,6 @@ class TradeSwapRequestReceived : Fragment() {
             override fun onCancelled(error: DatabaseError) {
                 println("Database error: ${error.message}")
                 onResult(null) //In case of error, return null
-            }
-        })
-    }
-
-    //get own swap request with Awaiting status
-    fun getSwapRequestFromFirebase(status: String? = null, onResult: (List<SwapRequest>) -> Unit) {
-        val sharedPreferencesTARSwapper =
-            requireActivity().getSharedPreferences("TARSwapperPreferences", Context.MODE_PRIVATE)
-        val userID = sharedPreferencesTARSwapper.getString("userID", null)
-
-        // Reference to the "SwapRequest" node in Firebase Realtime Database
-        val databaseRef = FirebaseDatabase.getInstance().getReference("SwapRequest")
-        val query       = databaseRef.orderByChild("receiverProductID").equalTo(userID)
-
-        // List to hold products retrieved from Firebase
-        val swapRequestList = mutableListOf<SwapRequest>()
-
-        // Add a listener to retrieve data
-        query.addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                if (snapshot.exists()) {
-                    // Loop through the products in the snapshot
-                    for (swapRequestSnapshot in snapshot.children) {
-                        val swapRequest = swapRequestSnapshot.getValue(SwapRequest::class.java)
-                        //filter out own product
-                        if (swapRequest != null && swapRequest.status == status) {
-                            swapRequestList.add(swapRequest) // Add the product to the list
-                        }
-                    }
-                    onResult(swapRequestList) // Return the list of products
-                    Log.d("swap request list found", swapRequestList.size.toString())
-                } else {
-                    // Handle empty database
-                    onResult(emptyList())
-                    Log.d("Empty found", swapRequestList.size.toString())
-                }
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                // Handle errors
-                println("Error fetching data: ${error.message}")
-                onResult(emptyList())
             }
         })
     }

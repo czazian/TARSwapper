@@ -2,22 +2,14 @@ package com.example.tarswapper
 
 import android.content.Context
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
-import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.tarswapper.data.ChatRoom
+import androidx.fragment.app.Fragment
 import com.example.tarswapper.data.User
-import com.example.tarswapper.dataAdapter.ChatSelectionAdapter
-import com.example.tarswapper.dataAdapter.CommunityVPAdapter
-import com.example.tarswapper.dataAdapter.VideoVPAdapter
-import com.example.tarswapper.databinding.FragmentChatSelectionBinding
-import com.example.tarswapper.databinding.FragmentTradeBinding
-import com.example.tarswapper.databinding.FragmentVideoBinding
-import com.example.tarswapper.databinding.FragmentVideoExploreBinding
-import com.example.tarswapper.interfaces.OnUserContactClick
+import com.example.tarswapper.dataAdapter.MyOrderVPAdapter
+import com.example.tarswapper.dataAdapter.SwapRequestVPAdapter
+import com.example.tarswapper.databinding.FragmentTradeOrderBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.tabs.TabLayoutMediator
 import com.google.firebase.database.DataSnapshot
@@ -25,26 +17,28 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 
-class Video : Fragment() {
+class TradeOrder : Fragment(){
     //fragment name
-    private lateinit var binding: FragmentVideoBinding
+    private lateinit var binding: FragmentTradeOrderBinding
+    private lateinit var userObj: User
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
 
-        binding = FragmentVideoBinding.inflate(layoutInflater, container, false)
+        binding = FragmentTradeOrderBinding.inflate(layoutInflater, container, false)
 
         // Set the adapter for ViewPager2
-        val adapter = VideoVPAdapter(requireActivity())
+        val adapter = MyOrderVPAdapter(requireActivity())
         binding.viewPager.adapter = adapter
 
         // Use TabLayoutMediator to bind TabLayout with ViewPager2
         TabLayoutMediator(binding.headerTab, binding.viewPager) { tab, position ->
             // Set tab text from TabItem
             tab.text = when (position) {
-                0 -> "Explore"
-                1 -> "My Video"
+                0 -> "On Going"
+                1 -> "Completed"
+                2 -> "Cancelled"
                 else -> null
             }
         }.attach()
@@ -60,6 +54,29 @@ class Video : Fragment() {
             requireActivity().getSharedPreferences("TARSwapperPreferences", Context.MODE_PRIVATE)
         val userID = sharedPreferencesTARSwapper.getString("userID", null)
 
+        getUserRecord(userID.toString()) {
+            if (it != null) {
+                userObj = it
+            }
+        }
+
+        binding.btnBackSwapRequest.setOnClickListener{
+            val fragment = Trade()
+
+            //Bottom Navigation Indicator Update
+            val navigationView =
+                requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigationView)
+            navigationView.selectedItemId = R.id.setting
+
+            val transaction = activity?.supportFragmentManager?.beginTransaction()
+            transaction?.replace(R.id.frameLayout, fragment)
+            transaction?.setCustomAnimations(
+                R.anim.fade_out,  // Enter animation
+                R.anim.fade_in  // Exit animation
+            )
+            transaction?.addToBackStack(null)
+            transaction?.commit()
+        }
         return binding.root
     }
 
@@ -85,7 +102,4 @@ class Video : Fragment() {
             }
         })
     }
-
-
-
 }

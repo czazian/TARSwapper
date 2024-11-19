@@ -141,10 +141,11 @@
                 android:id="@+id/textView22"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
                 android:text="Product Tag: "
                 android:textSize="16dp"
                 android:textStyle="bold"
-                android:layout_marginTop="20dp"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/container_product_images" />
 
 

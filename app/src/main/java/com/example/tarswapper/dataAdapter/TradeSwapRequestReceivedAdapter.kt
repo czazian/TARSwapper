@@ -105,7 +105,7 @@ class TradeSwapRequestReceivedAdapter(private var swapRequestList: List<SwapRequ
                     tradeType = "Swap",
                     status = "OnGoing",
                     createdAt = LocalDateTime.now(ZoneId.of("Asia/Kuala_Lumpur")).toString(),
-                    productID = swapRequest.senderProductID,
+                    //productID = swapRequest.senderProductID,
                     meetUpID = swapRequest.meetUpID,
                     swapRequestID = swapRequest.swapRequestID,
                 )
