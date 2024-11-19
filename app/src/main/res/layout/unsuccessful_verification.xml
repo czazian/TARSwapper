@@ -12,7 +12,6 @@
     android:elevation="8dp"
     android:padding="24dp"
     app:cardCornerRadius="20dp"
-    app:cardElevation="10dp"
     tools:context=".IdentityVerification">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -27,14 +26,14 @@
             android:layout_height="48dp"
             android:layout_marginTop="20dp"
             android:src="@drawable/baseline_highlight_off_24"
-            app:tint="#F44336"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="#F44336" />
 
         <TextView
             android:id="@+id/tvTitleUnsuccess"
-            android:layout_width="125dp"
+            android:layout_width="155dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:fontFamily="@font/poppins_bold"

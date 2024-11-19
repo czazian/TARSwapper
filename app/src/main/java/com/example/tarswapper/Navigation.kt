@@ -32,6 +32,7 @@ import com.android.volley.RequestQueue
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.example.tarswapper.data.MeetUp
+import com.example.tarswapper.data.Order
 import com.example.tarswapper.data.Product
 import com.example.tarswapper.data.SwapRequest
 import com.example.tarswapper.data.User
@@ -76,7 +77,7 @@ class Navigation : Fragment() {
     private var hasReachedDestination = false
 
     private var mapMode: String = "driving"
-    private var swap: SwapRequest? = null
+    private var order: Order? = null
 
 
     //Check if location services are enabled
@@ -158,24 +159,25 @@ class Navigation : Fragment() {
         val userID = sharedPreferencesTARSwapper.getString("userID", null)
 
         //Get Value from Bundle
-        val transaction = arguments?.getSerializable("transaction") as? SwapRequest
+        val transaction = arguments?.getSerializable("transaction") as? Order
         transaction?.let {
             //Store swap
-            swap = transaction
+            order = transaction
 
             //Transaction ID
-            binding.fillTransactionID.text = "Transaction ID: ${transaction.swapRequestID}"
+            binding.fillTransactionID.text = "Transaction ID: ${transaction.orderID}"
 
             transaction.meetUpID?.let { it1 ->
-                getMeetUpObject(it1){ meetUp ->
-                    if(meetUp != null){
+                getMeetUpObject(it1) { meetUp ->
+                    if (meetUp != null) {
                         //Location
                         binding.fillDestination.text = meetUp!!.location.toString()
                         destinationLocation = meetUp!!.location.toString()
 
                         //Scheduled Date & Time
                         //Original Date & Time
-                        val originalDateFormat = SimpleDateFormat("dd/MM/yyyy hh:mm a", Locale.getDefault())
+                        val originalDateFormat =
+                            SimpleDateFormat("dd/MM/yyyy hh:mm a", Locale.getDefault())
                         val dateToFormat = "${meetUp.date} ${meetUp.time}"
 
                         //Parse the date and time
@@ -187,59 +189,112 @@ class Navigation : Fragment() {
                         }
 
                         //Desired output format
-                        val desiredDateFormat = SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault())
+                        val desiredDateFormat =
+                            SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault())
                         val dateTime = date?.let { desiredDateFormat.format(it) } ?: ""
 
                         //Set the formatted date and time to the TextView
                         binding.fillDateTime.text = dateTime
                     }
                 }
-            }
 
-            //Recipient
-            getSenderProduct(transaction.senderProductID!!){ product ->
-                if(product != null){
-                    getSenderUser(product.created_by_UserID!!) { user ->
-                        if(user != null){
-                            if (userID == user.userID) {
-                                //Item to Send
-                                binding.fillItemToSend.text = product.name
-                            } else {
-                                binding.fillName.text = user.name
+                //Trade Type
+                binding.fillTradeType.text = transaction.tradeType
 
-                                //Item to Receive
-                                binding.fillItemToReceive.text = product.name
+                //Recipient
+                val database = FirebaseDatabase.getInstance()
+                val swapRequestsRef = database.getReference("SwapRequest")
+                val productsRef = database.getReference("Product")
+
+                when (transaction.tradeType) {
+
+                    "Sale" -> {
+                        //Case:
+                        //Buyer  : Testing
+                        //Seller : Koyasu Kun
+
+                        //Have seller and buyer id already
+                        getUser(transaction.buyerID.toString()) { user ->
+                            if (user != null) {
+
+                                //If logged-in user in Seller
+                                if (userID == user.userID) {
+                                    /////I am Buyer/////
+
+                                    //Show Seller Name
+                                    getUser(transaction.sellerID.toString()) {
+                                        binding.nameTitle.text = "Seller"
+                                        binding.fillName.text = user!!.name
+                                    }
+
+                                    //Get Product Name
+                                    getProductForSale(transaction.productID!!) {
+                                        binding.fillItemToSend.text = it!!.name
+                                    }
+
+                                    //Hide not relevant field
+                                    binding.itemToSentTitle.text = "Item to Buy"
+                                    binding.itemToReceiveTitle.visibility = View.GONE
+                                    binding.fillItemToReceive.visibility = View.GONE
+
+                                } else {
+                                    /////I am Seller/////
+
+                                    //Show Buyer Name
+                                    binding.nameTitle.text = "Buyer"
+                                    binding.fillName.text = user!!.name
+
+                                    //Get Product Name
+                                    getProductForSale(transaction.productID!!) {
+                                        binding.fillItemToReceive.text = it!!.name
+                                    }
+
+                                    //Hide not relevant field
+                                    binding.itemToReceiveTitle.text = "Item to Sell"
+                                    binding.itemToSentTitle.visibility = View.GONE
+                                    binding.fillItemToSend.visibility = View.GONE
+                                }
+
                             }
                         }
                     }
 
-                    //Trade Type
-                    if(product.tradeType != null){
-                        binding.fillTradeType.text = product.tradeType
-                    }
-                }
-            }
+                    "Swap" -> {
+                        //Case: From Koyasu Kun View
+                        //Item to Send    : Cable Wire (From Koyasu Kun)
+                        //Item to Receive : Power Bank (From Testing)
 
-            getReceiverProduct(transaction.receiverProductID!!){ product ->
-                if(product != null){
-                    getReceiverUser(product.created_by_UserID!!) { user ->
-                        if(user != null){
-                            if (userID == user.userID) {
-                                //Item to Send
-                                binding.fillItemToSend.text = product.name
-                            } else {
-                                binding.fillName.text = user.name
+                        //Need to use SwapRequestID to get Seller and Receiver Product ID, and Use these ID for User ID
+                        swapRequestsRef.child(transaction.swapRequestID!!).get()
+                            .addOnSuccessListener { swapRequestSnapshot ->
+                                val swapRequest =
+                                    swapRequestSnapshot.getValue(SwapRequest::class.java)
 
-                                //Item to Receive
-                                binding.fillItemToReceive.text = product.name
+                                swapRequest?.let { request ->
+                                    //Fetch and process Sender Product
+                                    productsRef.child(request.senderProductID!!).get()
+                                        .addOnSuccessListener { senderProductSnapshot ->
+                                            val senderProduct =
+                                                senderProductSnapshot.getValue(Product::class.java)
+                                            processProduct(userID!!, senderProduct, isSender = true)
+                                        }
+
+                                    //Fetch and process Receiver Product
+                                    productsRef.child(request.receiverProductID!!).get()
+                                        .addOnSuccessListener { receiverProductSnapshot ->
+                                            val receiverProduct =
+                                                receiverProductSnapshot.getValue(Product::class.java)
+                                            processProduct(userID!!, receiverProduct, isSender = false)
+                                        }
+                                }
                             }
-                        }
                     }
 
-                    //Item to Receive
-                    binding.fillItemToReceive.text = product.name
+                    else -> {}
                 }
+
             }
+
         }
 
 
@@ -269,6 +324,8 @@ class Navigation : Fragment() {
                         //"Walking" button is selected
                         mapMode = "walking"
 
+                        Toast.makeText(requireContext(), "Changed to Walking", Toast.LENGTH_SHORT).show()
+
                         startLocationUpdates()
                     }
                 }
@@ -277,6 +334,8 @@ class Navigation : Fragment() {
                     if (isChecked) {
                         //"Driving" button is selected
                         mapMode = "driving"
+
+                        Toast.makeText(requireContext(), "Changed to Driving", Toast.LENGTH_SHORT).show()
 
                         startLocationUpdates()
                     }
@@ -288,35 +347,32 @@ class Navigation : Fragment() {
         return binding.root
     }
 
-    private fun getSenderUser(createdByUserid: String, onResult: (User?) -> Unit) {
-        val database = FirebaseDatabase.getInstance()
-        val userRef = database.getReference("User").child(createdByUserid)
+    private fun processProduct(userID: String, product: Product?, isSender:Boolean?) {
+        product?.let {
+            val userId = product.created_by_UserID!!
+            getUser(userId) { user ->
+                user?.let {
+                    if (userID == user.userID) {
+                        //Logged-in user is sending or receiving
+                        binding.fillItemToSend.text = product.name
+                    } else {
+                        //Other party details
+                        binding.fillName.text = user.name
+                        binding.fillItemToReceive.text = product.name
+                    }
+                }
+            }
 
-        userRef.get().addOnSuccessListener { dataSnapshot ->
-            val user = dataSnapshot.getValue(User::class.java)
-            onResult(user)
-        }.addOnFailureListener { e ->
-            println("Error fetching MeetUp: ${e.message}")
-            onResult(null)
+            //Display trade type for the sender's product
+            if(isSender!!){
+                binding.fillTradeType.text = product.tradeType
+            }
         }
     }
 
-    private fun getReceiverUser(createdByUserid: String, onResult: (User?) -> Unit) {
+    private fun getProductForSale(productID: String, onResult: (Product?) -> Unit) {
         val database = FirebaseDatabase.getInstance()
-        val userRef = database.getReference("User").child(createdByUserid)
-
-        userRef.get().addOnSuccessListener { dataSnapshot ->
-            val user = dataSnapshot.getValue(User::class.java)
-            onResult(user)
-        }.addOnFailureListener { e ->
-            println("Error fetching MeetUp: ${e.message}")
-            onResult(null)
-        }
-    }
-
-    private fun getReceiverProduct(receiverProductID: String, onResult: (Product?) -> Unit) {
-        val database = FirebaseDatabase.getInstance()
-        val productRef = database.getReference("Product").child(receiverProductID)
+        val productRef = database.getReference("Product").child(productID)
 
         productRef.get().addOnSuccessListener { dataSnapshot ->
             val product = dataSnapshot.getValue(Product::class.java)
@@ -327,13 +383,13 @@ class Navigation : Fragment() {
         }
     }
 
-    private fun getSenderProduct(senderProductID: String, onResult: (Product?) -> Unit) {
+    private fun getUser(createdByUserid: String, onResult: (User?) -> Unit) {
         val database = FirebaseDatabase.getInstance()
-        val productRef = database.getReference("Product").child(senderProductID)
+        val userRef = database.getReference("User").child(createdByUserid)
 
-        productRef.get().addOnSuccessListener { dataSnapshot ->
-            val product = dataSnapshot.getValue(Product::class.java)
-            onResult(product)
+        userRef.get().addOnSuccessListener { dataSnapshot ->
+            val user = dataSnapshot.getValue(User::class.java)
+            onResult(user)
         }.addOnFailureListener { e ->
             println("Error fetching MeetUp: ${e.message}")
             onResult(null)
@@ -469,7 +525,10 @@ class Navigation : Fragment() {
 
                 //Add a marker for the current location (only once)
                 if (currentLocationMarker == null) {
-                    val vectorDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.round_person_pin_circle_24) as VectorDrawable
+                    val vectorDrawable = ContextCompat.getDrawable(
+                        requireContext(),
+                        R.drawable.round_person_pin_circle_24
+                    ) as VectorDrawable
                     val bitmap = getBitmapFromVectorDrawable(vectorDrawable)
                     currentLocationMarker = googleMap.addMarker(
                         MarkerOptions()
@@ -568,8 +627,8 @@ class Navigation : Fragment() {
 
                         //If the threshold is reached, redirect to identity verification page
                         val bundle = Bundle().apply {
-                            if (swap != null) {
-                                putSerializable("swap", swap)
+                            if (order != null) {
+                                putSerializable("order", order)
                                 Log.e("Navigation", "Swap object is not null")
                             } else {
                                 Log.e("Navigation", "Swap object is null")

@@ -1,6 +1,7 @@
 package com.example.tarswapper
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -10,6 +11,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.tarswapper.data.Message
+import com.example.tarswapper.data.Order
 import com.example.tarswapper.data.Product
 import com.example.tarswapper.data.SwapRequest
 import com.example.tarswapper.dataAdapter.MessageAdapter
@@ -19,6 +21,9 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.tabs.TabLayout
 import com.google.firebase.database.FirebaseDatabase
 import java.io.Serializable
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class Notification : Fragment() {
     private lateinit var binding: FragmentNotificationBinding
@@ -197,11 +202,24 @@ class Notification : Fragment() {
             } else {
                 Log.e("RESULT", list.toString())
 
-                //Set up adapter
+                //Set up adapter + When "Start Navigation Button is Clicked"
                 val adapter = TransactionAdapter(requireContext()) { transaction ->
 
                     Log.d("TransactionAdapter", "Button clicked for transaction: ${transaction.swapRequestID}")
 
+                    //Start Count Time
+                    val currentDateTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(
+                        Date()
+                    )
+                    val sharedPreferences: SharedPreferences = requireActivity().getSharedPreferences("CountTime", Context.MODE_PRIVATE)
+                    val editor = sharedPreferences.edit()
+
+                    // Store the date and time
+                    editor.putString("dateTime", currentDateTime)
+                    editor.apply()
+
+
+                    //Redirection
                     val bundle = Bundle().apply {
                         //Pass all data need to be used in Navigation
                         putSerializable("transaction", transaction)
@@ -222,38 +240,76 @@ class Notification : Fragment() {
                 binding.notificationRecyclerView.setHasFixedSize(true)
             }
         }
+
     }
 
-    private fun fetchData(currentUserID: String, onResult: (List<SwapRequest>) -> Unit) {
+    private fun fetchData(currentUserID: String, onResult: (List<Order>) -> Unit) {
         val database = FirebaseDatabase.getInstance()
+        val ordersRef = database.getReference("Order")
         val swapRequestsRef = database.getReference("SwapRequest")
         val productsRef = database.getReference("Product")
 
-        productsRef.get().addOnSuccessListener { productSnapshot ->
-            val products = productSnapshot.children.mapNotNull { it.getValue(Product::class.java) }
-            val userProductIDs = products
-                .filter { it.created_by_UserID == currentUserID }
-                .map { it.productID }
+        ordersRef.get().addOnSuccessListener { orderSnapshot ->
+            val orders = orderSnapshot.children.mapNotNull { it.getValue(Order::class.java) }
 
-            swapRequestsRef.get().addOnSuccessListener { swapRequestSnapshot ->
-                val swapRequests = swapRequestSnapshot.children.mapNotNull { it.getValue(SwapRequest::class.java) }
+            ////Separate orders into Sale and Swap categories////
+            //If the Order is Sale, Directly check if the Current Logged On User is buyer or seller
+            val saleOrders = orders.filter { order ->
+                order.tradeType == "Sale" &&
+                        (order.buyerID == currentUserID || order.sellerID == currentUserID)
+            }
 
-                //Filter SwapRequests
-                val userSwapRequests = swapRequests.filter { swapRequest ->
-                    swapRequest.status == "Accepted" &&
-                            (swapRequest.senderProductID in userProductIDs ||
-                                    swapRequest.receiverProductID in userProductIDs)
+            //If the Order is Swap, need to use SwapRequest ID (SwapRequest > Product) to know weather the Current Logged On User is either the buyer or seller
+            val swapOrders = orders.filter { order ->
+                order.tradeType == "Swap"
+            }
+
+            //Return only sale orders if no swap orders
+            if (swapOrders.isEmpty()) {
+                onResult(saleOrders)
+                return@addOnSuccessListener
+            }
+
+            //Fetch related data for Swap orders
+            productsRef.get().addOnSuccessListener { productSnapshot ->
+                //Get all Product and Filter based on the current logged on user
+                val products = productSnapshot.children.mapNotNull { it.getValue(Product::class.java) }
+                val userProductIDs = products
+                    .filter { it.created_by_UserID == currentUserID }
+                    .map { it.productID }
+
+                swapRequestsRef.get().addOnSuccessListener { swapRequestSnapshot ->
+                    //Retrieve all SwapRequest objects from the database
+                    val swapRequests = swapRequestSnapshot.children.mapNotNull { it.getValue(SwapRequest::class.java) }
+
+                    //Filter swap orders related to the user
+                    val userSwapOrders = swapOrders.filter { order ->
+                        val relatedSwapRequest = swapRequests.find { it.swapRequestID == order.swapRequestID }
+                        relatedSwapRequest != null &&
+                                (relatedSwapRequest.senderProductID in userProductIDs ||
+                                        relatedSwapRequest.receiverProductID in userProductIDs)
+                    }
+
+                    //Combine Sale and Swap orders
+                    val allOrders = saleOrders + userSwapOrders
+                    Log.e("Notification Check List", "Sale: $saleOrders")
+                    Log.e("Notification Check List", "Swap: $userSwapOrders")
+
+                    onResult(allOrders)
+
+                }.addOnFailureListener { e ->
+                    Log.e("Error", "Error fetching SwapRequest: ${e.message}")
+                    onResult(saleOrders)
                 }
-
-                //Print the results
-                onResult(userSwapRequests)
-
             }.addOnFailureListener { e ->
-                Log.e("Error", "Error fetching SwapRequest: ${e.message}")
+                Log.e("Error", "Error fetching Product: ${e.message}")
+                onResult(saleOrders)
             }
         }.addOnFailureListener { e ->
-            Log.e("Error", "Error fetching Product: ${e.message}")
+            Log.e("Error", "Error fetching Order: ${e.message}")
+            onResult(emptyList())
         }
     }
+
 
 }

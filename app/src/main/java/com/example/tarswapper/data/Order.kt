@@ -10,4 +10,6 @@ data class Order (
     val productID: String? = null,
     val meetUpID: String? = null,
     val swapRequestID: String? = null,
+    val sellerID: String? = null,
+    val buyerID: String? = null,
 ) : Serializable

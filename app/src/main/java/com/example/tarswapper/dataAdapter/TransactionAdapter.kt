@@ -8,6 +8,7 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.tarswapper.R
 import com.example.tarswapper.data.MeetUp
+import com.example.tarswapper.data.Order
 import com.example.tarswapper.data.SwapRequest
 import com.example.tarswapper.databinding.NotificationTransactionLayoutBinding
 import com.google.firebase.database.FirebaseDatabase
@@ -20,12 +21,13 @@ import java.util.Locale
 
 class TransactionAdapter(
     private val context: Context,
-    private val onTransactionClick: (SwapRequest) -> Unit
+    private val onTransactionClick: (Order) -> Unit
 ) : RecyclerView.Adapter<TransactionAdapter.TransactionViewHolder>() {
 
-    private var transactions = listOf<SwapRequest>()
+    //The Order list consisting for both Sale and Swap type
+    private var transactions = listOf<Order>()
 
-    fun setData(transactions: List<SwapRequest>) {
+    fun setData(transactions: List<Order>) {
         //Sort transactions by datetime before binding data, in descending order (latest to oldest)
 //        val sortedTransactions = transactions.sortedByDescending { transaction ->
 //            val combinedDateTime = "${transaction.date}|${transaction.time}"
@@ -62,10 +64,11 @@ class TransactionAdapter(
     inner class TransactionViewHolder(private val binding: NotificationTransactionLayoutBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(transaction: SwapRequest) {
+        fun bind(transaction: Order) {
             getMeetUpObj(transaction.meetUpID!!) {
                 if(it != null){
-                    //Date Time
+
+                    //Bind the Date Time
                     val inputFormatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
                     val outputFormatter = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
 
@@ -83,7 +86,6 @@ class TransactionAdapter(
 
 
 
-                    //HAVEN'T HANDLE CHECK IF THIS TRANSACTION IS ALREADY SUCCESSFUL
                     //Handle Button Status - If the Transaction is Over Transaction Date, or Already Successful, it should be Transaction Ended
                     val dateItem = "${it.date}"
                     if (dateItem.isNotEmpty()) {
@@ -92,7 +94,7 @@ class TransactionAdapter(
                             val transactionDate = dateFormat.parse(dateItem)
                             val currentDate = Date()
 
-                            // Remove time part from both dates to compare only the date
+                            //Remove time part from both dates to compare only the date
                             val calendar = Calendar.getInstance()
                             calendar.time = currentDate
                             calendar.set(Calendar.HOUR_OF_DAY, 0)
@@ -101,7 +103,7 @@ class TransactionAdapter(
                             calendar.set(Calendar.MILLISECOND, 0)
                             val currentDateOnly = calendar.time
 
-                            if (transactionDate != null && transactionDate.before(currentDateOnly)) {
+                            if (transactionDate != null && transactionDate.before(currentDateOnly) || transaction.status.toString() != "OnGoing") {
                                 binding.transactionBtn.text = "Transaction Ended"
                                 binding.transactionBtn.isEnabled = false
 
@@ -126,7 +128,7 @@ class TransactionAdapter(
 
 
             //Transaction ID
-            binding.transactionID.text = "Transaction ID: ${transaction.swapRequestID}"
+            binding.transactionID.text = "Transaction ID: ${transaction.orderID}"
 
 
             //Only the future date time can be shown - On Click Event of Start Navigation
