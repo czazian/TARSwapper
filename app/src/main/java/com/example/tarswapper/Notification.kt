@@ -199,6 +199,11 @@ class Notification : Fragment() {
             //If the result is not null or empty
             if (list.isNullOrEmpty()) {
                 Toast.makeText(requireContext(), "No transactions available", Toast.LENGTH_SHORT).show()
+                val adapter = TransactionAdapter(requireContext()){}
+                adapter.setData(list)
+                binding.notificationRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+                binding.notificationRecyclerView.adapter = adapter
+                binding.notificationRecyclerView.setHasFixedSize(true)
             } else {
                 Log.e("RESULT", list.toString())
 
