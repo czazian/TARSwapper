@@ -336,7 +336,7 @@ class IdentityVerification : Fragment() {
                     if (snapshot.exists()) {
                         for (orderSnapshot in snapshot.children) {
                             //Update the 'status' field to "Past"
-                            orderSnapshot.ref.child("status").setValue("Past")
+                            orderSnapshot.ref.child("status").setValue("Completed")
                                 .addOnSuccessListener {
                                     onResult(true)
                                 }

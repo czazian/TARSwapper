@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.tarswapper.data.ChatRoom
 import com.example.tarswapper.dataAdapter.ChatSelectionAdapter
@@ -149,6 +150,7 @@ class ChatSelection : Fragment(), OnUserContactClick {
                             LinearLayoutManager(requireContext())
                         binding.contactRecyclerView.adapter = adapter
                         binding.contactRecyclerView.setHasFixedSize(true)
+                        binding.contactRecyclerView.itemAnimator = DefaultItemAnimator()
                         adapter!!.notifyDataSetChanged()
 
                     }
