@@ -1,6 +1,10 @@
 package com.example.tarswapper
 
+import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.RectF
+import android.graphics.Typeface
 import android.graphics.pdf.PdfDocument
 import android.os.Bundle
 import android.util.Log
@@ -13,13 +17,13 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.android.volley.DefaultRetryPolicy
 import com.android.volley.RequestQueue
+import com.android.volley.Response
 import com.android.volley.RetryPolicy
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.example.tarswapper.data.Message
 import com.example.tarswapper.data.Product
 import com.example.tarswapper.dataAdapter.AIChatbotAdapter
-import com.example.tarswapper.dataAdapter.ChatAdapter
 import com.example.tarswapper.databinding.FragmentAIChatbotBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.auth.oauth2.GoogleCredentials
@@ -34,6 +38,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.json.JSONArray
 import java.io.ByteArrayOutputStream
 import org.json.JSONObject
 import java.io.InputStream
@@ -230,8 +235,17 @@ class AIChatbot : Fragment() {
             }
         }
 
+
         return binding.root
     }
+
+
+
+
+
+
+
+
 
 
 
@@ -393,24 +407,100 @@ class AIChatbot : Fragment() {
             }
         })
     }
+
+
+
+
+
+
     private fun createPDFWithIndividualTables(products: List<Product>): ByteArray {
         val outputStream = ByteArrayOutputStream()
         val document = PdfDocument()
 
-        //Page settings (adjust page size if necessary)
-        val pageInfo = PdfDocument.PageInfo.Builder(2384, 1684, 1).create() //A1 size
+        // Page settings - A4 size in landscape orientation
+        val pageInfo = PdfDocument.PageInfo.Builder(2480, 1754, 1).create()
         var currentPage = document.startPage(pageInfo)
         var canvas = currentPage.canvas
 
-        val paint = Paint().apply { textSize = 40f } //Use appropriate font size
-        val startX = 100f
-        var currentY = 150f //Start position for content
-        val rowSpacing = 70f //Spacing between rows
-        val extraSpacing = 100f //Space between tables
-        val maxWidth = 1800f //Maximum width for wrapping (adjust as needed)
+        // Enhanced styling
+        val titlePaint = Paint().apply {
+            textSize = 40f
+            typeface = Typeface.create(Typeface.DEFAULT_BOLD, Typeface.BOLD)
+            color = Color.rgb(33, 33, 33)
+        }
+
+        val headerPaint = Paint().apply {
+            textSize = 32f
+            typeface = Typeface.create(Typeface.DEFAULT_BOLD, Typeface.BOLD)
+            color = Color.rgb(255, 255, 255)
+        }
+
+        // New: Separate paint for field names (bold)
+        val fieldPaint = Paint().apply {
+            textSize = 30f
+            typeface = Typeface.create(Typeface.DEFAULT_BOLD, Typeface.BOLD)
+            color = Color.rgb(66, 66, 66)
+        }
+
+        // Regular paint for values
+        val contentPaint = Paint().apply {
+            textSize = 30f
+            color = Color.rgb(66, 66, 66)
+        }
+
+        val tablePaint = Paint().apply {
+            color = Color.rgb(33, 33, 33)
+            strokeWidth = 2f
+            style = Paint.Style.STROKE
+        }
+
+        val headerBackgroundPaint = Paint().apply {
+            color = Color.rgb(63, 81, 181) // Material Design primary color
+            style = Paint.Style.FILL
+        }
+
+        // Table dimensions
+        val tableMargin = 50f
+        val cellPadding = 20f
+        val columnWidths = listOf(600f, 1000f)
+        val rowHeight = 100f
+        val startX = (pageInfo.pageWidth - columnWidths.sum() - tableMargin * 2) / 2
+        var currentY = 150f
 
         products.forEachIndexed { index, product ->
-            //Define product details with an index
+            // Check if we need a new page
+            if (currentY + rowHeight * 10 > pageInfo.pageHeight - tableMargin) {
+                document.finishPage(currentPage)
+                currentPage = document.startPage(pageInfo)
+                canvas = currentPage.canvas
+                currentY = 150f
+            }
+
+            // Draw product title
+            canvas.drawText("Product #${index + 1}", startX, currentY - 30f, titlePaint)
+
+            // Draw table header background
+            val headerRect = RectF(startX, currentY, startX + columnWidths.sum(), currentY + rowHeight)
+            canvas.drawRect(headerRect, headerBackgroundPaint)
+
+            // Draw header texts
+            val headers = listOf("Field", "Value")
+            drawTableRow(
+                canvas = canvas,
+                cells = headers,
+                startX = startX,
+                startY = currentY,
+                fieldPaint = headerPaint, // Use header paint for both columns in header
+                valuePaint = headerPaint,
+                columnWidths = columnWidths,
+                rowHeight = rowHeight,
+                padding = cellPadding,
+                isHeader = true
+            )
+
+            currentY += rowHeight
+
+            // Product details
             val productDetails = listOf(
                 "Product ID" to (product.productID ?: ""),
                 "Product Name" to (product.name ?: ""),
@@ -423,67 +513,153 @@ class AIChatbot : Fragment() {
             )
 
             productDetails.forEach { (key, value) ->
-                //Wrap text for fields like Product Description
-                val wrappedLines = if (key == "Product Description") {
-                    wrapTextToWidth(value, paint, maxWidth - 20)
-                } else {
-                    listOf(value) //No wrapping needed for other fields
-                }
+                val wrappedValue = wrapTextToWidth(value, contentPaint, columnWidths[1] - cellPadding * 2)
 
-                //Check if we need a new page
-                if (currentY + (rowSpacing * wrappedLines.size) > pageInfo.pageHeight) {
+                // Calculate required height for wrapped text
+                val requiredHeight = maxOf(rowHeight, wrappedValue.size * (contentPaint.textSize + cellPadding))
+
+                // Check if we need a new page
+                if (currentY + requiredHeight > pageInfo.pageHeight - tableMargin) {
                     document.finishPage(currentPage)
                     currentPage = document.startPage(pageInfo)
                     canvas = currentPage.canvas
                     currentY = 150f
                 }
 
-                //Draw key
-                canvas.drawText("$key:", startX, currentY, paint)
+                // Draw the row with wrapped text
+                drawTableRow(
+                    canvas = canvas,
+                    cells = listOf(key, wrappedValue.joinToString("\n")),
+                    startX = startX,
+                    startY = currentY,
+                    fieldPaint = fieldPaint,  // Use bold paint for field names
+                    valuePaint = contentPaint, // Use regular paint for values
+                    columnWidths = columnWidths,
+                    rowHeight = requiredHeight,
+                    padding = cellPadding,
+                    isHeader = false
+                )
 
-                //Draw wrapped value
-                var lineY = currentY
-                wrappedLines.forEach { line ->
-                    canvas.drawText(line, startX + 600f, lineY, paint) //Indent for values
-                    lineY += rowSpacing / 2 //Reduce spacing for wrapped lines
-                }
+                // Draw cell borders
+                canvas.drawRect(
+                    startX,
+                    currentY,
+                    startX + columnWidths.sum(),
+                    currentY + requiredHeight,
+                    tablePaint
+                )
 
-                currentY += rowSpacing * wrappedLines.size //Adjust for multiple lines
+                currentY += requiredHeight
             }
 
-            currentY += extraSpacing //Add extra space between tables
+            currentY += 100f // Space between products
         }
 
-        //Finish the last page
         document.finishPage(currentPage)
-
-        //Write PDF to output stream
         document.writeTo(outputStream)
         document.close()
 
         return outputStream.toByteArray()
     }
 
+    private fun drawTableRow(
+        canvas: Canvas,
+        cells: List<String>,
+        startX: Float,
+        startY: Float,
+        fieldPaint: Paint,  // Paint for field names (left column)
+        valuePaint: Paint,  // Paint for values (right column)
+        columnWidths: List<Float>,
+        rowHeight: Float,
+        padding: Float,
+        isHeader: Boolean
+    ) {
+        var currentX = startX
+
+        cells.forEachIndexed { index, cellText ->
+            val cellRect = RectF(
+                currentX,
+                startY,
+                currentX + columnWidths[index],
+                startY + rowHeight
+            )
+
+            // Use appropriate paint based on column
+            val paint = if (index == 0) fieldPaint else valuePaint
+
+            // Draw text with wrapping
+            val lines = cellText.split("\n")
+            val textX = currentX + padding
+            var textY = startY + padding + paint.textSize
+
+            lines.forEach { line ->
+                canvas.drawText(line, textX, textY, paint)
+                textY += paint.textSize + padding/2
+            }
+
+            // Draw vertical line
+            canvas.drawLine(
+                currentX,
+                startY,
+                currentX,
+                startY + rowHeight,
+                paint
+            )
+
+            currentX += columnWidths[index]
+        }
+
+        // Draw final vertical line
+        canvas.drawLine(
+            currentX,
+            startY,
+            currentX,
+            startY + rowHeight,
+            fieldPaint
+        )
+    }
 
     private fun wrapTextToWidth(text: String, paint: Paint, maxWidth: Float): List<String> {
+        if (text.isEmpty()) return listOf("")
+
         val words = text.split(" ")
         val lines = mutableListOf<String>()
-        var line = ""
+        var currentLine = StringBuilder(words[0])
 
-        for (word in words) {
-            val testLine = if (line.isEmpty()) word else "$line $word"
+        for (i in 1 until words.size) {
+            val word = words[i]
+            val testLine = "${currentLine} $word"
+
             if (paint.measureText(testLine) <= maxWidth) {
-                line = testLine
+                currentLine.append(" $word")
             } else {
-                lines.add(line)
-                line = word
+                lines.add(currentLine.toString())
+                currentLine = StringBuilder(word)
             }
         }
-        if (line.isNotEmpty()) {
-            lines.add(line)
-        }
+
+        lines.add(currentLine.toString())
         return lines
     }
+
+    private fun formatDateTime(input: String): String {
+        return try {
+            val originalFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS", Locale.getDefault())
+            val date = originalFormat.parse(input)
+            val newFormat = SimpleDateFormat("MMMM dd, yyyy, hh:mm a", Locale.getDefault())
+            newFormat.format(date)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            input
+        }
+    }
+
+
+
+
+
+
+
 
 
     private fun storeToFirebaseStorage(pdfData: ByteArray) {
@@ -499,23 +675,9 @@ class AIChatbot : Fragment() {
 
         uploadTask.addOnSuccessListener {
             Log.d("Upload PDF", "PDF file with individual tables successfully uploaded.")
+
         }.addOnFailureListener { exception ->
             Log.e("Upload PDF Error", "Upload failed: ${exception.message}")
-        }
-    }
-
-    fun formatDateTime(input: String): String {
-        try {
-            //Parse the ISO 8601 datetime string (2024-11-14T01:47:10.044941)
-            val originalFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS", Locale.getDefault())
-            val date = originalFormat.parse(input)
-
-            //Format it into a more readable format (e.g., "November 14, 2024, 01:47 AM")
-            val newFormat = SimpleDateFormat("MMMM dd, yyyy, hh:mm a", Locale.getDefault())
-            return newFormat.format(date)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return input
         }
     }
 }

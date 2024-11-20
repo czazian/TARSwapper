@@ -12,6 +12,8 @@ import android.widget.Toast
 import android.window.OnBackInvokedDispatcher
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.Fragment
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
 import com.example.tarswapper.Chat
 import com.example.tarswapper.R
 import com.example.tarswapper.Setting
@@ -20,14 +22,22 @@ import com.example.tarswapper.game.GameOver
 import com.example.tarswapper.game.GameView
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.auth.oauth2.GoogleCredentials
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.messaging.FirebaseMessaging
+import com.google.firebase.storage.FirebaseStorage
+import org.json.JSONArray
+import org.json.JSONObject
+import java.io.InputStream
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
     private val fragmentManager = supportFragmentManager
     private lateinit var binding: ActivityMainBinding
     private var isBackPressPrevented = false
+    private var isUpdating = false
 
     //Check network connectivity - If network connection is not available, close the app
     private fun isNetworkConnected(): Boolean {
@@ -62,6 +72,10 @@ class MainActivity : AppCompatActivity() {
 
             return
         }
+
+
+        //Check if a day pass. If a day past, update the Product Data Store for AI Chat bot
+        shouldRunDailyUpdate()
 
 
         //Set initial fragment
@@ -148,12 +162,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun restartActivity() {
-        val intent = intent
-        finish()
-        startActivity(intent)
-    }
-
     override fun onBackPressed() {
         //Check if the current fragment is the one you want to prevent back navigation from
         val currentFragment = supportFragmentManager.findFragmentById(R.id.frameLayout)
@@ -174,4 +182,129 @@ class MainActivity : AppCompatActivity() {
     fun setBackPressPrevented(prevent: Boolean) {
         isBackPressPrevented = prevent
     }
+
+    //Check if a day past, if yes, update the product data store
+    private fun shouldRunDailyUpdate() {
+        val database = FirebaseDatabase.getInstance().reference
+        val timestampRef = database.child("lastUpdateDate")
+
+        timestampRef.get().addOnSuccessListener { snapshot ->
+            val lastUpdateDateString = snapshot.getValue(String::class.java)
+
+            val currentDate = getCurrentDateString()
+
+            //Log both the current date and the last update date for debugging purposes
+            Log.d("VertexAI", "Last update date: $lastUpdateDateString, Current date: $currentDate")
+
+            //Compare current date with the last update date
+            if (lastUpdateDateString == null || currentDate != lastUpdateDateString) {
+                //If the last update date is null or not matching today's date, run the update task
+                startUpdateDataStore()
+
+                Log.e("VertexAI", "Product Data Store Updated!")
+
+                //Update the last update date to today's date
+                timestampRef.setValue(currentDate)
+            } else {
+                Log.d("VertexAI", "No update needed, last update is already today's date.")
+            }
+        }.addOnFailureListener { exception ->
+            Log.e("FirebaseDatabase", "Error reading last update date: ${exception.message}")
+        }
+    }
+
+    //Function to get current date as String in yyyy-MM-dd format
+    private fun getCurrentDateString(): String {
+        val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        return sdf.format(Date())
+    }
+
+    ////Start Update Data Store////
+    private fun startUpdateDataStore() {
+        //Prevent multiple simultaneous updates
+        if (isUpdating) return
+        isUpdating = true
+
+
+        val storageRef = FirebaseStorage.getInstance().reference
+        val pdfRef = storageRef.child("Dataset/products.pdf")
+
+        pdfRef.downloadUrl.addOnSuccessListener { uri ->
+            //Convert Firebase Storage URL to GCS format
+            val gcsUri = "gs://tarswapper-d4b2a.appspot.com/Dataset/products.pdf"
+
+            //Proceed to upload the GCS URI to Google Vertex AI
+            uploadToVertexAI(gcsUri)
+        }.addOnFailureListener { exception ->
+            Log.e("FirebaseStorage", "Error generating URL for PDF: ${exception.message}")
+        }
+    }
+
+    private fun uploadToVertexAI(gcsUri: String) {
+        val projectID = "tarswapper-d4b2a"
+        val location = "us"
+        val collectionID = "default_collection"
+        val dataStoreID = "products_1730897591056"
+        val branchID = "default_branch"
+
+        //Correct API endpoint
+        val url = "https://us-discoveryengine.googleapis.com/v1/projects/$projectID/locations/$location/collections/$collectionID/dataStores/$dataStoreID/branches/$branchID/documents:import"
+
+        //Build the request body
+        val requestBody = JSONObject().apply {
+            put("gcsSource", JSONObject().apply {
+                put("inputUris", JSONArray().apply {
+                    put(gcsUri)
+                })
+                put("dataSchema", "content")
+            })
+            put("reconciliationMode", "FULL")
+            put("errorConfig", JSONObject().apply {
+                put("gcsPrefix", "gs://tarswapper-d4b2a.appspot.com/errors/")
+            })
+        }
+
+        val jsonObjectRequest = object : JsonObjectRequest(
+            Method.POST,
+            url,
+            requestBody,
+            { response ->
+                Log.d("VertexAI", "Data store update successful: $response")
+            },
+            { error ->
+                Log.e("VertexAI", "Error updating data store", error)
+                error.networkResponse?.let { networkResponse ->
+                    Log.e("VertexAI", "Error response code: ${networkResponse.statusCode}")
+                    val responseBody = String(networkResponse.data)
+                    Log.e("VertexAI", "Error response body: $responseBody")
+                }
+            }
+        ) {
+            override fun getHeaders(): MutableMap<String, String> {
+                val headers = mutableMapOf<String, String>()
+                headers["Authorization"] = "Bearer ${getAccessTokenDiscoveryEngine()}"
+                headers["Content-Type"] = "application/json"
+                Log.d("RequestHeaders", headers.toString())
+                return headers
+            }
+        }
+
+        Volley.newRequestQueue(this).add(jsonObjectRequest)
+    }
+
+    fun getAccessTokenDiscoveryEngine(): String {
+        val inputStream: InputStream = resources.openRawResource(R.raw.discovery_engine)
+        val credentials = GoogleCredentials.fromStream(inputStream)
+            .createScoped(listOf("https://www.googleapis.com/auth/cloud-platform"))
+
+        credentials.refreshIfExpired()
+
+        val token = credentials.accessToken.tokenValue
+        Log.d("DiscoveryEngineAccessToken", token)
+        return token
+    }
+    ////End Update Data Store////
+
+
+
 }

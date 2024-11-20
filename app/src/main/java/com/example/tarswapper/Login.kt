@@ -5,14 +5,18 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.text.InputType
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.content.res.ResourcesCompat
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
 import com.example.tarswapper.databinding.FragmentLoginBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.auth.oauth2.GoogleCredentials
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -20,6 +24,9 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
+import org.json.JSONArray
+import org.json.JSONObject
+import java.io.InputStream
 import java.security.MessageDigest
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -104,6 +111,8 @@ class Login : Fragment() {
                     val editor = sharedPreferences.edit()
                     editor.putString("userID", it)
                     editor.apply()
+
+
 
 
 
