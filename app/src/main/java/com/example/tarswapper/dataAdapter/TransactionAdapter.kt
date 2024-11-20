@@ -28,20 +28,38 @@ class TransactionAdapter(
     private var transactions = listOf<Order>()
 
     fun setData(transactions: List<Order>) {
-        //Sort transactions by datetime before binding data, in descending order (latest to oldest)
-//        val sortedTransactions = transactions.sortedByDescending { transaction ->
-//            val combinedDateTime = "${transaction.date}|${transaction.time}"
-//            val dateFormat = SimpleDateFormat("yyyy-MM-dd|HH:mm", Locale.getDefault())
-//            try {
-//                dateFormat.parse(combinedDateTime) ?: Date(0)
-//            } catch (e: Exception) {
-//                Log.e("TransactionAdapter", "Error parsing date: $combinedDateTime", e)
-//                Date(0)
-//            }
-//        }
-        this.transactions = transactions
-        notifyDataSetChanged()
+        val database = FirebaseDatabase.getInstance()
+        val meetUpRef = database.getReference("MeetUp")
+
+        val meetUpMap = mutableMapOf<String, MeetUp>()
+
+        meetUpRef.get().addOnSuccessListener { dataSnapshot ->
+            dataSnapshot.children.forEach { snapshot ->
+                val meetUp = snapshot.getValue(MeetUp::class.java)
+                meetUp?.let { meetUpMap[it.meetUpID.toString()] = it }
+            }
+
+            // Proceed to sort transactions
+            val dateFormat = SimpleDateFormat("dd/MM/yyyy hh:mm a", Locale.getDefault())
+
+            val sortedTransactions = transactions.sortedByDescending { transaction ->
+                val meetUp = meetUpMap[transaction.meetUpID]
+                val combinedDateTime = "${meetUp?.date} ${meetUp?.time}"
+                try {
+                    dateFormat.parse(combinedDateTime) ?: Date(0)
+                } catch (e: Exception) {
+                    Log.e("TransactionAdapter", "Error parsing date: $combinedDateTime", e)
+                    Date(0) // Fallback date for sorting
+                }
+            }
+
+            this.transactions = sortedTransactions
+            notifyDataSetChanged()
+        }.addOnFailureListener { exception ->
+            Log.e("TransactionAdapter", "Error fetching MeetUp data", exception)
+        }
     }
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TransactionViewHolder {
         val binding = NotificationTransactionLayoutBinding.inflate(
