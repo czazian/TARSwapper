@@ -45,6 +45,7 @@ class TradeSwapRequestReceived : Fragment() {
 
         //bind adapter
         val productRef = FirebaseDatabase.getInstance().getReference("Product")
+        val SwapRequestRef = FirebaseDatabase.getInstance().getReference("SwapRequest")
         // Step 1: Get all product IDs created by the user
 
         // Step 1: Get all product IDs created by the user with status "Available"

@@ -82,6 +82,12 @@ class CommunityEditPost : Fragment() {
         getCommunityFromFirebase(communityID = communityID) { community ->
             binding.titleED.setText(community.title)
             binding.descriptionED.setText(community.description)
+            if (community.status == getString(R.string.COMMUNITY_POST_PUBLIC)) {
+                binding.radioGroupStatus.check(R.id.radioPublic)
+            } else if (community.status == getString(R.string.COMMUNITY_POST_HIDE)) {
+                binding.radioGroupStatus.check(R.id.radioHide)
+            }
+
 
             //get product tag id
             val database = FirebaseDatabase.getInstance()
@@ -134,9 +140,15 @@ class CommunityEditPost : Fragment() {
             binding.selectedProductID.setText(community.title)
         }
 
+
         binding.btnBack.setOnClickListener{
             //put bundle
-            val fragment = com.example.tarswapper.Community()
+            val fragment = CommunityDetail()
+
+            val args = Bundle()
+            args.putString("CommunityID", communityID)
+
+            fragment.arguments = args
 
             val transaction = activity?.supportFragmentManager?.beginTransaction()
             transaction?.replace(R.id.frameLayout, fragment)
@@ -235,12 +247,28 @@ class CommunityEditPost : Fragment() {
             }
 
             if (isValid) {
+                val selectedOptionId = binding.radioGroupStatus.checkedRadioButtonId
+                var status : String
+                when (selectedOptionId) {
+                    R.id.radioPublic -> {
+                        status = getString(R.string.COMMUNITY_POST_PUBLIC)
+                        Toast.makeText(requireContext(), "Public selected", Toast.LENGTH_SHORT).show()
+                    }
+                    R.id.radioHide -> {
+                        status = getString(R.string.COMMUNITY_POST_HIDE)
+                        Toast.makeText(requireContext(), "Private selected", Toast.LENGTH_SHORT).show()
+                    }
+                    else -> {
+                        status = getString(R.string.COMMUNITY_POST_PUBLIC)
+                        Toast.makeText(requireContext(), "No selection made", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
                 val updatedCommunity = Community(
                     communityID = communityID,
                     title = binding.titleED.text.toString(),
                     description = binding.descriptionED.text.toString(),
-                    //example dulu
-                    status = getString(R.string.COMMUNITY_POST_PUBLIC), // Assuming status remains the same or updated based on your logic
+                    status = status.toString()
                 )
 
                 updateCommunityInFirebase(updatedCommunity)

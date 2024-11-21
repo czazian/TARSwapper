@@ -94,6 +94,8 @@ dependencies {
     implementation ("com.github.PhilJay:MPAndroidChart:v3.1.0")      //pie chart
     implementation ("com.airbnb.android:lottie:3.4.0") //lottie animation
     implementation("com.google.zxing:zxing-parent:3.5.3")
+    implementation ("com.github.PhilJay:MPAndroidChart:v3.1.0") //pie chart
+    implementation ("com.squareup.okhttp3:okhttp:4.9.3") //
 
 
 

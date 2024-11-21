@@ -100,6 +100,11 @@ class TradeSwapRequestReceivedAdapter(private var swapRequestList: List<SwapRequ
             holder.binding.acceptBtn.setOnClickListener{
                 //update status
                 updateSwapRequestStatus(swapRequest.swapRequestID.toString(), "Accepted", position)
+
+                //update all the other swap request that contain senderProduct and receiverProduct into "Product Not Available"
+                //not this swap request id
+                updateOtherSwapRequestStatus(swapRequest.senderProductID.toString(), swapRequest.receiverProductID.toString(), swapRequest.swapRequestID.toString())
+                
                 //insert order record
                 val order = Order(
                     tradeType = "Swap",
@@ -304,6 +309,45 @@ class TradeSwapRequestReceivedAdapter(private var swapRequestList: List<SwapRequ
                 // Handle error
                 Log.e("SwapRequest", "Failed to update status: ${e.message}")
             }
+    }
+
+    private fun updateOtherSwapRequestStatus(
+        senderProductID: String,
+        receiverProductID: String,
+        excludeSwapRequestID: String
+    ) {
+        val database = FirebaseDatabase.getInstance().getReference("SwapRequest")
+
+        // Fetch all swap requests
+        database.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                for (swapRequestSnap in snapshot.children) {
+                    val swapRequestID = swapRequestSnap.key ?: continue
+                    val senderProduct = swapRequestSnap.child("senderProductID").getValue(String::class.java)
+                    val receiverProduct = swapRequestSnap.child("receiverProductID").getValue(String::class.java)
+                    val status = swapRequestSnap.child("status").getValue(String::class.java)
+
+                    // Skip the swap request that matches the provided ID
+                    if (swapRequestID == excludeSwapRequestID) continue
+
+                    // Check if senderProduct or receiverProduct matches the IDs
+                    if ((senderProduct == senderProductID || receiverProduct == receiverProductID) && status == "AwaitingResponse") {
+                        // Update the status to "Product Not Available"
+                        swapRequestSnap.ref.child("status").setValue("ProductNotAvailable")
+                            .addOnSuccessListener {
+                                Log.d("UpdateStatus", "SwapRequest $swapRequestID updated to Product Not Available")
+                            }
+                            .addOnFailureListener { e ->
+                                Log.e("UpdateStatus", "Failed to update SwapRequest $swapRequestID: ${e.message}")
+                            }
+                    }
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("Firebase", "Error fetching data: ${error.message}")
+            }
+        })
     }
 }
 

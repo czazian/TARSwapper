@@ -30,11 +30,18 @@ import com.google.firebase.database.Transaction
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
+import okhttp3.*
+import java.io.IOException
+
 
 class CommunityDetail : Fragment() {
 
@@ -94,6 +101,31 @@ class CommunityDetail : Fragment() {
             )
             transaction?.addToBackStack(null)
             transaction?.commit()
+        }
+
+        binding.translatePost.setOnClickListener {
+            val titleText = binding.titleTV.text.toString()
+            val descriptionText = binding.descriptionTV.text.toString()
+
+            if (titleText.isBlank() || descriptionText.isBlank()) {
+                Toast.makeText(
+                    requireContext(),
+                    "Title or Description is empty!",
+                    Toast.LENGTH_SHORT
+                ).show()
+                return@setOnClickListener
+            }
+
+
+                // Translate title and description to Chinese
+                translateToChinese(titleText) { translatedTitle ->
+                    binding.titleTV.text = translatedTitle
+                }
+
+                translateToChinese(descriptionText) { translatedDescription ->
+                    binding.descriptionTV.text = translatedDescription
+                }
+            
         }
 
         binding.moreOperationBtn.setOnClickListener{
@@ -649,6 +681,50 @@ class CommunityDetail : Fragment() {
                 onResult(null)  // Handle any failure when listing items
             }
     }
+
+    fun translateToChinese(text: String, callback: (String) -> Unit) {
+        val client = OkHttpClient()
+
+        // Prepare JSON body
+        val json = JSONObject()
+        json.put("q", text)
+        json.put("source", "en")
+        json.put("target", "zh")
+        json.put("format", "text")
+
+        val requestBody = json.toString().toRequestBody("application/json".toMediaType())
+
+        // Create Request
+        val request = Request.Builder()
+            .url("https://libretranslate.de/translate")
+            .post(requestBody)
+            .build()
+
+        // Execute Request
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                requireActivity().runOnUiThread {
+                    Toast.makeText(requireContext(), "Translation failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                if (response.isSuccessful) {
+                    response.body?.string()?.let { responseBody ->
+                        val translatedText = JSONObject(responseBody).getString("translatedText")
+                        requireActivity().runOnUiThread {
+                            callback(translatedText)
+                        }
+                    }
+                } else {
+                    requireActivity().runOnUiThread {
+                        Toast.makeText(requireContext(), "Translation failed with code: ${response.code}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        })
+    }
+
 
 
 

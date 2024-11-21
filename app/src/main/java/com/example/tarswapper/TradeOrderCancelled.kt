@@ -91,21 +91,24 @@ class TradeOrderCancelled : Fragment() {
     }
 
 
-    fun fetchAllOrdersForUser(userID: String, onResult: (List<Order>) -> Unit, onError: (DatabaseError?) -> Unit) {
+    fun fetchAllOrdersForUser(
+        userID: String,
+        onResult: (List<Order>) -> Unit,
+        onError: (DatabaseError?) -> Unit
+    ) {
         val database = FirebaseDatabase.getInstance()
         val ordersRef = database.getReference("Order")
         val swapRequestsRef = database.getReference("SwapRequest")
         val productsRef = database.getReference("Product")
 
         val allOrders = mutableListOf<Order>()
-        var tasksRemaining = 2 // Two tasks: fetch sale orders and fetch swap orders
+        var tasksRemaining = 2 // Two main tasks: sale orders and swap orders
 
-        // Helper function to notify when tasks are completed
+        // Helper function to decrement tasks and invoke onResult when done
         fun onTaskComplete() {
             tasksRemaining -= 1
             Log.d("TaskStatus", "Tasks remaining: $tasksRemaining")
             if (tasksRemaining == 0) {
-                Log.d("ALL ORDERS", allOrders.toString())
                 onResult(allOrders)
             }
         }
@@ -138,69 +141,75 @@ class TradeOrderCancelled : Fragment() {
         // Fetch Swap Orders
         ordersRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(orderSnapshot: DataSnapshot) {
+                val swapTasks = mutableListOf<() -> Unit>()
+
                 for (orderSnap in orderSnapshot.children) {
                     val tradeType = orderSnap.child("tradeType").getValue(String::class.java)
                     val status = orderSnap.child("status").getValue(String::class.java)
                     val swapRequestID = orderSnap.child("swapRequestID").getValue(String::class.java)
 
                     if (tradeType == "Swap" && status == getString(R.string.ORDER_CANCELLED) && swapRequestID != null) {
-                        // Fetch the corresponding SwapRequest
-                        swapRequestsRef.child(swapRequestID).addListenerForSingleValueEvent(object : ValueEventListener {
-                            override fun onDataChange(swapRequestSnapshot: DataSnapshot) {
-                                val receiverProductID =
-                                    swapRequestSnapshot.child("receiverProductID").getValue(String::class.java)
-                                val senderProductID =
-                                    swapRequestSnapshot.child("senderProductID").getValue(String::class.java)
+                        swapTasks.add {
+                            swapRequestsRef.child(swapRequestID).addListenerForSingleValueEvent(object :
+                                ValueEventListener {
+                                override fun onDataChange(swapRequestSnapshot: DataSnapshot) {
+                                    val receiverProductID =
+                                        swapRequestSnapshot.child("receiverProductID").getValue(String::class.java)
+                                    val senderProductID =
+                                        swapRequestSnapshot.child("senderProductID").getValue(String::class.java)
 
-                                // Check receiver and sender products
-                                val productIDsToCheck = listOfNotNull(receiverProductID, senderProductID)
+                                    val productIDsToCheck = listOfNotNull(receiverProductID, senderProductID)
 
-                                productsRef.addListenerForSingleValueEvent(object : ValueEventListener {
-                                    override fun onDataChange(productSnapshot: DataSnapshot) {
-                                        for (productID in productIDsToCheck) {
-                                            val product = productSnapshot.child(productID)
-                                            val createdByUserID =
-                                                product.child("created_by_UserID").getValue(String::class.java)
+                                    productsRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                                        override fun onDataChange(productSnapshot: DataSnapshot) {
+                                            for (productID in productIDsToCheck) {
+                                                val product = productSnapshot.child(productID)
+                                                val createdByUserID =
+                                                    product.child("created_by_UserID").getValue(String::class.java)
 
-                                            if (createdByUserID == userID) {
-                                                val orderID = orderSnap.key ?: ""
-                                                allOrders.add(
-                                                    Order(
-                                                        orderID = orderID,
-                                                        tradeType = tradeType ?: "",
-                                                        status = status ?: "",
-                                                        swapRequestID = swapRequestID
+                                                if (createdByUserID == userID) {
+                                                    val orderID = orderSnap.key ?: ""
+                                                    allOrders.add(
+                                                        Order(
+                                                            orderID = orderID,
+                                                            tradeType = tradeType ?: "",
+                                                            status = status ?: "",
+                                                            swapRequestID = swapRequestID
+                                                        )
                                                     )
-                                                )
-                                                Log.d("Swap record added", allOrders.toString())
+                                                }
                                             }
+                                            Log.d("SwapOrders", "Fetched swap orders: ${allOrders.size}")
+                                            if (swapTasks.isEmpty()) onTaskComplete()
                                         }
-                                        Log.d("SwapOrders", "Fetched swap orders: ${allOrders.size}")
-                                        onTaskComplete()
-                                    }
 
-                                    override fun onCancelled(error: DatabaseError) {
-                                        Log.e("Firebase", "Error fetching product data: ${error.message}")
-                                        onError(error)
-                                    }
-                                })
-                            }
+                                        override fun onCancelled(error: DatabaseError) {
+                                            onError(error)
+                                        }
+                                    })
+                                }
 
-                            override fun onCancelled(error: DatabaseError) {
-                                Log.e("Firebase", "Error fetching swap request data: ${error.message}")
-                                onError(error)
-                            }
-                        })
+                                override fun onCancelled(error: DatabaseError) {
+                                    onError(error)
+                                }
+                            })
+                        }
                     }
+                }
+
+                if (swapTasks.isEmpty()) {
+                    onTaskComplete()
+                } else {
+                    swapTasks.forEach { it.invoke() }
                 }
             }
 
             override fun onCancelled(error: DatabaseError) {
-                Log.e("Firebase", "Error fetching order data: ${error.message}")
                 onError(error)
             }
         })
     }
+
 
 
 

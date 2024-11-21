@@ -78,7 +78,6 @@ class Notification : Fragment() {
                     }
                     //Community
                     1 -> {
-
                     }
                     //Message
                     2 -> {

@@ -71,6 +71,19 @@ class CommunityMyPost : Fragment() {
             transaction?.commit()
         }
 
+        binding.viewReport.setOnClickListener{
+            val fragment = ReportCommunity()
+
+            val transaction = activity?.supportFragmentManager?.beginTransaction()
+            transaction?.replace(R.id.frameLayout, fragment)
+            transaction?.setCustomAnimations(
+                R.anim.fade_out,  // Enter animation
+                R.anim.fade_in  // Exit animation
+            )
+            transaction?.addToBackStack(null)
+            transaction?.commit()
+        }
+
 
         return binding.root
     }

@@ -2,15 +2,21 @@ package com.example.tarswapper.dataAdapter
 
 import android.content.Context
 import android.os.Build
+import android.os.Bundle
+import android.provider.Settings.Global.getString
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.example.tarswapper.CommunityDetail
+import com.example.tarswapper.CommunityMyPost
 import com.example.tarswapper.R
+import com.example.tarswapper.TradeOrderUpdate
 import com.example.tarswapper.data.MeetUp
 import com.example.tarswapper.data.Order
 import com.example.tarswapper.data.Product
@@ -54,6 +60,7 @@ class TradeOrderOnGoingAdapter(private var orderList: List<Order>, private val c
         with(holder.binding) {
             getOrderDetail(order.orderID.toString()) { order ->
                 holder.binding.usernameTV.text = order?.orderID.toString()
+                Log.d("Order GET", order.toString())
 
                 if(order?.tradeType == "Sale"){
                     holder.binding.tradeTypeImg.setImageResource(R.drawable.baseline_attach_money_24)
@@ -233,18 +240,75 @@ class TradeOrderOnGoingAdapter(private var orderList: List<Order>, private val c
                     holder.binding.dateTV.text = meetUp!!.date
                 }
 
-            }
+                holder.binding.updateBtn.setOnClickListener{
+                    val fragment = TradeOrderUpdate()
 
-            holder.binding.updateBtn.setOnClickListener{
-                //redirect to update pages
+                    // Create a Bundle to pass data
+                    val bundle = Bundle()
+                    bundle.putString("OrderID", order.orderID)
 
-            }
+                    // Set the Bundle as arguments for the fragment
+                    fragment.arguments = bundle
 
-            holder.binding.completeBtn.setOnClickListener{
-                //order -> completed
+                    (context as? AppCompatActivity)?.supportFragmentManager?.beginTransaction()
+                        ?.apply {
+                            replace(R.id.frameLayout, fragment)
+                            setCustomAnimations(R.anim.fade_out, R.anim.fade_in)
+                            addToBackStack(null)
+                            commit()
+                        }
+                }
 
-                //product -> change status for both product
+                holder.binding.completeBtn.setOnClickListener {
+                    //order -> completed
+                    //update status
+                    updateOrderStatus(
+                        order.orderID.toString(),
+                        context.getString(R.string.ORDER_COMPLETED)
+                    )
 
+                    //product -> change status for both product
+                    val database = FirebaseDatabase.getInstance()
+                    if (order.tradeType == "Sale") {
+                        val productRef = database.getReference("Product/${order.productID}")
+
+                        productRef.child("status")
+                            .setValue(context.getString(R.string.PRODUCT_NOT_AVAILABLE))
+                            .addOnSuccessListener {
+                                println("Sender product status updated to Booked successfully.")
+                            }
+                            .addOnFailureListener { e ->
+                                println("Failed to update sender product status: ${e.message}")
+                            }
+
+                    } else if (order.tradeType == "Swap") {
+                        getSwapRequest(order.swapRequestID.toString()) { swapRequest ->
+                            val senderProductRef =
+                                database.getReference("Product/${swapRequest!!.senderProductID}")
+                            val receiverProductRef =
+                                database.getReference("Product/${swapRequest.receiverProductID}")
+
+                            senderProductRef.child("status")
+                                .setValue(context.getString(R.string.PRODUCT_NOT_AVAILABLE))
+                                .addOnSuccessListener {
+                                    println("Sender product status updated to Booked successfully.")
+                                }
+                                .addOnFailureListener { e ->
+                                    println("Failed to update sender product status: ${e.message}")
+                                }
+
+                            // Update the receiver product
+                            receiverProductRef.child("status")
+                                .setValue(context.getString(R.string.PRODUCT_NOT_AVAILABLE))
+                                .addOnSuccessListener {
+                                    println("Receiver product status updated to Booked successfully.")
+                                }
+                                .addOnFailureListener { e ->
+                                    println("Failed to update receiver product status: ${e.message}")
+                                }
+                        }
+                    }
+                }
             }
 
         }
@@ -372,44 +436,6 @@ class TradeOrderOnGoingAdapter(private var orderList: List<Order>, private val c
             }
     }
 
-
-    // Function to retrieve user by receiver product ID
-    //IMPORTANT
-    fun getUserByReceiverProductId(senderProductID: String, onResult: (User?) -> Unit) {
-        // 1. Get reference to the SwapRequest node in Firebase
-        val swapRequestRef = FirebaseDatabase.getInstance().getReference("SwapRequest")
-
-        // 2. Query SwapRequest to find the swap request with the given receiverProductID
-        swapRequestRef.orderByChild("senderProductID").equalTo(senderProductID).addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                if (snapshot.exists()) {
-                    // 3. Retrieve the first SwapRequest matching the receiverProductID
-                    val swapRequestSnapshot = snapshot.children.firstOrNull()
-                    val receiverProductID = swapRequestSnapshot?.child("receiverProductID")?.getValue(String::class.java)
-                    val senderProductID = swapRequestSnapshot?.child("senderProductID")?.getValue(String::class.java)
-
-                    // 4. Get product details from senderProductID (assuming sender's product contains created_by_UserID)
-                    getProductDetail(senderProductID!!) { product ->
-                        product?.let {
-                            // 5. Retrieve user information based on product's created_by_UserID
-                            getUserDetail(it.created_by_UserID.toString()) { user ->
-                                onResult(user) // Return the user
-                            }
-                        }
-                    }
-                } else {
-                    onResult(null) // No swap request found
-                }
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                // Handle error
-                println("Database error: ${error.message}")
-                onResult(null)
-            }
-        })
-    }
-
     @RequiresApi(Build.VERSION_CODES.O)
     fun customizeDate(dateString: String): String? {
         val isoFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
@@ -446,6 +472,25 @@ class TradeOrderOnGoingAdapter(private var orderList: List<Order>, private val c
                 onResult(null) //In case of error, return null
             }
         })
+    }
+
+    // Function to update swap request status -> Accepted or Rejected
+    fun updateOrderStatus(orderID: String, newStatus: String) {
+        val databaseRef = FirebaseDatabase.getInstance().getReference("Order/$orderID")
+
+        // Updating only the status field of the swap request
+        val updateMap = mapOf("status" to newStatus)
+
+        // Use updateChildren to update specific fields
+        databaseRef.updateChildren(updateMap)
+            .addOnSuccessListener {
+                // Success
+                Log.d("Order", "Status updated successfully")
+            }
+            .addOnFailureListener { e ->
+                // Handle error
+                Log.e("Order", "Failed to update status: ${e.message}")
+            }
     }
 
 }
