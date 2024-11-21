@@ -73,12 +73,10 @@ class IdentityVerification : Fragment() {
         val userID = sharedPreferencesTARSwapper.getString("userID", null)
 
 
-
-
         //Get received data from previous fragment
         val transaction = arguments?.getSerializable("order") as? Order
 
-        if(transaction != null){
+        if (transaction != null) {
             listenForMeetUpUpdates(transaction.meetUpID.toString())
         }
 
@@ -88,7 +86,7 @@ class IdentityVerification : Fragment() {
 
                 transfer = transaction
 
-                when(transaction.tradeType){
+                when (transaction.tradeType) {
                     "Sale" -> {
                         if (transaction.sellerID == userID || transaction.buyerID == userID) {
                             transaction!!.meetUpID?.let { meetUpID ->
@@ -107,22 +105,31 @@ class IdentityVerification : Fragment() {
                                             binding.qrcode.setImageBitmap(qrBitmap)
                                         }
                                     } else {
-                                        Log.e("MeetUp", "MeetUp does not exist or is not authorized.")
+                                        Log.e(
+                                            "MeetUp",
+                                            "MeetUp does not exist or is not authorized."
+                                        )
                                     }
                                 }
                             }
                         } else {
                             Log.e("Authorization", "Transaction does not belong to this user.")
                             if (isAdded) {
-                                Toast.makeText(requireContext(), "Unauthorized access!", Toast.LENGTH_SHORT)
+                                Toast.makeText(
+                                    requireContext(),
+                                    "Unauthorized access!",
+                                    Toast.LENGTH_SHORT
+                                )
                                     .show()
                             }
                         }
                     }
+
                     "Swap" -> {
                         //Use the SwapRequestID in the Order to fetch sender and receiver product IDs
                         val swapRequestID = transaction.swapRequestID
-                        val swapRequestDetails = swapRequestID?.let { id -> getSwapRequestDetails(id) }
+                        val swapRequestDetails =
+                            swapRequestID?.let { id -> getSwapRequestDetails(id) }
                         val senderProductID = swapRequestDetails?.senderProductID
                         val receiverProductID = swapRequestDetails?.receiverProductID
 
@@ -133,7 +140,8 @@ class IdentityVerification : Fragment() {
 
                         //Fetch user IDs for the sender and receiver products
                         val senderUserID = senderProductID?.let { id -> getUserIDForProduct(id) }
-                        val receiverUserID = receiverProductID?.let { id -> getUserIDForProduct(id) }
+                        val receiverUserID =
+                            receiverProductID?.let { id -> getUserIDForProduct(id) }
 
                         //Get Verification Code - Ensure the correct parties are involves in the same transaction
                         if (senderUserID == userID || receiverUserID == userID) {
@@ -153,23 +161,30 @@ class IdentityVerification : Fragment() {
                                             binding.qrcode.setImageBitmap(qrBitmap)
                                         }
                                     } else {
-                                        Log.e("MeetUp", "MeetUp does not exist or is not authorized.")
+                                        Log.e(
+                                            "MeetUp",
+                                            "MeetUp does not exist or is not authorized."
+                                        )
                                     }
                                 }
                             }
                         } else {
                             Log.e("Authorization", "Transaction does not belong to this user.")
                             if (isAdded) {
-                                Toast.makeText(requireContext(), "Unauthorized access!", Toast.LENGTH_SHORT)
+                                Toast.makeText(
+                                    requireContext(),
+                                    "Unauthorized access!",
+                                    Toast.LENGTH_SHORT
+                                )
                                     .show()
                             }
                         }
                     }
+
                     else -> {}
                 }
             }
         }
-
 
 
         //////QR CODE SCANNER/////
@@ -294,23 +309,32 @@ class IdentityVerification : Fragment() {
                         updateMeetUpStatus(meetUpID, verified = true, completed = true)
                     }
 
-                    //Update Status & Store to Database
+                    //Update Status for MeetUp and Product
                     if (transaction != null) {
-                        updateStatus(transaction.meetUpID){ result ->
-                            if(result != null && result){
-                                //Redirect to Receipt
-                                dialog.dismiss()
-                                val bundle = Bundle().apply {
-                                    putSerializable("order", transaction)
+                        updateStatus(transaction.meetUpID) { result1 ->
+
+
+                            if (result1 != null && result1) {
+                                updateProductAvailability(transaction) { result2 ->
+                                    if (result2 != null && result2) {
+                                        //Redirect to Receipt
+                                        dialog.dismiss()
+                                        val bundle = Bundle().apply {
+                                            putSerializable("order", transaction)
+                                        }
+                                        val fragment = Receipt().apply {
+                                            arguments = bundle
+                                        }
+                                        activity?.supportFragmentManager?.beginTransaction()
+                                            ?.apply {
+                                                replace(R.id.frameLayout, fragment)
+                                                setCustomAnimations(R.anim.fade_out, R.anim.fade_in)
+                                                commit()
+                                            }
+                                    }
                                 }
-                                val fragment = Receipt().apply {
-                                    arguments = bundle
-                                }
-                                activity?.supportFragmentManager?.beginTransaction()?.apply {
-                                    replace(R.id.frameLayout, fragment)
-                                    setCustomAnimations(R.anim.fade_out, R.anim.fade_in)
-                                    commit()
-                                }
+
+
                             }
                         }
                     }
@@ -323,6 +347,141 @@ class IdentityVerification : Fragment() {
         }
 
         return binding.root
+    }
+
+    private fun updateProductAvailability(order: Order, onResult: (Boolean?) -> Unit) {
+        val databaseReference = FirebaseDatabase.getInstance().getReference("Product")
+
+        when (order.tradeType) {
+            //One Product
+            "Sale" -> {
+                databaseReference.orderByChild("productID").equalTo(order.productID)
+                    .addListenerForSingleValueEvent(object : ValueEventListener {
+                        override fun onDataChange(snapshot: DataSnapshot) {
+                            if (snapshot.exists()) {
+                                for (orderSnapshot in snapshot.children) {
+                                    //Update the Product's 'status' field to "NotAvailable"
+                                    orderSnapshot.ref.child("status").setValue("NotAvailable")
+                                        .addOnSuccessListener {
+                                            onResult(true)
+                                        }
+                                        .addOnFailureListener { error ->
+                                            Log.e(
+                                                "Failed to update order status",
+                                                "Failed to update order status: ${error.message}"
+                                            )
+                                            onResult(false)
+                                        }
+                                }
+                            } else {
+                                Log.e("Not Exist Meetup id", "Failed to update order status")
+                                onResult(false)
+                            }
+                        }
+
+                        override fun onCancelled(error: DatabaseError) {
+                            Log.e(
+                                "Failed to update order status",
+                                "Error querying database: ${error.message}"
+                            )
+                            onResult(false)
+                        }
+                    })
+            }
+
+            //Two Product
+            "Swap" -> {
+
+                val swapRequestsRef = FirebaseDatabase.getInstance().getReference("SwapRequest")
+                swapRequestsRef.child(order.swapRequestID!!).get()
+                    .addOnSuccessListener { snapshot ->
+                        //Get SwapRequest Object
+                        val swapRequest = snapshot.getValue(SwapRequest::class.java)
+
+                        //Update Sender
+                        databaseReference.orderByChild("productID")
+                            .equalTo(swapRequest!!.senderProductID)
+                            .addListenerForSingleValueEvent(object : ValueEventListener {
+                                override fun onDataChange(snapshot: DataSnapshot) {
+                                    if (snapshot.exists()) {
+                                        for (orderSnapshot in snapshot.children) {
+                                            //Update the Product's 'status' field to "NotAvailable"
+                                            orderSnapshot.ref.child("status").setValue("NotAvailable")
+                                                .addOnSuccessListener {
+                                                    onResult(true)
+                                                }
+                                                .addOnFailureListener { error ->
+                                                    Log.e(
+                                                        "Failed to update order status",
+                                                        "Failed to update order status: ${error.message}"
+                                                    )
+                                                    onResult(false)
+                                                }
+                                        }
+                                    } else {
+                                        Log.e(
+                                            "Not Exist Meetup id",
+                                            "Failed to update order status"
+                                        )
+                                        onResult(false)
+                                    }
+                                }
+
+                                override fun onCancelled(error: DatabaseError) {
+                                    Log.e(
+                                        "Failed to update order status",
+                                        "Error querying database: ${error.message}"
+                                    )
+                                    onResult(false)
+                                }
+                            })
+
+
+                        //Update Receiver
+                        databaseReference.orderByChild("productID")
+                            .equalTo(swapRequest!!.receiverProductID)
+                            .addListenerForSingleValueEvent(object : ValueEventListener {
+                                override fun onDataChange(snapshot: DataSnapshot) {
+                                    if (snapshot.exists()) {
+                                        for (orderSnapshot in snapshot.children) {
+                                            //Update the Product's 'status' field to "NotAvailable"
+                                            orderSnapshot.ref.child("status").setValue("NotAvailable")
+                                                .addOnSuccessListener {
+                                                    onResult(true)
+                                                }
+                                                .addOnFailureListener { error ->
+                                                    Log.e(
+                                                        "Failed to update order status",
+                                                        "Failed to update order status: ${error.message}"
+                                                    )
+                                                    onResult(false)
+                                                }
+                                        }
+                                    } else {
+                                        Log.e(
+                                            "Not Exist Meetup id",
+                                            "Failed to update order status"
+                                        )
+                                        onResult(false)
+                                    }
+                                }
+
+                                override fun onCancelled(error: DatabaseError) {
+                                    Log.e(
+                                        "Failed to update order status",
+                                        "Error querying database: ${error.message}"
+                                    )
+                                    onResult(false)
+                                }
+                            })
+
+                    }.addOnFailureListener {
+                    onResult(false)
+                }
+            }
+
+            else -> {}
+        }
     }
 
 
@@ -341,7 +500,10 @@ class IdentityVerification : Fragment() {
                                     onResult(true)
                                 }
                                 .addOnFailureListener { error ->
-                                    Log.e("Failed to update order status", "Failed to update order status: ${error.message}")
+                                    Log.e(
+                                        "Failed to update order status",
+                                        "Failed to update order status: ${error.message}"
+                                    )
                                     onResult(false)
                                 }
                         }
@@ -352,7 +514,10 @@ class IdentityVerification : Fragment() {
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-                    Log.e("Failed to update order status", "Error querying database: ${error.message}")
+                    Log.e(
+                        "Failed to update order status",
+                        "Error querying database: ${error.message}"
+                    )
                     onResult(false)
                 }
             })
