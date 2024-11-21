@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.example.tarswapper.data.User
 import com.example.tarswapper.dataAdapter.MyOrderVPAdapter
-import com.example.tarswapper.dataAdapter.SwapRequestVPAdapter
 import com.example.tarswapper.databinding.FragmentTradeOrderBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.tabs.TabLayoutMediator
@@ -62,11 +61,6 @@ class TradeOrder : Fragment(){
 
         binding.btnBackSwapRequest.setOnClickListener{
             val fragment = Trade()
-
-            //Bottom Navigation Indicator Update
-            val navigationView =
-                requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigationView)
-            navigationView.selectedItemId = R.id.setting
 
             val transaction = activity?.supportFragmentManager?.beginTransaction()
             transaction?.replace(R.id.frameLayout, fragment)

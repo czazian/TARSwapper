@@ -137,10 +137,11 @@ class TradeOrderOnGoing : Fragment() {
             }
         })
 
-        // Fetch Swap Orders
+// Fetch Swap Orders
         ordersRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(orderSnapshot: DataSnapshot) {
                 val swapTasks = mutableListOf<() -> Unit>()
+                var tasksRemaining = 0
 
                 for (orderSnap in orderSnapshot.children) {
                     val tradeType = orderSnap.child("tradeType").getValue(String::class.java)
@@ -148,58 +149,63 @@ class TradeOrderOnGoing : Fragment() {
                     val swapRequestID = orderSnap.child("swapRequestID").getValue(String::class.java)
 
                     if (tradeType == "Swap" && status == getString(R.string.ORDER_ONGOING) && swapRequestID != null) {
-                        swapTasks.add {
-                            swapRequestsRef.child(swapRequestID).addListenerForSingleValueEvent(object :
-                                ValueEventListener {
-                                override fun onDataChange(swapRequestSnapshot: DataSnapshot) {
-                                    val receiverProductID =
-                                        swapRequestSnapshot.child("receiverProductID").getValue(String::class.java)
-                                    val senderProductID =
-                                        swapRequestSnapshot.child("senderProductID").getValue(String::class.java)
+                        tasksRemaining++
+                        swapRequestsRef.child(swapRequestID).addListenerForSingleValueEvent(object : ValueEventListener {
+                            override fun onDataChange(swapRequestSnapshot: DataSnapshot) {
+                                val receiverProductID = swapRequestSnapshot.child("receiverProductID").getValue(String::class.java)
+                                val senderProductID = swapRequestSnapshot.child("senderProductID").getValue(String::class.java)
 
-                                    val productIDsToCheck = listOfNotNull(receiverProductID, senderProductID)
+                                val productIDsToCheck = listOfNotNull(receiverProductID, senderProductID)
+                                productsRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                                    override fun onDataChange(productSnapshot: DataSnapshot) {
+                                        for (productID in productIDsToCheck) {
+                                            val product = productSnapshot.child(productID)
+                                            val createdByUserID = product.child("created_by_UserID").getValue(String::class.java)
 
-                                    productsRef.addListenerForSingleValueEvent(object : ValueEventListener {
-                                        override fun onDataChange(productSnapshot: DataSnapshot) {
-                                            for (productID in productIDsToCheck) {
-                                                val product = productSnapshot.child(productID)
-                                                val createdByUserID =
-                                                    product.child("created_by_UserID").getValue(String::class.java)
-
-                                                if (createdByUserID == userID) {
-                                                    val orderID = orderSnap.key ?: ""
-                                                    allOrders.add(
-                                                        Order(
-                                                            orderID = orderID,
-                                                            tradeType = tradeType ?: "",
-                                                            status = status ?: "",
-                                                            swapRequestID = swapRequestID
-                                                        )
+                                            if (createdByUserID == userID) {
+                                                val orderID = orderSnap.key ?: ""
+                                                allOrders.add(
+                                                    Order(
+                                                        orderID = orderID,
+                                                        tradeType = tradeType ?: "",
+                                                        status = status ?: "",
+                                                        swapRequestID = swapRequestID
                                                     )
-                                                }
+                                                )
                                             }
-                                            Log.d("SwapOrders", "Fetched swap orders: ${allOrders.size}")
-                                            if (swapTasks.isEmpty()) onTaskComplete()
                                         }
 
-                                        override fun onCancelled(error: DatabaseError) {
-                                            onError(error)
+                                        // Decrement remaining tasks and check if all tasks are completed
+                                        tasksRemaining--
+                                        if (tasksRemaining == 0) {
+                                            onTaskComplete()
                                         }
-                                    })
-                                }
+                                    }
 
-                                override fun onCancelled(error: DatabaseError) {
-                                    onError(error)
+                                    override fun onCancelled(error: DatabaseError) {
+                                        onError(error)
+                                        tasksRemaining--
+                                        if (tasksRemaining == 0) {
+                                            onTaskComplete()
+                                        }
+                                    }
+                                })
+                            }
+
+                            override fun onCancelled(error: DatabaseError) {
+                                onError(error)
+                                tasksRemaining--
+                                if (tasksRemaining == 0) {
+                                    onTaskComplete()
                                 }
-                            })
-                        }
+                            }
+                        })
                     }
                 }
 
-                if (swapTasks.isEmpty()) {
+                // If no tasks were added, call onTaskComplete immediately
+                if (tasksRemaining == 0) {
                     onTaskComplete()
-                } else {
-                    swapTasks.forEach { it.invoke() }
                 }
             }
 
@@ -207,6 +213,8 @@ class TradeOrderOnGoing : Fragment() {
                 onError(error)
             }
         })
+
+
     }
 
 

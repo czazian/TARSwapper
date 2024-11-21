@@ -9,13 +9,12 @@ import com.example.tarswapper.TradeSwapRequestSent
 
 class SwapRequestVPAdapter (fragment: FragmentActivity) : FragmentStateAdapter(fragment) {
 
-    override fun getItemCount(): Int = 3 // Number of tabs
+    override fun getItemCount(): Int = 2 // Number of tabs
     override fun createFragment(position: Int): Fragment {
         // Return a fragment based on the tab index
         return when (position) {
-            0 -> TradeSwapRequestReceived()
-            1 -> TradeSwapRequestSent()
-            2 -> TradeSwapRequestHistory()
+            0 -> TradeSwapRequestSent()
+            1 -> TradeSwapRequestHistory()
             else -> throw IllegalStateException("Invalid position $position")
         }
     }

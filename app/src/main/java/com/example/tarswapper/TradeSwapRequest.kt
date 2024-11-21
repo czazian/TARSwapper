@@ -35,9 +35,8 @@ class TradeSwapRequest : Fragment(){
         TabLayoutMediator(binding.headerTab, binding.viewPager) { tab, position ->
             // Set tab text from TabItem
             tab.text = when (position) {
-                0 -> "Received"
-                1 -> "Waiting"
-                2 -> "Response"
+                0 -> "Waiting"
+                1 -> "Response"
                 else -> null
             }
         }.attach()
@@ -61,11 +60,6 @@ class TradeSwapRequest : Fragment(){
 
         binding.btnBackSwapRequest.setOnClickListener{
             val fragment = Trade()
-
-            //Bottom Navigation Indicator Update
-            val navigationView =
-                requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigationView)
-            navigationView.selectedItemId = R.id.setting
 
             val transaction = activity?.supportFragmentManager?.beginTransaction()
             transaction?.replace(R.id.frameLayout, fragment)

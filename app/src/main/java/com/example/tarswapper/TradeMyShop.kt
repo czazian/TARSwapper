@@ -7,6 +7,8 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.tarswapper.data.Product
 import com.example.tarswapper.data.User
@@ -48,20 +50,37 @@ class TradeMyShop : Fragment() {
             }
         }
 
-        // Set LayoutManager for RecyclerView & Call getProductsFromFirebase to populate the RecyclerView
-        binding.productHoriRV.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
-        getUserProductsFromFirebase { productList ->
-            binding.productHoriRV.adapter = TradeMyPostedProductAdapter(productList)
+        //bind spinner
+        // Initialize Spinner and Status List
+        val displayStatusList = listOf("All", "Available", "Booked", "Not Available")
+        val actualStatus = listOf("", getString(R.string.PRODUCT_AVAILABLE), getString(R.string.PRODUCT_BOOKED), getString(R.string.PRODUCT_NOT_AVAILABLE))
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, displayStatusList)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.statusSpinner.adapter = adapter
+
+        // Set "All" as default selection
+        binding.statusSpinner.setSelection(0)
+
+        // Spinner Item Selection Listener
+        binding.statusSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                // Call getUserProductsFromFirebase with the selected status
+                getUserProductsFromFirebase(actualStatus[position].toString()) { productList ->
+                    // Update RecyclerView with filtered products
+                    binding.productHoriRV.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+                    binding.productHoriRV.adapter = TradeMyPostedProductAdapter(productList, requireContext())
+                }
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                // Optional: Handle no selection scenario if needed
+            }
         }
+
 
         //back
         binding.btnBackMyPostedProduct.setOnClickListener(){
             val fragment = Trade()
-
-            //Bottom Navigation Indicator Update
-            val navigationView =
-                requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigationView)
-            navigationView.selectedItemId = R.id.setting
 
             //Back to previous page with animation
             val transaction = activity?.supportFragmentManager?.beginTransaction()
@@ -77,11 +96,6 @@ class TradeMyShop : Fragment() {
         //on click
         binding.addProductBtn.setOnClickListener(){
             val fragment = TradeAddProduct()
-
-            //Bottom Navigation Indicator Update
-            val navigationView =
-                requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigationView)
-            navigationView.selectedItemId = R.id.setting
 
             //Back to previous page with animation
             val transaction = activity?.supportFragmentManager?.beginTransaction()
@@ -120,7 +134,7 @@ class TradeMyShop : Fragment() {
         })
     }
 
-    fun getUserProductsFromFirebase(onResult: (List<Product>) -> Unit) {
+    fun getUserProductsFromFirebase(status: String, onResult: (List<Product>) -> Unit) {
         val sharedPreferencesTARSwapper =
             requireActivity().getSharedPreferences("TARSwapperPreferences", Context.MODE_PRIVATE)
         val userID = sharedPreferencesTARSwapper.getString("userID", null)
@@ -139,8 +153,13 @@ class TradeMyShop : Fragment() {
                     for (productSnapshot in snapshot.children) {
                         // Convert each child into a Product object
                         val product = productSnapshot.getValue(Product::class.java)
-                        if (product != null && product.status == "Available") {
-                            productList.add(product) // Add the product to the list
+                        //now can get all product
+                        if (product != null) {
+                            if(status.isNullOrEmpty()){
+                                productList.add(product) // Add the product to the list
+                            }else if(status == product.status){
+                                productList.add(product) // Add the product to the list
+                            }
                         }
                     }
                     onResult(productList) // Return the list of products

@@ -38,7 +38,7 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent">
 
-                    <ImageView
+                    <com.google.android.material.imageview.ShapeableImageView
                         android:id="@+id/profile_ImgV"
                         android:layout_width="50dp"
                         android:layout_height="50dp"
@@ -47,7 +47,8 @@
                         android:src="@drawable/user"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:shapeAppearanceOverlay="@style/circleImageView" />/>
 
                     <TextView
                         android:id="@+id/usernameTV"
@@ -110,7 +111,7 @@
 
 
                         <androidx.constraintlayout.widget.ConstraintLayout
-                            android:layout_width="100dp"
+                            android:layout_width="wrap_content"
                             android:layout_height="120dp">
 
                             <TextView
@@ -118,6 +119,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="You give:"
+                                android:textStyle="bold"
                                 android:textColor="#868686"
                                 app:layout_constraintStart_toStartOf="parent"
                                 app:layout_constraintTop_toTopOf="parent" />
@@ -160,7 +162,7 @@
                         </androidx.constraintlayout.widget.ConstraintLayout>
 
                         <androidx.constraintlayout.widget.ConstraintLayout
-                            android:layout_width="100dp"
+                            android:layout_width="wrap_content"
                             android:layout_height="120dp">
 
                             <TextView
@@ -168,6 +170,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="You receive:"
+                                android:textStyle="bold"
                                 android:textColor="#868686"
                                 app:layout_constraintStart_toStartOf="parent"
                                 app:layout_constraintTop_toTopOf="parent" />

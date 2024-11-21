@@ -122,6 +122,12 @@ class TradeProductDetail : Fragment() {
         if (available) {
 
             getProductFromFirebase(productID = productID) { product ->
+                //hide trade button if the owner is viewing the product
+                if(product.created_by_UserID == userID){
+                    binding.submitBtn.visibility = View.GONE
+                    binding.btnChatStart.visibility = View.GONE
+                }
+
                 //get product owner
                 getUserRecord(product.created_by_UserID.toString()) {
                     if (it != null) {

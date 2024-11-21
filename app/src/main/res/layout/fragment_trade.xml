@@ -14,6 +14,8 @@
         android:layout_width="match_parent"
         android:layout_height="80dp"
         app:cardElevation="12dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -30,7 +32,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:shapeAppearanceOverlay="@style/circleImageView"/>
+                app:shapeAppearanceOverlay="@style/circleImageView" />
 
             <TextView
                 android:id="@+id/welcomeMsg1"
@@ -51,106 +53,216 @@
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="@+id/profile_ImgV"
                 app:layout_constraintStart_toStartOf="@+id/welcomeMsg1" />
-
-            <ImageButton
-                android:id="@+id/myShopImgBtn"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_marginEnd="4dp"
-                android:background="@drawable/rounded_button"
-                android:backgroundTint="#AC87C5"
-                android:scaleType="centerInside"
-                android:src="@drawable/baseline_shop_24"
-                app:layout_constraintBottom_toBottomOf="@+id/swapRequestImgBtn"
-                app:layout_constraintEnd_toStartOf="@+id/swapRequestImgBtn"
-                app:layout_constraintTop_toTopOf="@+id/swapRequestImgBtn"
-                app:layout_constraintVertical_bias="0.0" />
-
-            <ImageButton
-                android:id="@+id/swapRequestImgBtn"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_marginEnd="4dp"
-                android:background="@drawable/rounded_button"
-                android:backgroundTint="#AC87C5"
-                android:src="@drawable/baseline_swap_horiz_24"
-                app:layout_constraintBottom_toBottomOf="@+id/myOrderImgBtn"
-                app:layout_constraintEnd_toStartOf="@+id/myOrderImgBtn"
-                app:layout_constraintTop_toTopOf="@+id/myOrderImgBtn"
-                app:layout_constraintVertical_bias="0.0" />
-
-            <ImageButton
-                android:id="@+id/myOrderImgBtn"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:background="@drawable/rounded_button"
-                android:backgroundTint="#AC87C5"
-                android:scaleType="centerInside"
-                android:src="@drawable/baseline_receipt_24"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.6" />
-
-
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/searchCL"
-        android:layout_width="match_parent"
-        android:layout_height="160dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/headCV">
-
-        <Button
-            android:id="@+id/searchBtn"
-            android:layout_width="400dp"
-            android:layout_height="60dp"
-            android:layout_marginTop="20dp"
-            android:backgroundTint="#E0AED0"
-            android:text="Search for..."
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.495"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <Button
-            android:id="@+id/SaleBtn"
-            android:layout_width="195dp"
-            android:layout_height="40dp"
-            android:drawableStart="@drawable/baseline_attach_money_24"
-            android:text="Sale"
-            android:textSize="16dp"
-            android:drawablePadding="8dp"
-            app:layout_constraintBottom_toBottomOf="@+id/SwapBtn"
-            app:layout_constraintStart_toStartOf="@+id/searchBtn"
-            app:layout_constraintTop_toTopOf="@+id/SwapBtn"
-            android:backgroundTint="#AC87C5" />
-
-        <Button
-            android:id="@+id/SwapBtn"
-            android:layout_width="195dp"
-            android:layout_height="40dp"
-            android:layout_marginTop="6dp"
-            android:text="Swap"
-            android:textSize="16dp"
-            app:layout_constraintEnd_toEndOf="@+id/searchBtn"
-            app:layout_constraintTop_toBottomOf="@+id/searchBtn"
-            android:backgroundTint="#E8E8E9"/>
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/ProductRV"
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/searchCL"
-        tools:listitem="@layout/product_list"/>
+        app:layout_constraintTop_toBottomOf="@+id/headCV"
+        android:padding="15dp">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/linearLayout4"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <!-- Button 1 -->
+                <LinearLayout
+                    android:id="@+id/myProductBtn"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="8dp"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <ImageView
+                        android:id="@+id/button1Icon"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:contentDescription="Icon 1"
+                        android:scaleType="center"
+                        android:src="@drawable/baseline_shop_24" />
+
+                    <TextView
+                        android:id="@+id/button1Text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:gravity="center"
+                        android:text="My Product"
+                        android:textColor="@android:color/black"
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+                <!-- Button 4 -->
+                <LinearLayout
+                    android:id="@+id/requestReceivedBtn"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="8dp"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <ImageView
+                        android:id="@+id/button4Icon"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:contentDescription="Icon 3"
+                        android:scaleType="center"
+                        android:src="@drawable/baseline_question_answer_24" />
+
+                    <TextView
+                        android:id="@+id/button4Text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:gravity="center"
+                        android:text="Request Received"
+                        android:textColor="@android:color/black"
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+
+                <!-- Button 2 -->
+                <LinearLayout
+                    android:id="@+id/swapRequestBtn"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="8dp"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <ImageView
+                        android:id="@+id/button2Icon"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:contentDescription="Icon 2"
+                        android:scaleType="center"
+                        android:src="@drawable/baseline_swap_horiz_24" />
+
+                    <TextView
+                        android:id="@+id/button2Text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:gravity="center"
+                        android:text="Swap Request"
+                        android:textColor="@android:color/black"
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+
+
+                <!-- Button 3 -->
+                <LinearLayout
+                    android:id="@+id/orderBtn"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="8dp"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <ImageView
+                        android:id="@+id/button3Icon"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:contentDescription="Icon 3"
+                        android:scaleType="center"
+                        android:src="@drawable/baseline_receipt_24" />
+
+                    <TextView
+                        android:id="@+id/button3Text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:gravity="center"
+                        android:text="Track Order"
+                        android:textColor="@android:color/black"
+                        android:textSize="14sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <Button
+                        android:id="@+id/searchBtn"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:backgroundTint="#E0AED0"
+                        android:text="Search for..." />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/SaleBtn"
+                        android:layout_width="0dp"
+                        android:layout_height="40dp"
+                        android:layout_weight="1"
+                        android:backgroundTint="#AC87C5"
+                        android:drawableStart="@drawable/baseline_attach_money_24"
+                        android:drawablePadding="8dp"
+                        android:text="Sale"
+                        android:textColor="@android:color/white"
+                        android:textSize="16sp" />
+
+                    <Button
+                        android:id="@+id/SwapBtn"
+                        android:layout_width="0dp"
+                        android:layout_height="40dp"
+                        android:layout_weight="1"
+                        android:backgroundTint="#E8E8E9"
+                        android:text="Swap"
+                        android:textColor="@android:color/black"
+                        android:textSize="16sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/ProductRV"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                tools:listitem="@layout/product_list" />
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

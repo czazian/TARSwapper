@@ -38,7 +38,7 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent">
 
-                    <ImageView
+                    <com.google.android.material.imageview.ShapeableImageView
                         android:id="@+id/profile_ImgV"
                         android:layout_width="50dp"
                         android:layout_height="50dp"
@@ -47,7 +47,8 @@
                         android:src="@drawable/user"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:shapeAppearanceOverlay="@style/circleImageView" />
 
                     <TextView
                         android:id="@+id/usernameTV"
@@ -109,7 +110,7 @@
 
                         <androidx.constraintlayout.widget.ConstraintLayout
                             android:id="@+id/youGiveContainer"
-                            android:layout_width="100dp"
+                            android:layout_width="wrap_content"
                             android:layout_height="120dp">
 
                             <TextView
@@ -117,6 +118,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="You give:"
+                                android:textStyle="bold"
                                 android:textColor="#868686"
                                 app:layout_constraintStart_toStartOf="parent"
                                 app:layout_constraintTop_toTopOf="parent" />
@@ -161,7 +163,7 @@
 
                         <androidx.constraintlayout.widget.ConstraintLayout
                             android:id="@+id/youReceiveContainer"
-                            android:layout_width="100dp"
+                            android:layout_width="wrap_content"
                             android:layout_height="120dp">
 
                             <TextView
@@ -169,6 +171,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="You receive:"
+                                android:textStyle="bold"
                                 android:textColor="#868686"
                                 app:layout_constraintStart_toStartOf="parent"
                                 app:layout_constraintTop_toTopOf="parent" />
@@ -337,21 +340,8 @@
                         android:id="@+id/updateBtn"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="10dp"
                         android:backgroundTint="#AC87C5"
-                        android:text="Update"
-                        app:layout_constraintBottom_toBottomOf="@+id/completeBtn"
-                        app:layout_constraintEnd_toStartOf="@+id/completeBtn"
-                        app:layout_constraintTop_toTopOf="@+id/completeBtn"
-                        app:layout_constraintVertical_bias="0.0" />
-
-                    <Button
-                        android:id="@+id/completeBtn"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:backgroundTint="#756AB6"
-                        android:text="Complete"
-                        app:layout_constraintBottom_toBottomOf="parent"
+                        android:text="Update Meet Up"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
 

@@ -63,7 +63,7 @@ class Trade : Fragment() {
         }
 
         //on click
-        binding.myShopImgBtn.setOnClickListener(){
+        binding.myProductBtn.setOnClickListener(){
 
             val fragment = TradeMyShop()
 
@@ -82,13 +82,8 @@ class Trade : Fragment() {
             transaction?.commit()
         }
 
-        binding.swapRequestImgBtn.setOnClickListener{
-            val fragment = TradeSwapRequest()
-
-            //Bottom Navigation Indicator Update
-            val navigationView =
-                requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigationView)
-            navigationView.selectedItemId = R.id.setting
+        binding.requestReceivedBtn.setOnClickListener{
+            val fragment = TradeSwapRequestReceived()
 
             val transaction = activity?.supportFragmentManager?.beginTransaction()
             transaction?.replace(R.id.frameLayout, fragment)
@@ -100,13 +95,21 @@ class Trade : Fragment() {
             transaction?.commit()
         }
 
-        binding.myOrderImgBtn.setOnClickListener{
-            val fragment = TradeOrder()
+        binding.swapRequestBtn.setOnClickListener{
+            val fragment = TradeSwapRequest()
 
-            //Bottom Navigation Indicator Update
-            val navigationView =
-                requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigationView)
-            navigationView.selectedItemId = R.id.setting
+            val transaction = activity?.supportFragmentManager?.beginTransaction()
+            transaction?.replace(R.id.frameLayout, fragment)
+            transaction?.setCustomAnimations(
+                R.anim.fade_out,  // Enter animation
+                R.anim.fade_in  // Exit animation
+            )
+            transaction?.addToBackStack(null)
+            transaction?.commit()
+        }
+
+        binding.orderBtn.setOnClickListener{
+            val fragment = TradeOrder()
 
             val transaction = activity?.supportFragmentManager?.beginTransaction()
             transaction?.replace(R.id.frameLayout, fragment)

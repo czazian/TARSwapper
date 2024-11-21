@@ -233,6 +233,7 @@ class TradeOrderOnGoingAdapter(private var orderList: List<Order>, private val c
                         }
                     }
                 }
+                Log.d("Order meet up id", order!!.meetUpID.toString())
                 getMeetUp(order!!.meetUpID.toString()){ meetUp ->
                     holder.binding.locationTV.text = meetUp!!.location
                     holder.binding.venueTV.text = meetUp!!.venue
@@ -259,56 +260,56 @@ class TradeOrderOnGoingAdapter(private var orderList: List<Order>, private val c
                         }
                 }
 
-                holder.binding.completeBtn.setOnClickListener {
-                    //order -> completed
-                    //update status
-                    updateOrderStatus(
-                        order.orderID.toString(),
-                        context.getString(R.string.ORDER_COMPLETED)
-                    )
-
-                    //product -> change status for both product
-                    val database = FirebaseDatabase.getInstance()
-                    if (order.tradeType == "Sale") {
-                        val productRef = database.getReference("Product/${order.productID}")
-
-                        productRef.child("status")
-                            .setValue(context.getString(R.string.PRODUCT_NOT_AVAILABLE))
-                            .addOnSuccessListener {
-                                println("Sender product status updated to Booked successfully.")
-                            }
-                            .addOnFailureListener { e ->
-                                println("Failed to update sender product status: ${e.message}")
-                            }
-
-                    } else if (order.tradeType == "Swap") {
-                        getSwapRequest(order.swapRequestID.toString()) { swapRequest ->
-                            val senderProductRef =
-                                database.getReference("Product/${swapRequest!!.senderProductID}")
-                            val receiverProductRef =
-                                database.getReference("Product/${swapRequest.receiverProductID}")
-
-                            senderProductRef.child("status")
-                                .setValue(context.getString(R.string.PRODUCT_NOT_AVAILABLE))
-                                .addOnSuccessListener {
-                                    println("Sender product status updated to Booked successfully.")
-                                }
-                                .addOnFailureListener { e ->
-                                    println("Failed to update sender product status: ${e.message}")
-                                }
-
-                            // Update the receiver product
-                            receiverProductRef.child("status")
-                                .setValue(context.getString(R.string.PRODUCT_NOT_AVAILABLE))
-                                .addOnSuccessListener {
-                                    println("Receiver product status updated to Booked successfully.")
-                                }
-                                .addOnFailureListener { e ->
-                                    println("Failed to update receiver product status: ${e.message}")
-                                }
-                        }
-                    }
-                }
+//                holder.binding.completeBtn.setOnClickListener {
+//                    //order -> completed
+//                    //update status
+//                    updateOrderStatus(
+//                        order.orderID.toString(),
+//                        context.getString(R.string.ORDER_COMPLETED)
+//                    )
+//
+//                    //product -> change status for both product
+//                    val database = FirebaseDatabase.getInstance()
+//                    if (order.tradeType == "Sale") {
+//                        val productRef = database.getReference("Product/${order.productID}")
+//
+//                        productRef.child("status")
+//                            .setValue(context.getString(R.string.PRODUCT_NOT_AVAILABLE))
+//                            .addOnSuccessListener {
+//                                println("Sender product status updated to Booked successfully.")
+//                            }
+//                            .addOnFailureListener { e ->
+//                                println("Failed to update sender product status: ${e.message}")
+//                            }
+//
+//                    } else if (order.tradeType == "Swap") {
+//                        getSwapRequest(order.swapRequestID.toString()) { swapRequest ->
+//                            val senderProductRef =
+//                                database.getReference("Product/${swapRequest!!.senderProductID}")
+//                            val receiverProductRef =
+//                                database.getReference("Product/${swapRequest.receiverProductID}")
+//
+//                            senderProductRef.child("status")
+//                                .setValue(context.getString(R.string.PRODUCT_NOT_AVAILABLE))
+//                                .addOnSuccessListener {
+//                                    println("Sender product status updated to Booked successfully.")
+//                                }
+//                                .addOnFailureListener { e ->
+//                                    println("Failed to update sender product status: ${e.message}")
+//                                }
+//
+//                            // Update the receiver product
+//                            receiverProductRef.child("status")
+//                                .setValue(context.getString(R.string.PRODUCT_NOT_AVAILABLE))
+//                                .addOnSuccessListener {
+//                                    println("Receiver product status updated to Booked successfully.")
+//                                }
+//                                .addOnFailureListener { e ->
+//                                    println("Failed to update receiver product status: ${e.message}")
+//                                }
+//                        }
+//                    }
+//                }
             }
 
         }

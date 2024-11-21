@@ -334,7 +334,18 @@ class TradeOrderUpdate : Fragment() {
                                     }
                             }
                         }
+                        //redirect to
+                        //put bundle
+                        val fragment = TradeOrder()
 
+                        val transaction = activity?.supportFragmentManager?.beginTransaction()
+                        transaction?.replace(R.id.frameLayout, fragment)
+                        transaction?.setCustomAnimations(
+                            R.anim.fade_out,  // Enter animation
+                            R.anim.fade_in  // Exit animation
+                        )
+                        transaction?.addToBackStack(null)
+                        transaction?.commit()
                     }
                     .setNegativeButton("No") { dialog, which ->
                         dialog.dismiss()

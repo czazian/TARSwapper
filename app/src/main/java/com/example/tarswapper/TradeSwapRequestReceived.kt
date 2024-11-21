@@ -43,6 +43,19 @@ class TradeSwapRequestReceived : Fragment() {
             }
         }
 
+        binding.btnBack.setOnClickListener{
+            val fragment = Trade()
+
+            val transaction = activity?.supportFragmentManager?.beginTransaction()
+            transaction?.replace(R.id.frameLayout, fragment)
+            transaction?.setCustomAnimations(
+                R.anim.fade_out,  // Enter animation
+                R.anim.fade_in  // Exit animation
+            )
+            transaction?.addToBackStack(null)
+            transaction?.commit()
+        }
+
         //bind adapter
         val productRef = FirebaseDatabase.getInstance().getReference("Product")
         val SwapRequestRef = FirebaseDatabase.getInstance().getReference("SwapRequest")
@@ -69,7 +82,8 @@ class TradeSwapRequestReceived : Fragment() {
                     fetchSwapRequestsForUserProducts(userProductIds) {swapRequestList ->
                         Log.d("Swap request received: ", swapRequestList.toString())
                         binding.recyclerViewSRReceived.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
-                        binding.recyclerViewSRReceived.adapter = TradeSwapRequestReceivedAdapter(swapRequestList)
+                        binding.recyclerViewSRReceived.adapter = TradeSwapRequestReceivedAdapter(swapRequestList, requireContext())
+                        binding.srReceivedTV.text = "${swapRequestList.size} Swap Request Received"
                         Log.d("result found is...", swapRequestList.size.toString())
                     }
                 }

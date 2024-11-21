@@ -1,19 +1,26 @@
 package com.example.tarswapper.dataAdapter
 
+import android.content.Context
+import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.cardview.widget.CardView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.tarswapper.R
+import com.example.tarswapper.TradeProductDetail
 import com.example.tarswapper.data.Product
 import com.example.tarswapper.databinding.ProductListHoriBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
 
-class TradeMyPostedProductAdapter(private val productList: List<Product>) : RecyclerView.Adapter<TradeMyPostedProductAdapter.ProductViewHolder>() {
+class TradeMyPostedProductAdapter(private val productList: List<Product>, private val context: Context) : RecyclerView.Adapter<TradeMyPostedProductAdapter.ProductViewHolder>() {
 
     class ProductViewHolder(val binding: ProductListHoriBinding) : RecyclerView.ViewHolder(binding.root){}
 
@@ -28,6 +35,7 @@ class TradeMyPostedProductAdapter(private val productList: List<Product>) : Recy
         // Access views via binding instead of findViewById
         with(holder.binding) {
             productNameTV.text = product.name
+            setCardBorder(holder.binding.productLayout, holder.binding.productMoreOperationImgBtn, product.status.toString())
 
             if (product.tradeType == "Sale"){
                 tradeImg.setImageResource(R.drawable.baseline_attach_money_24)
@@ -59,6 +67,25 @@ class TradeMyPostedProductAdapter(private val productList: List<Product>) : Recy
                 } else {
                     holder.binding.removeBtn.visibility = View.VISIBLE
                 }
+            }
+
+            holder.binding.productLayout.setOnClickListener{
+                val fragment = TradeProductDetail()
+
+                // Create a Bundle to pass data
+                val bundle = Bundle()
+                bundle.putString("ProductID", product.productID) // Example data
+
+                // Set the Bundle as arguments for the fragment
+                fragment.arguments = bundle
+
+                (context as? AppCompatActivity)?.supportFragmentManager?.beginTransaction()
+                    ?.apply {
+                        replace(R.id.frameLayout, fragment)
+                        setCustomAnimations(R.anim.fade_out, R.anim.fade_in)
+                        addToBackStack(null)
+                        commit()
+                    }
             }
 
             holder.binding.removeBtn.setOnClickListener{
@@ -130,5 +157,27 @@ class TradeMyPostedProductAdapter(private val productList: List<Product>) : Recy
             .addOnFailureListener { e ->
                 onResult(null)  // Handle any failure when listing items
             }
+    }
+
+    fun setCardBorder(cl: ConstraintLayout, imgBtn: ImageButton, status: String) {
+        when (status) {
+            context.getString(R.string.PRODUCT_AVAILABLE) -> {
+                cl.setBackgroundResource(R.drawable.border_available)
+                imgBtn.visibility = View.VISIBLE
+            }
+            context.getString(R.string.PRODUCT_BOOKED) -> {
+                cl.setBackgroundResource(R.drawable.border_booked)
+                imgBtn.visibility = View.VISIBLE
+            }
+            "NotAvailable" -> {
+                cl.setBackgroundResource(R.drawable.border_not_available)
+                imgBtn.visibility = View.GONE
+            }
+            context.getString(R.string.PRODUCT_NOT_AVAILABLE) -> {
+                // Default background if status is unknown
+                cl.setBackgroundResource(android.R.color.transparent)
+                imgBtn.visibility = View.GONE
+            }
+        }
     }
 }

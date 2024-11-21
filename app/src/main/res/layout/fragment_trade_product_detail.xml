@@ -5,7 +5,8 @@
     android:id="@+id/frameLayout10"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".TradeProductDetail">
+    tools:context=".TradeProductDetail"
+    android:background="@color/white">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/myPostedProductHeader"
@@ -48,283 +49,294 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <ScrollView
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/myPostedProductHeader">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingBottom="10dp">
-
-            <androidx.viewpager2.widget.ViewPager2
-                android:id="@+id/viewPager2"
-                android:layout_width="match_parent"
-                android:layout_height="250dp"
-                android:orientation="horizontal"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <com.tbuonomo.viewpagerdotsindicator.DotsIndicator
-                android:id="@+id/slide_indicator"
-                android:layout_width="wrap_content"
-                android:layout_height="10dp"
-                android:layout_marginTop="5dp"
-                app:dotsColor="@color/grey_font"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="@+id/viewPager2"
-                app:layout_constraintTop_toBottomOf="@+id/viewPager2"
-                app:selectedDotColor="#756AB6" />
-
-            <TextView
-                android:id="@+id/productNameTV"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="8dp"
-                android:text="Item 1"
-                android:textSize="25dp"
-                android:textStyle="bold"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/slide_indicator" />
-
-            <TextView
-                android:id="@+id/tradeDetailTV"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:background="@drawable/rounded_button"
-                android:drawablePadding="4dp"
-                android:paddingRight="8dp"
-                android:text="RM 120"
-                android:textColor="#756AB6"
-                android:textSize="20dp"
-                android:textStyle="bold"
-                app:layout_constraintStart_toStartOf="@+id/productNameTV"
-                app:layout_constraintTop_toBottomOf="@+id/productNameTV" />
-
-            <com.google.android.material.imageview.ShapeableImageView
-                android:id="@+id/profile_ImgV"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_marginTop="12dp"
-                android:src="@drawable/user"
-                app:layout_constraintStart_toStartOf="@+id/productNameTV"
-                app:layout_constraintTop_toBottomOf="@+id/tradeDetailTV"
-                app:shapeAppearanceOverlay="@style/circleImageView" />
-
-            <TextView
-                android:id="@+id/usernameTV"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:text="User 1"
-                android:textSize="20dp"
-                android:textStyle="bold"
-                app:layout_constraintBottom_toBottomOf="@+id/profile_ImgV"
-                app:layout_constraintStart_toEndOf="@+id/profile_ImgV"
-                app:layout_constraintTop_toTopOf="@+id/profile_ImgV" />
-
-            <TextView
-                android:id="@+id/dateTV"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="24dp"
-                android:text="28/12/2204"
-                android:textColor="@color/grey_font"
-                android:textSize="16dp"
-                app:layout_constraintBottom_toBottomOf="@+id/usernameTV"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/usernameTV" />
+            android:layout_height="0dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/profile_ImgV">
+                android:paddingBottom="30dp">
 
-                <LinearLayout
+                <androidx.viewpager2.widget.ViewPager2
+                    android:id="@+id/viewPager2"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="250dp"
                     android:orientation="horizontal"
-                    android:padding="16dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent">
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <com.tbuonomo.viewpagerdotsindicator.DotsIndicator
+                    android:id="@+id/slide_indicator"
+                    android:layout_width="wrap_content"
+                    android:layout_height="10dp"
+                    android:layout_marginTop="5dp"
+                    app:dotsColor="@color/grey_font"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@+id/viewPager2"
+                    app:layout_constraintTop_toBottomOf="@+id/viewPager2"
+                    app:selectedDotColor="#756AB6" />
+
+                <TextView
+                    android:id="@+id/productNameTV"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginTop="8dp"
+                    android:text="Item 1"
+                    android:textSize="25dp"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/slide_indicator" />
+
+                <TextView
+                    android:id="@+id/tradeDetailTV"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/rounded_button"
+                    android:drawablePadding="4dp"
+                    android:paddingRight="8dp"
+                    android:text="RM 120"
+                    android:textColor="#756AB6"
+                    android:textSize="20dp"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="@+id/productNameTV"
+                    app:layout_constraintTop_toBottomOf="@+id/productNameTV" />
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/profile_ImgV"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="12dp"
+                    android:src="@drawable/user"
+                    app:layout_constraintStart_toStartOf="@+id/productNameTV"
+                    app:layout_constraintTop_toBottomOf="@+id/tradeDetailTV"
+                    app:shapeAppearanceOverlay="@style/circleImageView" />
+
+                <TextView
+                    android:id="@+id/usernameTV"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="User 1"
+                    android:textSize="20dp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="@+id/profile_ImgV"
+                    app:layout_constraintStart_toEndOf="@+id/profile_ImgV"
+                    app:layout_constraintTop_toTopOf="@+id/profile_ImgV" />
+
+                <TextView
+                    android:id="@+id/dateTV"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="24dp"
+                    android:text="28/12/2204"
+                    android:textColor="@color/grey_font"
+                    android:textSize="16dp"
+                    app:layout_constraintBottom_toBottomOf="@+id/usernameTV"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/usernameTV" />
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/profile_ImgV">
 
                     <LinearLayout
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="8dp"
-                        android:orientation="vertical"
-                        android:paddingRight="50dp">
+                        android:orientation="horizontal"
+                        android:padding="16dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent">
 
-                        <TextView
+                        <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="4dp"
-                            android:text="Description"
-                            android:textColor="#999999"
-                            android:textSize="18dp"
-                            android:textStyle="bold" />
+                            android:layout_marginEnd="8dp"
+                            android:orientation="vertical"
+                            android:paddingRight="50dp">
 
-                        <TextView
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="4dp"
+                                android:text="Description"
+                                android:textColor="#999999"
+                                android:textSize="18dp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="4dp"
+                                android:text="Category"
+                                android:textColor="#999999"
+                                android:textSize="18dp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="4dp"
+                                android:text="Condition"
+                                android:textColor="#999999"
+                                android:textSize="18dp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="4dp"
+                                android:text="Trade"
+                                android:textColor="#999999"
+                                android:textSize="18dp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/swapCateTV1"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="4dp"
+                                android:text="Swap Category"
+                                android:textColor="#999999"
+                                android:textSize="18dp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/swapRemarkTV1"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="4dp"
+                                android:text="Swap Remark"
+                                android:textColor="#999999"
+                                android:textSize="18dp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                        <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="4dp"
-                            android:text="Category"
-                            android:textColor="#999999"
-                            android:textSize="18dp"
-                            android:textStyle="bold" />
+                            android:orientation="vertical">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="4dp"
-                            android:text="Condition"
-                            android:textColor="#999999"
-                            android:textSize="18dp"
-                            android:textStyle="bold" />
+                            <TextView
+                                android:id="@+id/descriptionTV"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="4dp"
+                                android:text="This is description field"
+                                android:textColor="#000000"
+                                android:textSize="18dp"
+                                android:textStyle="bold" />
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="4dp"
-                            android:text="Trade"
-                            android:textColor="#999999"
-                            android:textSize="18dp"
-                            android:textStyle="bold" />
+                            <TextView
+                                android:id="@+id/categoryTV"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="4dp"
+                                android:text="Stationary"
+                                android:textColor="#000000"
+                                android:textSize="18dp"
+                                android:textStyle="bold" />
 
-                        <TextView
-                            android:id="@+id/swapCateTV1"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="4dp"
-                            android:text="Swap Category"
-                            android:textColor="#999999"
-                            android:textSize="18dp"
-                            android:textStyle="bold" />
+                            <TextView
+                                android:id="@+id/conditionTV"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="4dp"
+                                android:text="New"
+                                android:textColor="#000000"
+                                android:textSize="18dp"
+                                android:textStyle="bold" />
 
-                        <TextView
-                            android:id="@+id/swapRemarkTV1"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="4dp"
-                            android:text="Swap Remark"
-                            android:textColor="#999999"
-                            android:textSize="18dp"
-                            android:textStyle="bold" />
+                            <TextView
+                                android:id="@+id/tradeTV"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="4dp"
+                                android:text="Sale"
+                                android:textColor="#000000"
+                                android:textSize="18dp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/swapCateTV2"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="4dp"
+                                android:text="Cate 1"
+                                android:textColor="#000000"
+                                android:textSize="18dp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/swapRemarkTV2"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="4dp"
+                                android:text="Remark here"
+                                android:textColor="#000000"
+                                android:textSize="18dp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
                     </LinearLayout>
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
+                <Button
+                    android:id="@+id/submitBtn"
+                    android:layout_width="0dp"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginEnd="20dp"
+                    android:backgroundTint="#AC87C5"
+                    android:text="Trade"
+                    android:textSize="20dp"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toEndOf="@+id/btnChatStart"
+                    app:layout_constraintTop_toBottomOf="@+id/container" />
 
-                        <TextView
-                            android:id="@+id/descriptionTV"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="4dp"
-                            android:text="This is description field"
-                            android:textColor="#000000"
-                            android:textSize="18dp"
-                            android:textStyle="bold" />
+                <ImageButton
+                    android:id="@+id/btnChatStart"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginEnd="10dp"
+                    android:backgroundTint="@android:color/transparent"
+                    android:foreground="@drawable/ripple_effect"
+                    android:src="@drawable/baseline_chat_24"
+                    app:layout_constraintBottom_toBottomOf="@+id/submitBtn"
+                    app:layout_constraintEnd_toStartOf="@+id/submitBtn"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintHorizontal_chainStyle="packed"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/submitBtn"
+                    app:tint="#756AB6" />
 
-                        <TextView
-                            android:id="@+id/categoryTV"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="4dp"
-                            android:text="Stationary"
-                            android:textColor="#000000"
-                            android:textSize="18dp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/conditionTV"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="4dp"
-                            android:text="New"
-                            android:textColor="#000000"
-                            android:textSize="18dp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/tradeTV"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="4dp"
-                            android:text="Sale"
-                            android:textColor="#000000"
-                            android:textSize="18dp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/swapCateTV2"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="4dp"
-                            android:text="Cate 1"
-                            android:textColor="#000000"
-                            android:textSize="18dp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/swapRemarkTV2"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="4dp"
-                            android:text="Remark here"
-                            android:textColor="#000000"
-                            android:textSize="18dp"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-                </LinearLayout>
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <Button
-                android:id="@+id/submitBtn"
-                android:layout_width="0dp"
-                android:layout_height="50dp"
-                android:layout_marginTop="20dp"
-                android:layout_marginEnd="20dp"
-                android:backgroundTint="#AC87C5"
-                android:text="Trade"
-                android:textSize="20dp"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toEndOf="@+id/btnChatStart"
-                app:layout_constraintTop_toBottomOf="@+id/container" />
 
-            <ImageButton
-                android:id="@+id/btnChatStart"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="5dp"
-                android:layout_marginEnd="10dp"
-                android:backgroundTint="@android:color/transparent"
-                android:foreground="@drawable/ripple_effect"
-                android:src="@drawable/baseline_chat_24"
-                app:layout_constraintBottom_toBottomOf="@+id/submitBtn"
-                app:layout_constraintEnd_toStartOf="@+id/submitBtn"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintHorizontal_chainStyle="packed"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/submitBtn"
-                app:tint="#756AB6" />
+        </ScrollView>
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-
-    </ScrollView>
 
 
 
