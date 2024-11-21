@@ -27,7 +27,11 @@ Chew Zi An Part:
    - Enlarge Image/Video
    - ChatHistory - According to Text, Date, Media Type
    - ChatHistory - Redirect to Clicked History Message
-7) AI Chatbot (Done) - Need to Improve Accuracy + Integrate with Latest Product Details
+7) AI Chatbot (Done)
    - FAQs Inquiries
    - Product Recommendations
-9) Destination Location Navigation & Identity Verification 
+9) Destination Location Navigation & Identity Verification (Done)
+   - Show Transaction - Only allow "Start Navigation" for OnGoing Transaction
+   - Transaction Destination Navigation - Navigate the user to transaction destination with Maps (Choose Walking/Driving Mode)
+   - Identity Verification - Scan QR Code and 4 Digit Verification Code
+   - Complete Transaction - Complete the transaction, Update status, Store the record. 
