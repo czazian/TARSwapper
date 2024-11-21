@@ -70,7 +70,8 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:weightSum="3"
-                android:padding="8dp">
+                android:padding="8dp"
+                android:background="#F8F8FB">
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -88,7 +89,7 @@
                         android:id="@+id/totalViews"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="10,250"
+                        android:text="0"
                         android:textSize="20sp"
                         android:textStyle="bold"
                         android:gravity="center" />
@@ -110,7 +111,7 @@
                         android:id="@+id/totalPost"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="342"
+                        android:text="0"
                         android:textSize="20sp"
                         android:textStyle="bold"
                         android:gravity="center" />
@@ -133,7 +134,7 @@
                         android:id="@+id/averageViews"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="342"
+                        android:text="0"
                         android:textSize="20sp"
                         android:textStyle="bold"
                         android:gravity="center" />
@@ -146,7 +147,8 @@
                 android:id="@+id/pieChart"
                 android:layout_width="match_parent"
                 android:layout_height="300dp"
-                android:layout_marginTop="12dp" />
+                android:layout_marginTop="12dp"
+                android:background="#F8F8FB"/>
 
             <!-- Charts and RecyclerView -->
             <TextView
@@ -162,7 +164,8 @@
                 android:id="@+id/engagementBarChart"
                 android:layout_width="match_parent"
                 android:layout_height="300dp"
-                android:paddingTop="8dp" />
+                android:paddingTop="8dp"
+                android:background="#F8F8FB"/>
 
             <TextView
                 android:layout_width="match_parent"
@@ -176,7 +179,8 @@
                 android:id="@+id/topViewedCommunitiesRecyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingTop="8dp" />
+                android:paddingTop="8dp"
+                android:background="#F8F8FB"/>
 
             <TextView
                 android:layout_width="match_parent"
@@ -191,7 +195,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="300dp"
                 android:paddingTop="8dp"
-                android:layout_marginTop="10dp"/>
+                android:layout_marginTop="10dp"
+                android:background="#F8F8FB"/>
         </LinearLayout>
     </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

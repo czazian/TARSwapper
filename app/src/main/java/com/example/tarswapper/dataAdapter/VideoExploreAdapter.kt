@@ -112,6 +112,7 @@ class VideoExploreAdapter(private val videoList: List<ShortVideo>, private val f
                         val productTag = tagSnapshot.value.toString()
                         Log.d("Firebase", "Community Product Tag: $productTag")
                         holder.binding.productTagContainer.visibility = View.VISIBLE
+                        holder.binding.hideTV.visibility = View.VISIBLE
 
                         getProductFromFirebase(productID = productTag) { product ->
                             holder.binding.productTagNameTV.text = product.name
@@ -140,9 +141,20 @@ class VideoExploreAdapter(private val videoList: List<ShortVideo>, private val f
                 } else {
                     Log.d("Firebase", "No product tags found for this community.")
                     holder.binding.productTagContainer.visibility = View.GONE
+                    holder.binding.hideTV.visibility = View.GONE
                 }
             }.addOnFailureListener { e ->
                 Log.e("Firebase", "Error fetching data: ${e.message}")
+            }
+
+            holder.binding.hideTV.setOnClickListener{
+                if(holder.binding.hideTV.text == "Hide"){
+                    holder.binding.productTagContainer.visibility = View.GONE
+                    holder.binding.hideTV.text = "Show"
+                }else if(holder.binding.hideTV.text == "Show"){
+                    holder.binding.productTagContainer.visibility = View.VISIBLE
+                    holder.binding.hideTV.text = "Hide"
+                }
             }
 
             holder.binding.likeBtn.setOnClickListener {

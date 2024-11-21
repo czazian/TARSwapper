@@ -58,7 +58,7 @@ class TradeSwapRequestHistory : Fragment() {
                         val productId = productSnapshot.key // Product ID
 
                         // Only add product if status is "Available"
-                        if (productId != null && productStatus == getString(R.string.PRODUCT_BOOKED)) {
+                        if (productId != null) {
                             userProductIds.add(productId)
                         }
                     }
@@ -164,6 +164,7 @@ class TradeSwapRequestHistory : Fragment() {
                         }
                     }
                 }
+                Log.d("fecth request", matchingSwapRequests.size.toString())
                 onResult(matchingSwapRequests)
 
             }
