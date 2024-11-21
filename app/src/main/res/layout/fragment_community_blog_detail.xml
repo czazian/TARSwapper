@@ -53,10 +53,12 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintTop_toBottomOf="@+id/addProductHeader"
+        app:layout_constraintBottom_toTopOf="@+id/sentContainer"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/sentContainer">
+        app:layout_constraintTop_toBottomOf="@+id/addProductHeader"
+        app:layout_constraintVertical_bias="1.0">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -82,7 +84,7 @@
                     android:src="@drawable/user"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:shapeAppearanceOverlay="@style/circleImageView"/>
+                    app:shapeAppearanceOverlay="@style/circleImageView" />
 
                 <TextView
                     android:id="@+id/usernameTV"
@@ -101,15 +103,27 @@
                     android:id="@+id/more_operation_btn"
                     android:layout_width="60dp"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/baseline_more_horiz_24"
                     android:background="@null"
                     android:scaleType="centerCrop"
+                    android:src="@drawable/baseline_more_horiz_24"
+                    android:visibility="gone"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    android:visibility="gone"/>
+                    app:layout_constraintTop_toTopOf="parent" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <TextView
+                android:id="@+id/translatePost"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Translate blog to (Chinese)"
+                android:textColor="@color/grey_font"
+                android:textSize="10dp"
+                app:layout_constraintEnd_toEndOf="@+id/constraintLayout3"
+                app:layout_constraintTop_toBottomOf="@+id/constraintLayout3"
+                android:clickable="true"
+                android:focusable="true"/>
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/constraintLayout2"
@@ -121,6 +135,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/constraintLayout3">
+
 
                 <TextView
                     android:id="@+id/titleTV"
@@ -157,11 +172,11 @@
                     android:layout_width="wrap_content"
                     android:layout_height="10dp"
                     android:layout_marginTop="5dp"
+                    app:dotsColor="@color/grey_font"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="@+id/viewPager2"
                     app:layout_constraintTop_toBottomOf="@+id/viewPager2"
-                    app:dotsColor="@color/grey_font"
-                    app:selectedDotColor="#756AB6"/>
+                    app:selectedDotColor="#756AB6" />
 
 
             </androidx.constraintlayout.widget.ConstraintLayout>
@@ -196,8 +211,8 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/likeNumTV"
                     app:layout_constraintTop_toTopOf="parent"
-                    tools:layout_editor_absoluteY="0dp"
-                    app:tint="#000000" />
+                    app:tint="#000000"
+                    tools:layout_editor_absoluteY="0dp" />
 
 
                 <TextView
@@ -257,12 +272,12 @@
                     android:id="@+id/productTagContainer"
                     android:layout_width="match_parent"
                     android:layout_height="100dp"
-                    android:padding="4dp"
                     android:layout_marginTop="8dp"
-                    app:layout_constraintTop_toBottomOf="@+id/releventTagTV"
-                    android:visibility="gone"
                     android:clickable="true"
-                    android:focusable="true">
+                    android:focusable="true"
+                    android:padding="4dp"
+                    android:visibility="gone"
+                    app:layout_constraintTop_toBottomOf="@+id/releventTagTV">
 
                     <androidx.cardview.widget.CardView
                         android:layout_width="360dp"
@@ -296,11 +311,11 @@
                                 android:layout_width="160dp"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="12dp"
+                                android:ellipsize="end"
+                                android:maxLines="1"
                                 android:text="Item 1"
                                 android:textSize="20dp"
                                 android:textStyle="bold"
-                                android:maxLines="1"
-                                android:ellipsize="end"
                                 app:layout_constraintStart_toEndOf="@+id/productTagImgV"
                                 app:layout_constraintTop_toTopOf="@+id/productTagImgV" />
 
@@ -334,10 +349,10 @@
                                 android:id="@+id/selectedProductID"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:visibility="gone"
                                 android:enabled="false"
+                                android:visibility="gone"
                                 app:layout_constraintStart_toStartOf="parent"
-                                app:layout_constraintTop_toBottomOf="parent"/>
+                                app:layout_constraintTop_toBottomOf="parent" />
 
                         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -346,16 +361,15 @@
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@+id/constraintLayout5"
                 android:layout_marginStart="24dp"
                 android:layout_marginTop="8dp"
-                android:layout_marginEnd="24dp">
+                android:layout_marginEnd="24dp"
+                app:layout_constraintTop_toBottomOf="@+id/constraintLayout5">
 
                 <TextView
                     android:id="@+id/commentTV"
