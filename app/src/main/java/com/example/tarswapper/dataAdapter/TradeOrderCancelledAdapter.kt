@@ -50,6 +50,7 @@ class TradeOrderCancelledAdapter(private var orderList: List<Order>, private val
         // Access views via binding instead of findViewById
         with(holder.binding) {
             getOrderDetail(order.orderID.toString()) { order ->
+                holder.binding.orderIDTV.text = order?.orderID.toString()
                 holder.binding.orderStatusTV.text = order!!.status.toString()
                 holder.binding.orderStatusTV.setTextColor(Color.parseColor("#EA2020"))
 

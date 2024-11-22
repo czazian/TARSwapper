@@ -19,6 +19,7 @@ import com.example.tarswapper.databinding.ProductListHoriBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
+import okhttp3.internal.notifyAll
 
 class TradeMyPostedProductAdapter(private val productList: List<Product>, private val context: Context) : RecyclerView.Adapter<TradeMyPostedProductAdapter.ProductViewHolder>() {
 
@@ -108,8 +109,8 @@ class TradeMyPostedProductAdapter(private val productList: List<Product>, privat
 
                                 // Optionally, remove the product from the list and notify the adapter
                                 // You can update your productList and notify the adapter to refresh the view
-                                val updatedList = productList.toMutableList()
-                                updatedList.removeAt(position) // Remove item at the current position
+                                //val updatedList = productList.toMutableList()
+                                //updatedList.removeAt(position) // Remove item at the current position
                                 notifyItemRemoved(position) // Update the RecyclerView
                             }
                             .addOnFailureListener {

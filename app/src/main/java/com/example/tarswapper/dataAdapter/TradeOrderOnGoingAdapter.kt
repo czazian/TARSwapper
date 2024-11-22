@@ -59,7 +59,7 @@ class TradeOrderOnGoingAdapter(private var orderList: List<Order>, private val c
         // Access views via binding instead of findViewById
         with(holder.binding) {
             getOrderDetail(order.orderID.toString()) { order ->
-                holder.binding.usernameTV.text = order?.orderID.toString()
+                holder.binding.orderIDTV.text = order?.orderID.toString()
                 Log.d("Order GET", order.toString())
 
                 if(order?.tradeType == "Sale"){

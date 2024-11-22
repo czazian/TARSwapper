@@ -1,7 +1,11 @@
 package com.example.tarswapper
 
+import android.app.AlertDialog
 import android.content.Context
 import android.content.SharedPreferences
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -9,17 +13,24 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.tarswapper.data.Message
+import com.example.tarswapper.data.Notification
 import com.example.tarswapper.data.Order
 import com.example.tarswapper.data.Product
 import com.example.tarswapper.data.SwapRequest
 import com.example.tarswapper.dataAdapter.MessageAdapter
+import com.example.tarswapper.dataAdapter.NotificationTradeAdapter
 import com.example.tarswapper.dataAdapter.TransactionAdapter
 import com.example.tarswapper.databinding.FragmentNotificationBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.tabs.TabLayout
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import java.io.Serializable
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -60,6 +71,9 @@ class Notification : Fragment() {
             transaction?.commit()
         }
 
+        //default select first one
+        binding.tabs.getTabAt(0)?.select()
+        bindTrade()
 
         //Processing
         val sharedPreferencesTARSwapper =
@@ -74,10 +88,11 @@ class Notification : Fragment() {
                 when(tab.position){
                     //Trade
                     0 -> {
-
+                        bindTrade()
                     }
                     //Community
                     1 -> {
+                        bindCommunity()
                     }
                     //Message
                     2 -> {
@@ -98,6 +113,8 @@ class Notification : Fragment() {
 
         return binding.root
     }
+
+
 
 
     //When Message Tab is Selected
@@ -165,6 +182,47 @@ class Notification : Fragment() {
             binding.notificationRecyclerView.adapter = adapter
             binding.notificationRecyclerView.setHasFixedSize(true)
         }
+    }
+
+    private fun bindTrade() {
+
+        fetchTradeNotification { list ->
+            //If the result is not null or empty
+            if (list.isNullOrEmpty()) {
+                Toast.makeText(requireContext(), "No trade notification available", Toast.LENGTH_SHORT).show()
+                binding.notificationRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+                binding.notificationRecyclerView.adapter = NotificationTradeAdapter(list, requireContext())
+                binding.notificationRecyclerView.setHasFixedSize(true)
+            } else {
+                Log.e("RESULT", list.toString())
+
+                binding.notificationRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+                binding.notificationRecyclerView.adapter = NotificationTradeAdapter(list, requireContext())
+                binding.notificationRecyclerView.setHasFixedSize(true)
+            }
+        }
+
+        setupSwipeToRemove()
+    }
+
+    private fun bindCommunity() {
+
+        fetchCommunityNotification { list ->
+            //If the result is not null or empty
+            if (list.isNullOrEmpty()) {
+                Toast.makeText(requireContext(), "No community notification available", Toast.LENGTH_SHORT).show()
+                binding.notificationRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+                binding.notificationRecyclerView.adapter = NotificationTradeAdapter(list, requireContext())
+                binding.notificationRecyclerView.setHasFixedSize(true)
+            } else {
+                Log.e("RESULT", list.toString())
+
+                binding.notificationRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+                binding.notificationRecyclerView.adapter = NotificationTradeAdapter(list, requireContext())
+                binding.notificationRecyclerView.setHasFixedSize(true)
+            }
+        }
+        setupSwipeToRemove()
     }
 
     //Message Tab Click Event
@@ -313,6 +371,181 @@ class Notification : Fragment() {
             Log.e("Error", "Error fetching Order: ${e.message}")
             onResult(emptyList())
         }
+    }
+
+    fun fetchTradeNotification( onResult: (MutableList<Notification>) -> Unit) {
+        val sharedPreferencesTARSwapper =
+            requireActivity().getSharedPreferences("TARSwapperPreferences", Context.MODE_PRIVATE)
+        val userID = sharedPreferencesTARSwapper.getString("userID", null)
+
+        // Reference to the "Product" node in Firebase Realtime Database
+        val databaseRef = FirebaseDatabase.getInstance().getReference("Notification")
+        val query = databaseRef.orderByChild("notificationType").equalTo("Trade")
+
+        // List to hold products retrieved from Firebase
+        val notificationList = mutableListOf<com.example.tarswapper.data.Notification>()
+
+        // Add a listener to retrieve data
+        query.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    // Loop through the products in the snapshot
+                    for (notificationSnapshot in snapshot.children) {
+                        val notification = notificationSnapshot.getValue(Notification::class.java)
+                        // Filter out own products and check status
+                        if (notification != null && notification.userID == userID) {
+                            notificationList.add(notification) // Add the product to the list
+                        }
+                    }
+                    onResult(notificationList) // Return the list of products
+                    Log.d("Product List Found", notificationList.size.toString())
+                } else {
+                    // Handle empty database
+                    onResult(notificationList)
+                    Log.d("Empty Found", notificationList.size.toString())
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                // Handle errors
+                println("Error fetching data: ${error.message}")
+                onResult(notificationList)
+            }
+        })
+    }
+
+    fun fetchCommunityNotification( onResult: (MutableList<Notification>) -> Unit) {
+        val sharedPreferencesTARSwapper =
+            requireActivity().getSharedPreferences("TARSwapperPreferences", Context.MODE_PRIVATE)
+        val userID = sharedPreferencesTARSwapper.getString("userID", null)
+
+        // Reference to the "Product" node in Firebase Realtime Database
+        val databaseRef = FirebaseDatabase.getInstance().getReference("Notification")
+
+        val query = databaseRef.orderByChild("notificationType").equalTo("Community")
+
+        // List to hold products retrieved from Firebase
+        val notificationList = mutableListOf<com.example.tarswapper.data.Notification>()
+
+        // Add a listener to retrieve data
+        query.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    // Loop through the products in the snapshot
+                    for (notificationSnapshot in snapshot.children) {
+                        val notification = notificationSnapshot.getValue(Notification::class.java)
+                        // Filter out own products and check status
+                        if (notification != null && notification.userID == userID) {
+                            notificationList.add(notification) // Add the product to the list
+                        }
+                    }
+                    onResult(notificationList) // Return the list of products
+                    Log.d("Product List Found", notificationList.size.toString())
+                } else {
+                    // Handle empty database
+                    onResult(notificationList)
+                    Log.d("Empty Found", notificationList.size.toString())
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                // Handle errors
+                println("Error fetching data: ${error.message}")
+                onResult(notificationList)
+            }
+        })
+    }
+
+
+    private fun setupSwipeToRemove() {
+        val itemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean {
+                return false // Not needed for swipe
+            }
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                // Get the position of the swiped item
+                val position = viewHolder.adapterPosition
+
+                // Access the adapter and remove the item from the dataset
+                val adapter = binding.notificationRecyclerView.adapter as NotificationTradeAdapter
+                val removedItem = adapter.getItem(position)
+
+                // Show confirmation for removal (optional)
+                showRemoveConfirmationDialog(position, removedItem, adapter)
+            }
+
+            override fun onChildDraw(
+                c: Canvas,
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                dX: Float,
+                dY: Float,
+                actionState: Int,
+                isCurrentlyActive: Boolean
+            ) {
+                // Draw custom background for the swipe
+                if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
+                    val itemView = viewHolder.itemView
+                    val paint = Paint()
+                    paint.color = Color.RED // Color for remove action
+
+                    // Draw the background
+                    c.drawRect(
+                        itemView.right.toFloat() + dX, itemView.top.toFloat(),
+                        itemView.right.toFloat(), itemView.bottom.toFloat(),
+                        paint
+                    )
+
+                    // Draw a "Remove" text or icon
+                    val textPaint = Paint()
+                    textPaint.color = Color.WHITE
+                    textPaint.textSize = 40f
+                    c.drawText(
+                        "Remove",
+                        itemView.right - 200f,  // Position of the text
+                        itemView.top + itemView.height / 2f,
+                        textPaint
+                    )
+                }
+
+                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+            }
+        })
+
+        // Attach the ItemTouchHelper to the RecyclerView
+        itemTouchHelper.attachToRecyclerView(binding.notificationRecyclerView)
+    }
+
+    private fun showRemoveConfirmationDialog(
+        position: Int,
+        removedItem: Notification,
+        adapter: NotificationTradeAdapter
+    ) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Remove Notification")
+            .setMessage("Are you sure you want to remove this notification?")
+            .setPositiveButton("Yes") { dialog, _ ->
+                // Remove the item from the list and notify adapter
+                adapter.removeItem(position)
+
+                // Optionally, delete from Firebase
+                val databaseRef = FirebaseDatabase.getInstance().getReference("Notification")
+                databaseRef.child(removedItem.notificationID.toString()).removeValue()
+
+                Toast.makeText(requireContext(), "Notification removed", Toast.LENGTH_SHORT).show()
+                dialog.dismiss()
+            }
+            .setNegativeButton("No") { dialog, _ ->
+                adapter.notifyItemChanged(position) // Restore item if canceled
+                dialog.dismiss()
+            }
+            .show()
     }
 
 

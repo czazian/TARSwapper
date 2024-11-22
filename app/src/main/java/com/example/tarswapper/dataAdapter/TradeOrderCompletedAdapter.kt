@@ -47,9 +47,9 @@ class TradeOrderCompletedAdapter(private var orderList: List<Order>, private val
             context.getSharedPreferences("TARSwapperPreferences", Context.MODE_PRIVATE)
         val userID = sharedPreferencesTARSwapper.getString("userID", null)
 
-        // Access views via binding instead of findViewById
         with(holder.binding) {
             getOrderDetail(order.orderID.toString()) { order ->
+                holder.binding.orderIDTV.text = order?.orderID.toString()
                 holder.binding.orderStatusTV.text = order!!.status.toString()
                 holder.binding.orderStatusTV.setTextColor(Color.parseColor("#0077CC"))
 

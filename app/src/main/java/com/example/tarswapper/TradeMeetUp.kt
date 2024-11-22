@@ -17,6 +17,7 @@ import androidx.annotation.RequiresApi
 import androidx.annotation.StringRes
 import com.bumptech.glide.Glide
 import com.example.tarswapper.data.MeetUp
+import com.example.tarswapper.data.Notification
 import com.example.tarswapper.data.Order
 import com.example.tarswapper.data.Product
 import com.example.tarswapper.data.SwapRequest
@@ -245,6 +246,7 @@ class TradeMeetUp : Fragment() {
                     val meetUpRef = database.getReference("MeetUp")
                     val orderRef = database.getReference("Order")
                     val swapRequestRef = database.getReference("SwapRequest")
+                    val notificationRef = database.getReference("Notification")
 
                     // create meet up
                     //both sale & swap also need to create meetUp
@@ -276,11 +278,34 @@ class TradeMeetUp : Fragment() {
                             sellerID = product.created_by_UserID,
                             buyerID = userID
                         )
+
+                        val notification = Notification(
+                            notificationType = "Trade",
+                            notificationDateTime = LocalDateTime.now(ZoneId.of("Asia/Kuala_Lumpur")).toString(),
+                            userID = product.created_by_UserID
+                        )
+                        // Set the notification message
+                        getUserRecord(userID.toString()){user ->
+                            notification.notification = "${user?.name} have made a Sale Order(${order.orderID}) with you"
+                        }
+
                         val newOrderRef = orderRef.push()
                         order.orderID = newOrderRef.key
                         // Push order to Firebase
                         newOrderRef.setValue(order)
-                            .addOnSuccessListener {println("Order added successfully") }
+                            .addOnSuccessListener {
+                                println("Order added successfully")
+                                //push notification
+                                // Push the notification to Firebase
+                                notificationRef.push().setValue(notification)
+                                    .addOnSuccessListener {
+                                        Log.d("Firebase", "Notification added successfully.")
+                                    }
+                                    .addOnFailureListener { e ->
+                                        Log.e("Firebase", "Failed to add notification: ${e.message}")
+                                    }
+
+                            }
                             .addOnFailureListener { e -> println("Failed to add order: ${e.message}")}
 
                         //update product to BOOKED
@@ -305,11 +330,31 @@ class TradeMeetUp : Fragment() {
                             meetUpID = meetUp.meetUpID,
                         )
 
+                        val notification = Notification(
+                            notificationType = "Trade",
+                            notificationDateTime = LocalDateTime.now(ZoneId.of("Asia/Kuala_Lumpur")).toString(),
+                            userID = product.created_by_UserID
+                        )
+
+                        // Set the notification message
+                        getUserRecord(userID.toString()){user ->
+                            notification.notification = "${user?.name} have sent you a Swap Request"
+                        }
+
                         val newSwapRequestRef = swapRequestRef.push()
                         swapRequest.swapRequestID = newSwapRequestRef.key
                         // Push swap request to Firebase
                         newSwapRequestRef.setValue(swapRequest)
-                            .addOnSuccessListener {println("Swap Request added successfully") }
+                            .addOnSuccessListener {println("Swap Request added successfully")
+                                //push notification
+                                // Push the notification to Firebase
+                                notificationRef.push().setValue(notification)
+                                    .addOnSuccessListener {
+                                        Log.d("Firebase", "Notification added successfully.")
+                                    }
+                                    .addOnFailureListener { e ->
+                                        Log.e("Firebase", "Failed to add notification: ${e.message}")
+                                    }}
                             .addOnFailureListener { e -> println("Failed to add Swap Request: ${e.message}")}
                     }
                 }

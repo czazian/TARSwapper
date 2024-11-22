@@ -63,6 +63,9 @@
                 android:textColor="#756AB6"
                 android:textSize="20dp"
                 android:textStyle="bold"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:maxWidth="140dp"
                 app:layout_constraintStart_toStartOf="@+id/productNameTV"
                 app:layout_constraintTop_toBottomOf="@+id/productNameTV" />
 

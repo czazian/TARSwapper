@@ -121,6 +121,19 @@ class Trade : Fragment() {
             transaction?.commit()
         }
 
+        binding.searchBtn.setOnClickListener{
+            val fragment = TradeSearch()
+
+            val transaction = activity?.supportFragmentManager?.beginTransaction()
+            transaction?.replace(R.id.frameLayout, fragment)
+            transaction?.setCustomAnimations(
+                R.anim.fade_out,  // Enter animation
+                R.anim.fade_in  // Exit animation
+            )
+            transaction?.addToBackStack(null)
+            transaction?.commit()
+        }
+
 
 
         //sale and swap button design

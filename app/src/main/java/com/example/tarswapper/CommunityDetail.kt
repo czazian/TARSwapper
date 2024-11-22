@@ -15,6 +15,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.example.tarswapper.data.CommunityComment
+import com.example.tarswapper.data.Notification
 import com.example.tarswapper.data.Product
 import com.example.tarswapper.data.User
 import com.example.tarswapper.dataAdapter.CommunityCommentAdapter
@@ -41,6 +42,7 @@ import java.util.Date
 import java.util.Locale
 import okhttp3.*
 import java.io.IOException
+import java.time.ZoneId
 
 
 class CommunityDetail : Fragment() {
@@ -88,6 +90,7 @@ class CommunityDetail : Fragment() {
         val likeRef = communityRef.child(communityID.toString()).child("Like")
         val commentRef = communityRef.child(communityID.toString()).child("Comment")
         val productTagRef = communityRef.child(communityID.toString()).child("Community_ProductTag")
+        val notificationRef = database.getReference("Notification")
 
         //on click
         binding.btnBack.setOnClickListener{
@@ -268,22 +271,57 @@ class CommunityDetail : Fragment() {
         }
 
         //sent comment button
-        binding.sentCommentBtn.setOnClickListener{
-            if(!binding.commentED.text.isNullOrBlank()){
-                //push data
+        binding.sentCommentBtn.setOnClickListener {
+            if (!binding.commentED.text.isNullOrBlank()) {
+                // Create the comment object
                 val comment = CommunityComment(
                     comment = binding.commentED.text.toString(),
                     userID = userID,
                 )
 
-                commentRef.push().setValue(comment)
-                    .addOnSuccessListener {
-                        Log.d("Firebase", "Comment added successfully.")
-                        binding.commentED.setText("")
+                // Create the notification object
+                val notification = Notification(
+                    notificationType = "Community",
+                    notificationDateTime = LocalDateTime.now(ZoneId.of("Asia/Kuala_Lumpur")).toString(),
+                )
+
+                // Fetch user and community data to construct the notification
+                getUserRecord(userID.toString()) { user ->
+                    if (user != null) {
+                        getCommunityFromFirebase(communityID.toString()) { community ->
+                            if (community != null) {
+                                // Set the notification message
+                                notification.notification =
+                                    "${user.name} has commented on your post: ${community.title}"
+                                notification.userID = community.created_by_UserID
+
+                                // Push the comment to Firebase
+                                commentRef.push().setValue(comment)
+                                    .addOnSuccessListener {
+                                        Log.d("Firebase", "Comment added successfully.")
+                                        binding.commentED.setText("")
+
+                                        // Push the notification to Firebase
+                                        notificationRef.push().setValue(notification)
+                                            .addOnSuccessListener {
+                                                Log.d("Firebase", "Notification added successfully.")
+                                            }
+                                            .addOnFailureListener { e ->
+                                                Log.e("Firebase", "Failed to add notification: ${e.message}")
+                                            }
+                                    }
+                                    .addOnFailureListener { e ->
+                                        Log.e("Firebase", "Failed to add comment: ${e.message}")
+                                    }
+                            } else {
+                                Log.e("Firebase", "Community not found.")
+                            }
+                        }
+                    } else {
+                        Log.e("Firebase", "User not found.")
                     }
-                    .addOnFailureListener { e ->
-                        Log.e("Firebase", "Failed to add Like: ${e.message}")
-                    }
+                }
+
 
             }
         }
