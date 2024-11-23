@@ -547,9 +547,19 @@ class Navigation : Fragment() {
                 googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation, 15f))
 
                 //Add a marker for the default location
+                //Add a marker for the current location (only once)
                 if (currentLocationMarker == null) {
+                    val vectorDrawable = ContextCompat.getDrawable(
+                        requireContext(),
+                        R.drawable.round_person_pin_circle_24
+                    ) as VectorDrawable
+                    val bitmap = getBitmapFromVectorDrawable(vectorDrawable)
                     currentLocationMarker = googleMap.addMarker(
-                        MarkerOptions().position(defaultLocation).title("Default Location")
+                        MarkerOptions()
+                            .position(defaultLocation)
+                            .title("Current Location")
+                            .icon(BitmapDescriptorFactory.fromBitmap(bitmap))
+                            .snippet("You are here")
                     )
                 }
 
