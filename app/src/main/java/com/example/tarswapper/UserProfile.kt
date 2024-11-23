@@ -257,6 +257,26 @@ class UserProfile : Fragment() {
             transaction?.commit()
         }
 
+        binding.orderStatistic.setOnClickListener(){
+            val fragment = ReportTrade()
+
+            //Bottom Navigation Indicator Update
+            val navigationView =
+                requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigationView)
+            navigationView.selectedItemId = R.id.setting
+
+            //Back to previous page with animation
+            val transaction = activity?.supportFragmentManager?.beginTransaction()
+            transaction?.replace(R.id.frameLayout, fragment)
+            transaction?.setCustomAnimations(
+                R.anim.fade_out,  // Enter animation
+                R.anim.fade_in  // Exit animation
+            )
+            //Clear all back stack
+            transaction?.commit()
+
+        }
+
 
         //Display selected user title and profile background
         queryUserTitleAndProfileBackground(userID)

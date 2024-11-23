@@ -136,7 +136,6 @@ class TradeOrderCompleted : Fragment() {
         })
 
         // Fetch Swap Orders
-        // Fetch Swap Orders
         ordersRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(orderSnapshot: DataSnapshot) {
                 val swapTasks = mutableListOf<() -> Unit>()

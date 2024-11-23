@@ -189,7 +189,6 @@ class Notification : Fragment() {
         fetchTradeNotification { list ->
             //If the result is not null or empty
             if (list.isNullOrEmpty()) {
-                Toast.makeText(requireContext(), "No trade notification available", Toast.LENGTH_SHORT).show()
                 binding.notificationRecyclerView.layoutManager = LinearLayoutManager(requireContext())
                 binding.notificationRecyclerView.adapter = NotificationTradeAdapter(list, requireContext())
                 binding.notificationRecyclerView.setHasFixedSize(true)
@@ -210,7 +209,6 @@ class Notification : Fragment() {
         fetchCommunityNotification { list ->
             //If the result is not null or empty
             if (list.isNullOrEmpty()) {
-                Toast.makeText(requireContext(), "No community notification available", Toast.LENGTH_SHORT).show()
                 binding.notificationRecyclerView.layoutManager = LinearLayoutManager(requireContext())
                 binding.notificationRecyclerView.adapter = NotificationTradeAdapter(list, requireContext())
                 binding.notificationRecyclerView.setHasFixedSize(true)
