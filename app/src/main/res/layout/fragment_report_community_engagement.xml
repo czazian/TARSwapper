@@ -157,7 +157,7 @@
                 android:text="Engagement Distribution"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                android:paddingTop="16dp" />
+                android:paddingTop="25dp" />
 
             <com.github.mikephil.charting.charts.BarChart
                 android:layout_marginTop="10dp"
@@ -173,7 +173,7 @@
                 android:text="Top 5 Most Viewed Communities"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                android:paddingTop="16dp" />
+                android:paddingTop="25dp" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/topViewedCommunitiesRecyclerView"
@@ -188,7 +188,7 @@
                 android:text="Engagement Over Time"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                android:paddingTop="16dp" />
+                android:paddingTop="25dp" />
 
             <com.github.mikephil.charting.charts.LineChart
                 android:id="@+id/engagementLineChart"

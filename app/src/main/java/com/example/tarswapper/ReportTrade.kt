@@ -195,6 +195,9 @@ class ReportTrade : Fragment() {
                             // Update the TextView
                             binding.orderCompletedNum.text = filteredOrders.size.toString()
 
+                            binding.orderSaleNum.text = filteredOrders.count { it.tradeType == "Sale" }.toString()
+                            binding.orderSwapNum.text = filteredOrders.count { it.tradeType == "Swap" }.toString()
+
                             // Bind RecyclerView with filtered orders
                             bindRecyclerView(filteredOrders)
                         }
@@ -203,6 +206,8 @@ class ReportTrade : Fragment() {
 
                 override fun onNothingSelected() {
                     binding.orderCompletedNum.text = "0"
+                    binding.orderSaleNum.text = "0"
+                    binding.orderSwapNum.text = "0"
                     bindRecyclerView(emptyList()) // Clear RecyclerView when nothing is selected
                 }
             })
