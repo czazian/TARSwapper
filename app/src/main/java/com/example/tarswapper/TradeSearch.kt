@@ -50,6 +50,10 @@ class TradeSearch : Fragment() {
         }
 
         binding.ProductRV.layoutManager = GridLayoutManager(requireContext(), 2)
+        //default
+        getProductsFromFirebase(value = "", status = "Available") { productList ->
+            binding.ProductRV.adapter = TradeAdapter(productList,  requireContext())
+        }
         binding.searchBtn.setOnClickListener{
             val value = binding.searchInput.text.toString()
             getProductsFromFirebase(value = value, status = "Available") { productList ->

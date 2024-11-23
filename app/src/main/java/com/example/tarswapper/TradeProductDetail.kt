@@ -94,26 +94,24 @@ class TradeProductDetail : Fragment() {
         }
 
         binding.submitBtn.setOnClickListener {
-            //redirect to meet up detail page
-            val fragment = TradeMeetUp()
-
-            val bundle = Bundle()
-            bundle.putString("ProductID", productID) // Add any data you want to pass
-            fragment.arguments = bundle
-
-            //Bottom Navigation Indicator Update
-            val navigationView =
-                requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigationView)
-            navigationView.selectedItemId = R.id.tag
-
-            val transaction = activity?.supportFragmentManager?.beginTransaction()
-            transaction?.replace(R.id.frameLayout, fragment)
-            transaction?.setCustomAnimations(
-                R.anim.fade_out,  // Enter animation
-                R.anim.fade_in  // Exit animation
+            //check product availability first before submit
+            checkProductStatus(
+                productID = productID.toString(),
+                onResult = { status ->
+                    if (status != null) {
+                        when (status) {
+                            getString(R.string.PRODUCT_AVAILABLE) -> redirectToTradeMeetUp(productID)
+                            else -> redirectToProduct404()
+                        }
+                    } else {
+                        Log.d("ProductStatus", "Product not found.")
+                    }
+                },
+                onError = { errorMessage ->
+                    Log.e("ProductStatus", "Error: $errorMessage")
+                }
             )
-            transaction?.addToBackStack(null)
-            transaction?.commit()
+
         }
 
         //check availability before showing
@@ -126,6 +124,13 @@ class TradeProductDetail : Fragment() {
                 if(product.created_by_UserID == userID){
                     binding.submitBtn.visibility = View.GONE
                     binding.btnChatStart.visibility = View.GONE
+                }
+
+                //if product is available show submit button, else no
+                if(product.status == getString(R.string.PRODUCT_AVAILABLE)){
+                    binding.submitBtn.visibility = View.VISIBLE
+                }else{
+                    binding.submitBtn.visibility = View.GONE
                 }
 
                 //get product owner
@@ -351,6 +356,79 @@ class TradeProductDetail : Fragment() {
         ////END OF TO BE INTEGRATED IN PRODUCT PAGE////
 
     }
+
+    fun checkProductStatus(productID: String, onResult: (String?) -> Unit, onError: (String) -> Unit) {
+        // Reference to the "Product" node in Firebase Realtime Database
+        val databaseRef = FirebaseDatabase.getInstance().getReference("Product").child(productID)
+
+        // Add a listener to retrieve the product data
+        databaseRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    // Retrieve the status field from the product
+                    val status = snapshot.child("status").getValue(String::class.java)
+                    onResult(status) // Pass the status to the callback
+                } else {
+                    // Product not found
+                    onResult(null)
+                    Log.e("ProductStatus", "Product not found for ID: $productID")
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                // Handle any errors that occur during the read operation
+                onError(error.message)
+                Log.e("Firebase", "Error fetching product status: ${error.message}")
+            }
+        })
+    }
+
+    fun redirectToTradeMeetUp(productID: String?){
+        //redirect to meet up detail page
+        val fragment = TradeMeetUp()
+
+        val bundle = Bundle()
+        bundle.putString("ProductID", productID)
+        fragment.arguments = bundle
+
+        //Bottom Navigation Indicator Update
+        val navigationView =
+            requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigationView)
+        navigationView.selectedItemId = R.id.tag
+
+        val transaction = activity?.supportFragmentManager?.beginTransaction()
+        transaction?.replace(R.id.frameLayout, fragment)
+        transaction?.setCustomAnimations(
+            R.anim.fade_out,  // Enter animation
+            R.anim.fade_in  // Exit animation
+        )
+        transaction?.addToBackStack(null)
+        transaction?.commit()
+    }
+
+    fun redirectToProduct404(){
+        //redirect to meet up detail page
+        val fragment = Product404()
+
+        //val bundle = Bundle()
+        //bundle.putString("ProductID", productID)
+        //fragment.arguments = bundle
+
+        //Bottom Navigation Indicator Update
+        val navigationView =
+            requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigationView)
+        navigationView.selectedItemId = R.id.tag
+
+        val transaction = activity?.supportFragmentManager?.beginTransaction()
+        transaction?.replace(R.id.frameLayout, fragment)
+        transaction?.setCustomAnimations(
+            R.anim.fade_out,  // Enter animation
+            R.anim.fade_in  // Exit animation
+        )
+        transaction?.addToBackStack(null)
+        transaction?.commit()
+    }
+
 
 
 }

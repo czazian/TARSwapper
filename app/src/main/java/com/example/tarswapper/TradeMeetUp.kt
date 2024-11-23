@@ -218,7 +218,6 @@ class TradeMeetUp : Fragment() {
         binding.submitBtn.setOnClickListener{
             //date and time cannot be null
             var isValid = true
-            var available = true
             // Check if name field is empty
             if (binding.timeTV.text.isNullOrBlank()) {
                 binding.timeTV.error = "Please select time"
@@ -236,151 +235,163 @@ class TradeMeetUp : Fragment() {
                 isValid = false
             }
 
-            //all valid, insert and update data
-            if(isValid && available){
-                val viewing_prodID = productID
+            binding.submitBtn.setOnClickListener {
+                //ensure it is available
+                checkProductStatus(
+                    productID = productID.toString(),
+                    onResult = { status ->
+                        if (status == getString(R.string.PRODUCT_AVAILABLE) && isValid) {
 
-                getProductFromFirebase(productID = viewing_prodID) { product ->
-                    val database = FirebaseDatabase.getInstance()
-                    val productRef = database.getReference("Product/${product.productID}")
-                    val meetUpRef = database.getReference("MeetUp")
-                    val orderRef = database.getReference("Order")
-                    val swapRequestRef = database.getReference("SwapRequest")
-                    val notificationRef = database.getReference("Notification")
+                            //if available
+                            val viewing_prodID = productID
 
-                    // create meet up
-                    //both sale & swap also need to create meetUp
-                    var meetUp = MeetUp(
-                        date = binding.dateTV.text.toString(),
-                        time = binding.timeTV.text.toString(),
-                        verificationCode = generateRandom4DigitNumber(),
-                        verifiedStatus = false,
-                        completeStatus = false,
-                        location = binding.locationSpinner.selectedItem.toString(),
-                        venue = binding.venue.text.toString(),
-                    )
-                    val newMeetUpRef = meetUpRef.push()
-                    meetUp.meetUpID = newMeetUpRef.key
-                    // Push meetUp to Firebase
-                    newMeetUpRef.setValue(meetUp)
-                        .addOnSuccessListener {println("Meet up added successfully") }
-                        .addOnFailureListener { e -> println("Failed to add meet up: ${e.message}")}
+                            getProductFromFirebase(productID = viewing_prodID) { product ->
+                                val database = FirebaseDatabase.getInstance()
+                                val productRef = database.getReference("Product/${product.productID}")
+                                val meetUpRef = database.getReference("MeetUp")
+                                val orderRef = database.getReference("Order")
+                                val swapRequestRef = database.getReference("SwapRequest")
+                                val notificationRef = database.getReference("Notification")
 
-                    if (product.tradeType == "Sale"){
-                        //create order
-                        //product status -> Booked
-                        var order = Order(
-                            tradeType = product.tradeType,
-                            status = getString(R.string.ORDER_ONGOING),
-                            createdAt = LocalDateTime.now(ZoneId.of("Asia/Kuala_Lumpur")).toString(),
-                            productID = product.productID,
-                            meetUpID = meetUp.meetUpID,
-                            sellerID = product.created_by_UserID,
-                            buyerID = userID
-                        )
+                                // create meet up
+                                //both sale & swap also need to create meetUp
+                                var meetUp = MeetUp(
+                                    date = binding.dateTV.text.toString(),
+                                    time = binding.timeTV.text.toString(),
+                                    verificationCode = generateRandom4DigitNumber(),
+                                    verifiedStatus = false,
+                                    completeStatus = false,
+                                    location = binding.locationSpinner.selectedItem.toString(),
+                                    venue = binding.venue.text.toString(),
+                                )
+                                val newMeetUpRef = meetUpRef.push()
+                                meetUp.meetUpID = newMeetUpRef.key
+                                // Push meetUp to Firebase
+                                newMeetUpRef.setValue(meetUp)
+                                    .addOnSuccessListener {println("Meet up added successfully") }
+                                    .addOnFailureListener { e -> println("Failed to add meet up: ${e.message}")}
 
-                        val notification = Notification(
-                            notificationType = "Trade",
-                            notificationDateTime = LocalDateTime.now(ZoneId.of("Asia/Kuala_Lumpur")).toString(),
-                            userID = product.created_by_UserID
-                        )
-                        // Set the notification message
-                        getUserRecord(userID.toString()){user ->
-                            notification.notification = "${user?.name} have made a Sale Order(${order.orderID}) with you"
-                        }
+                                if (product.tradeType == "Sale"){
+                                    //create order
+                                    //product status -> Booked
+                                    var order = Order(
+                                        tradeType = product.tradeType,
+                                        status = getString(R.string.ORDER_ONGOING),
+                                        createdAt = LocalDateTime.now(ZoneId.of("Asia/Kuala_Lumpur")).toString(),
+                                        productID = product.productID,
+                                        meetUpID = meetUp.meetUpID,
+                                        sellerID = product.created_by_UserID,
+                                        buyerID = userID
+                                    )
 
-                        val newOrderRef = orderRef.push()
-                        order.orderID = newOrderRef.key
-                        // Push order to Firebase
-                        newOrderRef.setValue(order)
-                            .addOnSuccessListener {
-                                println("Order added successfully")
-                                //push notification
-                                // Push the notification to Firebase
-                                notificationRef.push().setValue(notification)
-                                    .addOnSuccessListener {
-                                        Log.d("Firebase", "Notification added successfully.")
-                                    }
-                                    .addOnFailureListener { e ->
-                                        Log.e("Firebase", "Failed to add notification: ${e.message}")
+                                    val notification = Notification(
+                                        notificationType = "Trade",
+                                        notificationDateTime = LocalDateTime.now(ZoneId.of("Asia/Kuala_Lumpur")).toString(),
+                                        userID = product.created_by_UserID
+                                    )
+                                    // Set the notification message
+                                    getUserRecord(userID.toString()){user ->
+                                        notification.notification = "${user?.name} have made a Sale Order(${order.orderID}) with you"
                                     }
 
+                                    val newOrderRef = orderRef.push()
+                                    order.orderID = newOrderRef.key
+                                    // Push order to Firebase
+                                    newOrderRef.setValue(order)
+                                        .addOnSuccessListener {
+                                            println("Order added successfully")
+                                            //push notification
+                                            // Push the notification to Firebase
+                                            notificationRef.push().setValue(notification)
+                                                .addOnSuccessListener {
+                                                    Log.d("Firebase", "Notification added successfully.")
+                                                }
+                                                .addOnFailureListener { e ->
+                                                    Log.e("Firebase", "Failed to add notification: ${e.message}")
+                                                }
+
+                                        }
+                                        .addOnFailureListener { e -> println("Failed to add order: ${e.message}")}
+
+                                    //update product to BOOKED
+                                    product.status = getString(R.string.PRODUCT_BOOKED)
+                                    productRef.setValue(product)
+                                        .addOnSuccessListener {println("Product status update to BOOKED successfully") }
+                                        .addOnFailureListener { e -> println("Failed to update product: ${e.message}")}
+
+                                }
+                                else if (product.tradeType == "Swap"){
+                                    //create swap request
+                                    //product
+                                    //if swap (involve 2 product)
+                                    //swap request with status AwaitingResponse
+
+                                    var swapRequest = SwapRequest(
+                                        status = getString(R.string.SWAP_REQUEST_AWAITING_RESPONSE),
+                                        receiverProductID = viewing_prodID,
+                                        //selected product id for swap
+                                        senderProductID = binding.selectedProductID.text.toString(),
+                                        created_at = LocalDateTime.now(ZoneId.of("Asia/Kuala_Lumpur")).toString(),
+                                        meetUpID = meetUp.meetUpID,
+                                    )
+
+                                    val notification = Notification(
+                                        notificationType = "Trade",
+                                        notificationDateTime = LocalDateTime.now(ZoneId.of("Asia/Kuala_Lumpur")).toString(),
+                                        userID = product.created_by_UserID
+                                    )
+
+                                    // Set the notification message
+                                    getUserRecord(userID.toString()){user ->
+                                        notification.notification = "${user?.name} have sent you a Swap Request"
+                                    }
+
+                                    val newSwapRequestRef = swapRequestRef.push()
+                                    swapRequest.swapRequestID = newSwapRequestRef.key
+                                    // Push swap request to Firebase
+                                    newSwapRequestRef.setValue(swapRequest)
+                                        .addOnSuccessListener {println("Swap Request added successfully")
+                                            //push notification
+                                            // Push the notification to Firebase
+                                            notificationRef.push().setValue(notification)
+                                                .addOnSuccessListener {
+                                                    Log.d("Firebase", "Notification added successfully.")
+                                                }
+                                                .addOnFailureListener { e ->
+                                                    Log.e("Firebase", "Failed to add notification: ${e.message}")
+                                                }}
+                                        .addOnFailureListener { e -> println("Failed to add Swap Request: ${e.message}")}
+                                }
                             }
-                            .addOnFailureListener { e -> println("Failed to add order: ${e.message}")}
 
-                        //update product to BOOKED
-                        product.status = getString(R.string.PRODUCT_BOOKED)
-                        productRef.setValue(product)
-                            .addOnSuccessListener {println("Product status update to BOOKED successfully") }
-                            .addOnFailureListener { e -> println("Failed to update product: ${e.message}")}
+                            //redirect to puchase successful page
+                            val fragment = BuySuccess()
+                            val bundle = Bundle()
+                            bundle.putString("TradeType", product_viewing.tradeType) // Add any data you want to pass
+                            fragment.arguments = bundle
 
-                    }
-                    else if (product.tradeType == "Swap"){
-                        //create swap request
-                        //product
-                        //if swap (involve 2 product)
-                        //swap request with status AwaitingResponse
+                            //Bottom Navigation Indicator Update
+                            val navigationView =
+                                requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigationView)
+                            navigationView.selectedItemId = R.id.setting
 
-                        var swapRequest = SwapRequest(
-                            status = getString(R.string.SWAP_REQUEST_AWAITING_RESPONSE),
-                            receiverProductID = viewing_prodID,
-                            //selected product id for swap
-                            senderProductID = binding.selectedProductID.text.toString(),
-                            created_at = LocalDateTime.now(ZoneId.of("Asia/Kuala_Lumpur")).toString(),
-                            meetUpID = meetUp.meetUpID,
-                        )
-
-                        val notification = Notification(
-                            notificationType = "Trade",
-                            notificationDateTime = LocalDateTime.now(ZoneId.of("Asia/Kuala_Lumpur")).toString(),
-                            userID = product.created_by_UserID
-                        )
-
-                        // Set the notification message
-                        getUserRecord(userID.toString()){user ->
-                            notification.notification = "${user?.name} have sent you a Swap Request"
+                            val transaction = activity?.supportFragmentManager?.beginTransaction()
+                            transaction?.replace(R.id.frameLayout, fragment)
+                            transaction?.setCustomAnimations(
+                                R.anim.fade_out,  // Enter animation
+                                R.anim.fade_in  // Exit animation
+                            )
+                            transaction?.addToBackStack(null)
+                            transaction?.commit()
+                        } else {
+                            redirectToProduct404()
                         }
-
-                        val newSwapRequestRef = swapRequestRef.push()
-                        swapRequest.swapRequestID = newSwapRequestRef.key
-                        // Push swap request to Firebase
-                        newSwapRequestRef.setValue(swapRequest)
-                            .addOnSuccessListener {println("Swap Request added successfully")
-                                //push notification
-                                // Push the notification to Firebase
-                                notificationRef.push().setValue(notification)
-                                    .addOnSuccessListener {
-                                        Log.d("Firebase", "Notification added successfully.")
-                                    }
-                                    .addOnFailureListener { e ->
-                                        Log.e("Firebase", "Failed to add notification: ${e.message}")
-                                    }}
-                            .addOnFailureListener { e -> println("Failed to add Swap Request: ${e.message}")}
+                    },
+                    onError = { errorMessage ->
+                        Toast.makeText(requireContext(), "Error: $errorMessage", Toast.LENGTH_SHORT).show()
                     }
-                }
-
-                //redirect to puchase successful page
-                val fragment = BuySuccess()
-                val bundle = Bundle()
-                bundle.putString("TradeType", product_viewing.tradeType) // Add any data you want to pass
-                fragment.arguments = bundle
-
-                //Bottom Navigation Indicator Update
-                val navigationView =
-                    requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigationView)
-                navigationView.selectedItemId = R.id.setting
-
-                val transaction = activity?.supportFragmentManager?.beginTransaction()
-                transaction?.replace(R.id.frameLayout, fragment)
-                transaction?.setCustomAnimations(
-                    R.anim.fade_out,  // Enter animation
-                    R.anim.fade_in  // Exit animation
                 )
-                transaction?.addToBackStack(null)
-                transaction?.commit()
             }
-
-
         }
 
         //check availability before showing
@@ -593,5 +604,52 @@ class TradeMeetUp : Fragment() {
         return Random.nextInt(1000, 10000)
     }
 
+    fun checkProductStatus(productID: String, onResult: (String?) -> Unit, onError: (String) -> Unit) {
+        // Reference to the "Product" node in Firebase Realtime Database
+        val databaseRef = FirebaseDatabase.getInstance().getReference("Product").child(productID)
 
+        // Add a listener to retrieve the product data
+        databaseRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    // Retrieve the status field from the product
+                    val status = snapshot.child("status").getValue(String::class.java)
+                    onResult(status) // Pass the status to the callback
+                } else {
+                    // Product not found
+                    onResult(null)
+                    Log.e("ProductStatus", "Product not found for ID: $productID")
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                // Handle any errors that occur during the read operation
+                onError(error.message)
+                Log.e("Firebase", "Error fetching product status: ${error.message}")
+            }
+        })
+    }
+
+    fun redirectToProduct404(){
+        //redirect to meet up detail page
+        val fragment = Product404()
+
+        //val bundle = Bundle()
+        //bundle.putString("ProductID", productID)
+        //fragment.arguments = bundle
+
+        //Bottom Navigation Indicator Update
+        val navigationView =
+            requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigationView)
+        navigationView.selectedItemId = R.id.tag
+
+        val transaction = activity?.supportFragmentManager?.beginTransaction()
+        transaction?.replace(R.id.frameLayout, fragment)
+        transaction?.setCustomAnimations(
+            R.anim.fade_out,  // Enter animation
+            R.anim.fade_in  // Exit animation
+        )
+        transaction?.addToBackStack(null)
+        transaction?.commit()
+    }
 }
