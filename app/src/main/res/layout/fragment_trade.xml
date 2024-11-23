@@ -21,7 +21,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="10dp">
+            android:padding="15dp">
 
             <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/profile_ImgV"
@@ -40,7 +40,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:text="Good morning"
-                android:textSize="20dp"
+                android:textSize="18dp"
                 app:layout_constraintStart_toEndOf="@+id/profile_ImgV"
                 app:layout_constraintTop_toTopOf="@+id/profile_ImgV" />
 
@@ -48,11 +48,24 @@
                 android:id="@+id/usernameTV"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="User 1"
-                android:textSize="20dp"
+                android:text="User"
+                android:textSize="18dp"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="@+id/profile_ImgV"
                 app:layout_constraintStart_toStartOf="@+id/welcomeMsg1" />
+
+            <ImageButton
+                android:id="@+id/meetUpBtn"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:scaleType="centerCrop"
+                android:background="@drawable/transparent_dialog_bg"
+                android:src="@drawable/baseline_calendar_month_24"
+                app:layout_constraintBottom_toBottomOf="@+id/profile_ImgV"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/profile_ImgV"/>
+
+
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
@@ -173,8 +186,6 @@
                         android:textColor="@android:color/black"
                         android:textSize="14sp" />
                 </LinearLayout>
-
-
 
                 <!-- Button 3 -->
                 <LinearLayout
