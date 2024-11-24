@@ -77,6 +77,20 @@
             android:text="User 1"
             android:textSize="20dp"
             android:textStyle="bold" />
+        <TextView
+            android:id="@+id/youTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="You"
+            android:textColor="@color/white"
+            android:backgroundTint="#756AB6"
+            android:paddingStart="15dp"
+            android:paddingEnd="15dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:textSize="16dp"
+            android:visibility="gone"
+            android:background="@drawable/rounded_button"/>
     </LinearLayout>
 
     <com.google.android.material.tabs.TabLayout

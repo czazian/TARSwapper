@@ -42,6 +42,12 @@ class UserDetail : Fragment() {
         val args = arguments
         val userID = args?.getString("UserID")
 
+        ////User IDs////
+        //Get visitor User ID - From SharedPreference
+        val sharedPreferencesTARSwapper =
+            requireActivity().getSharedPreferences("TARSwapperPreferences", Context.MODE_PRIVATE)
+        val visitorUserID = sharedPreferencesTARSwapper.getString("userID", null)
+
         // Set the adapter for ViewPager2
         val adapter = UserDetailVPAdapter(requireActivity(), userID.toString())
         binding.viewPager.adapter = adapter
@@ -66,6 +72,9 @@ class UserDetail : Fragment() {
                 userObj = it
                 //Meaning to say the user has record, and store as "it"
                 //Display user data
+                if(visitorUserID == it.userID){
+                    View.VISIBLE.also { binding.youTV.visibility = it }
+                }
                 binding.usernameTV.text = it.name.toString()
                 binding.headerTV.text = "${it.name.toString()} Profile"
                 Glide.with(requireContext()).load(it.profileImage) // User Icon URL string

@@ -13,7 +13,9 @@ import com.example.tarswapper.data.Community
 import com.example.tarswapper.data.User
 import com.example.tarswapper.dataAdapter.CommunityMyPostAdapter
 import com.example.tarswapper.dataAdapter.CommunityPostExploreAdapter
+import com.example.tarswapper.dataAdapter.CommunityPostExploreUserAdapter
 import com.example.tarswapper.dataAdapter.CommunityVPAdapter
+import com.example.tarswapper.dataAdapter.TradeAdapter
 import com.example.tarswapper.databinding.CommunityBlogListBinding
 import com.example.tarswapper.databinding.FragmentCommunityBinding
 import com.example.tarswapper.databinding.FragmentCommunityExploreBinding
@@ -57,8 +59,25 @@ class CommunityPostExplore : Fragment() {
 
         // Set LayoutManager for RecyclerView & Call getCommunityFromFirebase to populate the RecyclerView
         binding.explorePostRecyclerView.layoutManager = GridLayoutManager(requireContext(), 1)
-        getCommunityFromFirebase { communityList ->
+        binding.userRecyclerView.layoutManager = GridLayoutManager(requireContext(), 1)
+        getCommunityFromFirebase(value = "") { communityList ->
             binding.explorePostRecyclerView.adapter = CommunityPostExploreAdapter(communityList, requireContext())
+        }
+
+        binding.searchBtn.setOnClickListener{
+            val value = binding.searchInput.text.toString()
+
+            if(!value.isNullOrBlank()){
+                getUserFromFirebase(value = value){ userList ->
+                    binding.userRecyclerView.adapter = CommunityPostExploreUserAdapter(userList, requireContext())
+                }
+            }else{
+                binding.userRecyclerView.adapter = CommunityPostExploreUserAdapter(emptyList(), requireContext())
+            }
+
+            getCommunityFromFirebase(value = value) { productList ->
+                binding.explorePostRecyclerView.adapter = CommunityPostExploreAdapter(productList,  requireContext())
+            }
         }
 
 
@@ -89,11 +108,17 @@ class CommunityPostExplore : Fragment() {
     }
 
 
-    fun getCommunityFromFirebase(onResult: (List<Community>) -> Unit) {
+    fun getCommunityFromFirebase(value: String? = null, onResult: (List<Community>) -> Unit) {
 
         // Reference to the "Product" node in Firebase Realtime Database
         val databaseRef = FirebaseDatabase.getInstance().getReference("Community")
-        val query       = databaseRef.orderByChild("status").equalTo(getString(R.string.COMMUNITY_POST_PUBLIC))
+
+        // Construct the query for partial matching
+        val query = if (!value.isNullOrEmpty()) {
+            databaseRef.orderByChild("title").startAt(value).endAt(value + "\uf8ff")
+        } else {
+            databaseRef.orderByChild("title")
+        }
 
         // List to hold products retrieved from Firebase
         val communitylist = mutableListOf<com.example.tarswapper.data.Community>()
@@ -106,8 +131,8 @@ class CommunityPostExplore : Fragment() {
                     for (communitySnapshot in snapshot.children) {
                         // Convert each child into a Product object
                         val community = communitySnapshot.getValue(Community::class.java)
-                        if (community != null) {
-                            communitylist.add(community) // Add the product to the list
+                        if (community != null && community.status == getString(R.string.COMMUNITY_POST_PUBLIC)) {
+                            communitylist.add(community) // Add the community to the list
                         }
                     }
                     onResult(communitylist) // Return the list of products
@@ -116,6 +141,50 @@ class CommunityPostExplore : Fragment() {
                     // Handle empty database
                     onResult(emptyList())
                     Log.d("Empty found", communitylist.size.toString())
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                // Handle errors
+                println("Error fetching data: ${error.message}")
+                onResult(emptyList())
+            }
+        })
+    }
+
+    fun getUserFromFirebase(value: String? = null, onResult: (List<User>) -> Unit) {
+
+        // Reference to the "Product" node in Firebase Realtime Database
+        val databaseRef = FirebaseDatabase.getInstance().getReference("User")
+
+        // Construct the query for partial matching
+        val query = if (!value.isNullOrEmpty()) {
+            databaseRef.orderByChild("name").startAt(value).endAt(value + "\uf8ff")
+        } else {
+            databaseRef.orderByChild("name")
+        }
+
+        // List to hold products retrieved from Firebase
+        val userlist = mutableListOf<User>()
+
+        // Add a listener to retrieve data
+        query.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    // Loop through the products in the snapshot
+                    for (userSnapshot in snapshot.children) {
+                        // Convert each child into a Product object
+                        val user = userSnapshot.getValue(User::class.java)
+                        if (user != null) {
+                            userlist.add(user) // Add the community to the list
+                        }
+                    }
+                    onResult(userlist) // Return the list of products
+                    Log.d("User list found", userlist.size.toString())
+                } else {
+                    // Handle empty database
+                    onResult(emptyList())
+                    Log.d("Empty user found", userlist.size.toString())
                 }
             }
 

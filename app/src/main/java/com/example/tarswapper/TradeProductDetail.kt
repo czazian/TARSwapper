@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import com.example.tarswapper.data.Product
@@ -110,6 +111,7 @@ class TradeProductDetail : Fragment() {
                 //hide trade button if the owner is viewing the product
                 if(product.created_by_UserID == userID){
                     binding.submitBtn.visibility = View.GONE
+                    binding.submitBtn.isEnabled = false
                     binding.btnChatStart.visibility = View.GONE
                 }
 
@@ -162,13 +164,30 @@ class TradeProductDetail : Fragment() {
                 }
 
                 //if product is available show submit button, else make it disabled
-                if(product.status == getString(R.string.PRODUCT_AVAILABLE) && product.created_by_UserID != userID ){
-                    binding.submitBtn.visibility = View.VISIBLE
-                }else{
-                    binding.submitBtn.visibility = View.VISIBLE
+                if(product.status != getString(R.string.PRODUCT_AVAILABLE)){
                     binding.submitBtn.text = "Not Available"
                     binding.submitBtn.isEnabled = false
                     binding.submitBtn.backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.grey_font)
+                }
+
+                binding.userProfileLayout.setOnClickListener{
+                    val fragment = UserDetail()
+
+                    // Create a Bundle to pass data
+                    val bundle = Bundle()
+                    bundle.putString("UserID", product.created_by_UserID) // Example data
+
+                    // Set the Bundle as arguments for the fragment
+                    fragment.arguments = bundle
+
+                    val transaction = (context as AppCompatActivity)?.supportFragmentManager?.beginTransaction()
+                    transaction?.replace(R.id.frameLayout, fragment)
+                    transaction?.setCustomAnimations(
+                        R.anim.fade_out,  // Enter animation
+                        R.anim.fade_in  // Exit animation
+                    )
+                    transaction?.addToBackStack(null)
+                    transaction?.commit()
                 }
 
             }

@@ -115,27 +115,37 @@
                     app:layout_constraintStart_toStartOf="@+id/productNameTV"
                     app:layout_constraintTop_toBottomOf="@+id/productNameTV" />
 
-                <com.google.android.material.imageview.ShapeableImageView
-                    android:id="@+id/profile_ImgV"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:layout_marginTop="12dp"
-                    android:src="@drawable/user"
-                    app:layout_constraintStart_toStartOf="@+id/productNameTV"
-                    app:layout_constraintTop_toBottomOf="@+id/tradeDetailTV"
-                    app:shapeAppearanceOverlay="@style/circleImageView" />
 
-                <TextView
-                    android:id="@+id/usernameTV"
+                <LinearLayout
+                    android:id="@+id/userProfileLayout"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:text="User 1"
-                    android:textSize="20dp"
-                    android:textStyle="bold"
-                    app:layout_constraintBottom_toBottomOf="@+id/profile_ImgV"
-                    app:layout_constraintStart_toEndOf="@+id/profile_ImgV"
-                    app:layout_constraintTop_toTopOf="@+id/profile_ImgV" />
+                    android:orientation="horizontal"
+                    app:layout_constraintStart_toStartOf="@+id/productNameTV"
+                    app:layout_constraintTop_toBottomOf="@+id/tradeDetailTV"
+                    android:gravity="center"
+                    android:layout_marginTop="12dp">
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/profile_ImgV"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:src="@drawable/user"
+                        app:shapeAppearanceOverlay="@style/circleImageView" />
+
+                    <TextView
+                        android:id="@+id/usernameTV"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:text="User 1"
+                        android:textSize="20dp"
+                        android:textStyle="bold"
+                        app:layout_constraintBottom_toBottomOf="@+id/profile_ImgV"
+                        app:layout_constraintStart_toEndOf="@+id/profile_ImgV"
+                        app:layout_constraintTop_toTopOf="@+id/profile_ImgV" />
+
+                </LinearLayout>
 
                 <TextView
                     android:id="@+id/dateTV"
@@ -145,16 +155,16 @@
                     android:text="28/12/2204"
                     android:textColor="@color/grey_font"
                     android:textSize="16dp"
-                    app:layout_constraintBottom_toBottomOf="@+id/usernameTV"
+                    app:layout_constraintBottom_toBottomOf="@+id/userProfileLayout"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="@+id/usernameTV" />
+                    app:layout_constraintTop_toTopOf="@+id/userProfileLayout" />
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/profile_ImgV">
+                    app:layout_constraintTop_toBottomOf="@id/userProfileLayout">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -297,38 +307,36 @@
                     </LinearLayout>
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
-                <Button
-                    android:id="@+id/submitBtn"
-                    android:layout_width="0dp"
-                    android:layout_height="50dp"
-                    android:layout_marginTop="20dp"
-                    android:layout_marginEnd="20dp"
-                    android:backgroundTint="#AC87C5"
-                    android:text="Trade"
-                    android:textSize="20dp"
-                    android:textStyle="bold"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.5"
-                    app:layout_constraintStart_toEndOf="@+id/btnChatStart"
-                    app:layout_constraintTop_toBottomOf="@+id/container" />
 
-                <ImageButton
-                    android:id="@+id/btnChatStart"
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginTop="5dp"
-                    android:layout_marginEnd="10dp"
-                    android:backgroundTint="@android:color/transparent"
-                    android:foreground="@drawable/ripple_effect"
-                    android:src="@drawable/baseline_chat_24"
-                    app:layout_constraintBottom_toBottomOf="@+id/submitBtn"
-                    app:layout_constraintEnd_toStartOf="@+id/submitBtn"
-                    app:layout_constraintHorizontal_bias="0.5"
-                    app:layout_constraintHorizontal_chainStyle="packed"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="@+id/submitBtn"
-                    app:tint="#756AB6" />
+                    app:layout_constraintTop_toBottomOf="@+id/container">
+
+                    <ImageButton
+                        android:id="@+id/btnChatStart"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:backgroundTint="@android:color/transparent"
+                        android:foreground="@drawable/ripple_effect"
+                        android:src="@drawable/baseline_chat_24"
+                        app:tint="#756AB6" />
+
+                    <Button
+                        android:id="@+id/submitBtn"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:backgroundTint="#AC87C5"
+                        android:text="Trade"
+                        android:textSize="20dp"
+                        android:textStyle="bold"
+                        android:layout_marginEnd="24dp"/>
+
+                </LinearLayout>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
