@@ -13,6 +13,7 @@ import com.example.tarswapper.data.Community
 import com.example.tarswapper.data.User
 import com.example.tarswapper.dataAdapter.CommunityMyPostAdapter
 import com.example.tarswapper.databinding.FragmentCommunityMyPostBinding
+import com.example.tarswapper.databinding.FragmentUserDetailPostBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.tabs.TabLayoutMediator
 import com.google.firebase.database.DataSnapshot
@@ -20,16 +21,16 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 
-class CommunityMyPost : Fragment() {
+class UserDetailPost : Fragment() {
     //fragment name
-    private lateinit var binding: FragmentCommunityMyPostBinding
+    private lateinit var binding: FragmentUserDetailPostBinding
     private lateinit var userObj: User
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
 
-        binding = FragmentCommunityMyPostBinding.inflate(layoutInflater, container, false)
+        binding = FragmentUserDetailPostBinding.inflate(layoutInflater, container, false)
 
         //bind recycle view
 
@@ -38,11 +39,9 @@ class CommunityMyPost : Fragment() {
             (activity as MainActivity).findViewById<BottomNavigationView>(R.id.bottomNavigationView)
         bottomNavigation.visibility = View.VISIBLE
 
-        ////User IDs////
-        //Get User ID - From SharedPreference
-        val sharedPreferencesTARSwapper =
-            requireActivity().getSharedPreferences("TARSwapperPreferences", Context.MODE_PRIVATE)
-        val userID = sharedPreferencesTARSwapper.getString("userID", null)
+        //set username and image
+        val args = arguments
+        val userID = args?.getString("UserID")
 
         getUserRecord(userID.toString()) {
             if (it != null) {
@@ -52,36 +51,9 @@ class CommunityMyPost : Fragment() {
 
         // Set LayoutManager for RecyclerView & Call getCommunityFromFirebase to populate the RecyclerView
         binding.myPostRecyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
-        getUserCommunityFromFirebase { communityList ->
+        getUserCommunityFromFirebase(userID.toString()) { communityList ->
             binding.myPostRecyclerView.adapter = CommunityMyPostAdapter(communityList, requireContext())
         }
-
-        binding.addPostBtn.setOnClickListener{
-            val fragment = CommunityCreatePost()
-
-            val transaction = activity?.supportFragmentManager?.beginTransaction()
-            transaction?.replace(R.id.frameLayout, fragment)
-            transaction?.setCustomAnimations(
-                R.anim.fade_out,  // Enter animation
-                R.anim.fade_in  // Exit animation
-            )
-            transaction?.addToBackStack(null)
-            transaction?.commit()
-        }
-
-        binding.viewReport.setOnClickListener{
-            val fragment = ReportCommunity()
-
-            val transaction = activity?.supportFragmentManager?.beginTransaction()
-            transaction?.replace(R.id.frameLayout, fragment)
-            transaction?.setCustomAnimations(
-                R.anim.fade_out,  // Enter animation
-                R.anim.fade_in  // Exit animation
-            )
-            transaction?.addToBackStack(null)
-            transaction?.commit()
-        }
-
 
         return binding.root
     }
@@ -110,10 +82,7 @@ class CommunityMyPost : Fragment() {
     }
 
 
-    fun getUserCommunityFromFirebase(onResult: (List<Community>) -> Unit) {
-        val sharedPreferencesTARSwapper =
-            requireActivity().getSharedPreferences("TARSwapperPreferences", Context.MODE_PRIVATE)
-        val userID = sharedPreferencesTARSwapper.getString("userID", null)
+    fun getUserCommunityFromFirebase(userID: String, onResult: (List<Community>) -> Unit) {
         // Reference to the "Product" node in Firebase Realtime Database
         val databaseRef = FirebaseDatabase.getInstance().getReference("Community")
         val query       = databaseRef.orderByChild("created_by_UserID").equalTo(userID)

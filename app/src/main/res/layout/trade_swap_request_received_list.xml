@@ -238,13 +238,14 @@
                     app:layout_constraintTop_toBottomOf="@id/swapRequest_body_cointainer">
 
                     <TextView
+                        android:id="@+id/suggestionTV"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Accept is suggest!"
                         android:textSize="10dp"
                         android:drawableStart="@drawable/baseline_lightbulb_24"
                         android:textColor="#FFBB8A"
-                        android:visibility="visible"
+                        android:visibility="gone"
                         app:layout_constraintBottom_toTopOf="@+id/acceptBtn"
                         app:layout_constraintStart_toStartOf="@+id/acceptBtn" />
 

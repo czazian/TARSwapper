@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import com.example.tarswapper.data.Product
 import com.example.tarswapper.data.User
@@ -76,21 +77,7 @@ class TradeProductDetail : Fragment() {
         //on click
 
         binding.btnBackMyPostedProduct.setOnClickListener {
-            val fragment = Trade()
-
-            //Bottom Navigation Indicator Update
-            val navigationView =
-                requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigationView)
-            navigationView.selectedItemId = R.id.tag
-
-            val transaction = activity?.supportFragmentManager?.beginTransaction()
-            transaction?.replace(R.id.frameLayout, fragment)
-            transaction?.setCustomAnimations(
-                R.anim.fade_out,  // Enter animation
-                R.anim.fade_in  // Exit animation
-            )
-            transaction?.addToBackStack(null)
-            transaction?.commit()
+            activity?.supportFragmentManager?.popBackStack()
         }
 
         binding.submitBtn.setOnClickListener {
@@ -124,13 +111,6 @@ class TradeProductDetail : Fragment() {
                 if(product.created_by_UserID == userID){
                     binding.submitBtn.visibility = View.GONE
                     binding.btnChatStart.visibility = View.GONE
-                }
-
-                //if product is available show submit button, else no
-                if(product.status == getString(R.string.PRODUCT_AVAILABLE)){
-                    binding.submitBtn.visibility = View.VISIBLE
-                }else{
-                    binding.submitBtn.visibility = View.GONE
                 }
 
                 //get product owner
@@ -179,6 +159,16 @@ class TradeProductDetail : Fragment() {
                         0,
                         0
                     )
+                }
+
+                //if product is available show submit button, else make it disabled
+                if(product.status == getString(R.string.PRODUCT_AVAILABLE) && product.created_by_UserID != userID ){
+                    binding.submitBtn.visibility = View.VISIBLE
+                }else{
+                    binding.submitBtn.visibility = View.VISIBLE
+                    binding.submitBtn.text = "Not Available"
+                    binding.submitBtn.isEnabled = false
+                    binding.submitBtn.backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.grey_font)
                 }
 
             }

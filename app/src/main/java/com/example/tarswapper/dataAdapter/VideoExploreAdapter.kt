@@ -9,14 +9,17 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.tarswapper.CommunityEditPost
 import com.example.tarswapper.R
+import com.example.tarswapper.TradeProductDetail
+import com.example.tarswapper.UserDetail
 import com.example.tarswapper.data.Product
 import com.example.tarswapper.data.ShortVideo
-import com.example.tarswapper.databinding.VideoCommentBottomSheetBinding
+import com.example.tarswapper.data.User
 import com.example.tarswapper.databinding.VideoExploreVideoListBinding
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
@@ -46,6 +49,16 @@ class VideoExploreAdapter(private val videoList: List<ShortVideo>, private val f
         val userID = sharedPreferencesTARSwapper.getString("userID", null)
 
         with(holder.binding){
+
+            getUserRecord(shortVideo.created_by_UserID.toString()) {
+                if (it != null) {
+                    //Meaning to say the user has record, and store as "it"
+                    //Display user data
+                    Glide.with(context).load(it.profileImage) // User Icon URL string
+                        .into(holder.binding.profileImgV)
+                }
+            }
+
 
             holder.binding.titleTV.text = shortVideo.title
             // Setup ExoPlayer
@@ -135,6 +148,26 @@ class VideoExploreAdapter(private val videoList: List<ShortVideo>, private val f
                                     R.drawable.baseline_wifi_protected_setup_24, 0, 0, 0)
                                 holder.binding.tradeImg.setImageResource(R.drawable.baseline_wifi_protected_setup_24)
                             }
+
+                            holder.binding.productTagContainer.setOnClickListener{
+                                val fragment = TradeProductDetail()
+
+                                // Create a Bundle to pass data
+                                val bundle = Bundle()
+                                bundle.putString("ProductID", product.productID) // Example data
+
+                                // Set the Bundle as arguments for the fragment
+                                fragment.arguments = bundle
+
+                                (context as? AppCompatActivity)?.supportFragmentManager?.beginTransaction()
+                                    ?.apply {
+                                        replace(R.id.frameLayout, fragment)
+                                        setCustomAnimations(R.anim.fade_out, R.anim.fade_in)
+                                        addToBackStack(null)
+                                        commit()
+                                    }
+                            }
+
                         }
 
                     }
@@ -155,6 +188,26 @@ class VideoExploreAdapter(private val videoList: List<ShortVideo>, private val f
                     holder.binding.productTagContainer.visibility = View.VISIBLE
                     holder.binding.hideTV.text = "Hide"
                 }
+            }
+
+            holder.binding.userProfileLayout.setOnClickListener{
+                val fragment = UserDetail()
+
+                // Create a Bundle to pass data
+                val bundle = Bundle()
+                bundle.putString("UserID", shortVideo.created_by_UserID) // Example data
+
+                // Set the Bundle as arguments for the fragment
+                fragment.arguments = bundle
+
+                val transaction = (context as AppCompatActivity)?.supportFragmentManager?.beginTransaction()
+                transaction?.replace(R.id.frameLayout, fragment)
+                transaction?.setCustomAnimations(
+                    R.anim.fade_out,  // Enter animation
+                    R.anim.fade_in  // Exit animation
+                )
+                transaction?.addToBackStack(null)
+                transaction?.commit()
             }
 
             holder.binding.likeBtn.setOnClickListener {
@@ -298,5 +351,28 @@ class VideoExploreAdapter(private val videoList: List<ShortVideo>, private val f
             .addOnFailureListener { e ->
                 onResult(null)  // Handle any failure when listing items
             }
+    }
+
+    private fun getUserRecord(userID: String, onResult: (User?) -> Unit) {
+        //Get a reference to the database
+        val databaseRef = FirebaseDatabase.getInstance().getReference("User").child(userID)
+
+        //Add a listener to retrieve the user data
+        databaseRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    //Convert the snapshot to a User object
+                    val user = snapshot.getValue(User::class.java)
+                    onResult(user) //Return the user record
+                } else {
+                    onResult(null) //User not found
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                println("Database error: ${error.message}")
+                onResult(null) //In case of error, return null
+            }
+        })
     }
 }

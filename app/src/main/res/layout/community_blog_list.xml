@@ -21,28 +21,38 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <com.google.android.material.imageview.ShapeableImageView
-            android:id="@+id/profile_ImgV"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:background="@drawable/circular_image"
-            android:src="@drawable/user"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:shapeAppearanceOverlay="@style/circleImageView"/>
 
-        <TextView
-            android:id="@+id/usernameTV"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/userProfileLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:text="User 1"
-            android:textSize="20dp"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="@+id/profile_ImgV"
-            app:layout_constraintStart_toEndOf="@+id/profile_ImgV"
-            app:layout_constraintTop_toTopOf="@+id/profile_ImgV"
-            app:layout_constraintVertical_bias="0.478" />
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/profile_ImgV"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/circular_image"
+                android:src="@drawable/user"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:shapeAppearanceOverlay="@style/circleImageView" />
+
+            <TextView
+                android:id="@+id/usernameTV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="User 1"
+                android:textSize="20dp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="@+id/profile_ImgV"
+                app:layout_constraintStart_toEndOf="@+id/profile_ImgV"
+                app:layout_constraintTop_toTopOf="@+id/profile_ImgV"
+                app:layout_constraintVertical_bias="0.478" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -140,7 +150,7 @@
             android:id="@+id/likeNumTV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="20"
+            android:text="0"
             app:layout_constraintEnd_toStartOf="@+id/commentBtn"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -160,7 +170,7 @@
             android:id="@+id/commentNumTV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="30"
+            android:text="0"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -194,17 +204,20 @@
             android:id="@+id/productTagContainer"
             android:layout_width="match_parent"
             android:layout_height="100dp"
-            android:padding="4dp"
             android:layout_marginTop="8dp"
-            app:layout_constraintTop_toBottomOf="@+id/releventTagTV"
-            android:visibility="visible"
             android:clickable="true"
-            android:focusable="true">
+            android:focusable="true"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/releventTagTV">
 
             <androidx.cardview.widget.CardView
-                android:layout_width="360dp"
-                android:layout_height="90dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:backgroundTint="#F8F8FB"
+                android:layout_margin="10dp"
                 app:cardCornerRadius="15dp"
                 app:cardElevation="5dp"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -233,11 +246,11 @@
                         android:layout_width="160dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="12dp"
+                        android:ellipsize="end"
+                        android:maxLines="1"
                         android:text="Item 1"
                         android:textSize="20dp"
                         android:textStyle="bold"
-                        android:maxLines="1"
-                        android:ellipsize="end"
                         app:layout_constraintStart_toEndOf="@+id/productTagImgV"
                         app:layout_constraintTop_toTopOf="@+id/productTagImgV" />
 
@@ -271,10 +284,10 @@
                         android:id="@+id/selectedProductID"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:visibility="gone"
                         android:enabled="false"
+                        android:visibility="gone"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="parent"/>
+                        app:layout_constraintTop_toBottomOf="parent" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 

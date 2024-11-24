@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
@@ -94,16 +95,7 @@ class CommunityDetail : Fragment() {
 
         //on click
         binding.btnBack.setOnClickListener{
-            val fragment = Community()
-
-            val transaction = activity?.supportFragmentManager?.beginTransaction()
-            transaction?.replace(R.id.frameLayout, fragment)
-            transaction?.setCustomAnimations(
-                R.anim.fade_out,  // Enter animation
-                R.anim.fade_in  // Exit animation
-            )
-            transaction?.addToBackStack(null)
-            transaction?.commit()
+            activity?.supportFragmentManager?.popBackStack()
         }
 
         binding.translatePost.setOnClickListener {
@@ -121,13 +113,13 @@ class CommunityDetail : Fragment() {
 
 
                 // Translate title and description to Chinese
-                translateToChinese(titleText) { translatedTitle ->
-                    binding.titleTV.text = translatedTitle
+            translateTextWithRapidAPI(titleText, "en", "zh"){ translatedText ->
+                requireActivity().runOnUiThread {
+                    // Update your UI with the translated text
+                    binding.titleTV.text = translatedText
                 }
 
-                translateToChinese(descriptionText) { translatedDescription ->
-                    binding.descriptionTV.text = translatedDescription
-                }
+            }
             
         }
 
@@ -367,6 +359,26 @@ class CommunityDetail : Fragment() {
                     }
                 }
 
+                binding.userProfileLayout.setOnClickListener{
+                    val fragment = UserDetail()
+
+                    // Create a Bundle to pass data
+                    val bundle = Bundle()
+                    bundle.putString("UserID", community.created_by_UserID) // Example data
+
+                    // Set the Bundle as arguments for the fragment
+                    fragment.arguments = bundle
+
+                    val transaction = (context as AppCompatActivity)?.supportFragmentManager?.beginTransaction()
+                    transaction?.replace(R.id.frameLayout, fragment)
+                    transaction?.setCustomAnimations(
+                        R.anim.fade_out,  // Enter animation
+                        R.anim.fade_in  // Exit animation
+                    )
+                    transaction?.addToBackStack(null)
+                    transaction?.commit()
+                }
+
                 binding.dateTV.text = customizeDate(community.created_at.toString())
                 binding.titleTV.text = community.title
                 binding.descriptionTV.text = community.description
@@ -461,9 +473,28 @@ class CommunityDetail : Fragment() {
 
                                     }
                                 }
+                                binding.productTagContainer.setOnClickListener{
+                                    val fragment = TradeProductDetail()
+
+                                    // Create a Bundle to pass data
+                                    val bundle = Bundle()
+                                    bundle.putString("ProductID", product.productID) // Example data
+
+                                    // Set the Bundle as arguments for the fragment
+                                    fragment.arguments = bundle
+
+                                    (context as? AppCompatActivity)?.supportFragmentManager?.beginTransaction()
+                                        ?.apply {
+                                            replace(R.id.frameLayout, fragment)
+                                            setCustomAnimations(R.anim.fade_out, R.anim.fade_in)
+                                            addToBackStack(null)
+                                            commit()
+                                        }
+                                }
                             }
 
                         }
+
                     } else {
                         Log.d("Firebase", "No product tags found for this community.")
                         binding.productTagContainer.visibility = View.GONE
@@ -720,44 +751,48 @@ class CommunityDetail : Fragment() {
             }
     }
 
-    fun translateToChinese(text: String, callback: (String) -> Unit) {
+    fun translateTextWithRapidAPI(
+        text: String,
+        sourceLang: String = "en",
+        targetLang: String = "zh",
+        callback: (String) -> Unit
+    ) {
         val client = OkHttpClient()
 
-        // Prepare JSON body
-        val json = JSONObject()
-        json.put("q", text)
-        json.put("source", "en")
-        json.put("target", "zh")
-        json.put("format", "text")
+        val jsonBody = JSONObject()
+        jsonBody.put("q", text)
+        jsonBody.put("source", sourceLang)
+        jsonBody.put("target", targetLang)
 
-        val requestBody = json.toString().toRequestBody("application/json".toMediaType())
+        val requestBody = jsonBody.toString().toRequestBody("application/json".toMediaType())
 
-        // Create Request
         val request = Request.Builder()
-            .url("https://libretranslate.de/translate")
+            .url("https://google-translate1.p.rapidapi.com/language/translate/v2") // Replace with the endpoint you’re using
             .post(requestBody)
+            .addHeader("Content-Type", "application/json")
+            .addHeader("X-RapidAPI-Key", "9344bdffa1mshdb95778def04dadp1661abjsnd5eac2d7d7b9") // Replace with your key
+            .addHeader("X-RapidAPI-Host", "google-translate1.p.rapidapi.com") // Host from RapidAPI
             .build()
 
-        // Execute Request
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-                requireActivity().runOnUiThread {
-                    Toast.makeText(requireContext(), "Translation failed: ${e.message}", Toast.LENGTH_SHORT).show()
-                }
+                Log.e("Translation", "Error: ${e.message}")
             }
 
             override fun onResponse(call: Call, response: Response) {
                 if (response.isSuccessful) {
                     response.body?.string()?.let { responseBody ->
-                        val translatedText = JSONObject(responseBody).getString("translatedText")
-                        requireActivity().runOnUiThread {
-                            callback(translatedText)
-                        }
+                        val result = JSONObject(responseBody)
+                        val translatedText = result
+                            .getJSONObject("data")
+                            .getJSONArray("translations")
+                            .getJSONObject(0)
+                            .getString("translatedText")
+
+                        callback(translatedText)
                     }
                 } else {
-                    requireActivity().runOnUiThread {
-                        Toast.makeText(requireContext(), "Translation failed with code: ${response.code}", Toast.LENGTH_SHORT).show()
-                    }
+                    Log.e("Translation", "Failed with code: ${response.code}")
                 }
             }
         })

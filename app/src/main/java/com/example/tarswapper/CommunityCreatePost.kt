@@ -70,17 +70,7 @@ class CommunityCreatePost : Fragment() {
         }
 
         binding.btnBack.setOnClickListener{
-            //put bundle
-            val fragment = CommunityMyPost()
-
-            val transaction = activity?.supportFragmentManager?.beginTransaction()
-            transaction?.replace(R.id.frameLayout, fragment)
-            transaction?.setCustomAnimations(
-                R.anim.fade_out,  // Enter animation
-                R.anim.fade_in  // Exit animation
-            )
-            transaction?.addToBackStack(null)
-            transaction?.commit()
+            activity?.supportFragmentManager?.popBackStack()
         }
 
         // Set up the  to open gallery for selecting multiple images

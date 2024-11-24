@@ -22,12 +22,20 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
+import okhttp3.OkHttpClient
+import okhttp3.RequestBody
+import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
+import okhttp3.*
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import java.io.IOException
+import android.os.Handler
+import android.os.Looper
 
 class TradeSwapRequestReceivedAdapter(private var swapRequestList: List<SwapRequest>, private val context: Context) :
     RecyclerView.Adapter<TradeSwapRequestReceivedAdapter.SwapRequestViewHolder>() {
@@ -65,6 +73,15 @@ class TradeSwapRequestReceivedAdapter(private var swapRequestList: List<SwapRequ
             //set content - you give
             getProductDetail(swapRequest.receiverProductID.toString()){ product ->
                 holder.binding.userItemNameTV.text = product!!.name
+
+                //use API to estimate product price
+                getProductPrice(product.name.toString()) { priceEstimate ->
+                    // Ensure this is updated on the main thread
+                    holder.itemView.post {
+                        holder.binding.userItemEstimatePriceTV.text = priceEstimate ?: "N/A"
+                    }
+                }
+
                 // Load image from Firebase Storage
                 getProductFirebaseImageUrl(product) { url ->
                     if (url != null) {
@@ -76,13 +93,20 @@ class TradeSwapRequestReceivedAdapter(private var swapRequestList: List<SwapRequ
                         userItemImg.setImageResource(R.drawable.ai) // Set a placeholder
                     }
                 }
-                //connect to API set product price
-                holder.binding.userItemEstimatePriceTV.text = "RM 1"
             }
 
             //set content - you received
             getProductDetail(swapRequest.senderProductID.toString()){ product ->
                 holder.binding.userReceiveItemNameTV.text = product!!.name
+
+                //use API to estimate product price
+                getProductPrice(product.name.toString()) { priceEstimate ->
+                    // Ensure this is updated on the main thread
+                    holder.itemView.post {
+                        holder.binding.userReceiveItemEstimatePriceTV.text = priceEstimate ?: "N/A"
+                    }
+                }
+
                 // Load image from Firebase Storage
                 getProductFirebaseImageUrl(product) { url ->
                     if (url != null) {
@@ -94,9 +118,9 @@ class TradeSwapRequestReceivedAdapter(private var swapRequestList: List<SwapRequ
                         userReceiveItemImg.setImageResource(R.drawable.ai) // Set a placeholder
                     }
                 }
-                //connect to API set product price
-                holder.binding.userReceiveItemEstimatePriceTV.text = "RM 2"
             }
+
+
 
             holder.binding.acceptBtn.setOnClickListener{
                 //update status
@@ -418,6 +442,76 @@ class TradeSwapRequestReceivedAdapter(private var swapRequestList: List<SwapRequ
             }
         })
     }
+
+
+    fun getProductPrice(productName: String, onResult: (String?) -> Unit) {
+        val url = "https://api.upcitemdb.com/prod/trial/search"
+        val client = OkHttpClient()
+
+        val jsonBody = JSONObject().apply {
+            put("s", productName)
+            put("match_mode", "0")
+            put("type", "product")
+        }.toString()
+
+        val requestBody = RequestBody.create("application/json".toMediaTypeOrNull(), jsonBody)
+
+        val request = Request.Builder()
+            .url(url)
+            .post(requestBody)
+            .addHeader("Content-Type", "application/json")
+            .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                e.printStackTrace()
+                Handler(Looper.getMainLooper()).post {
+                    onResult(null) // Pass null to indicate failure
+                }
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                response.use {
+                    if (!response.isSuccessful) {
+                        Log.e("API_ERROR", "Response Code: ${response.code} - ${response.message}")
+                        val rateLimitRemaining = response.header("X-RateLimit-Remaining")
+                        val rateLimitReset = response.header("X-RateLimit-Reset")
+                        Log.d("API_RATE_LIMIT", "Remaining: $rateLimitRemaining, Reset: $rateLimitReset")
+                        Handler(Looper.getMainLooper()).post {
+                            onResult("N/A")
+                        }
+                        return
+                    }
+
+                    val responseString = response.body?.string()
+                    val jsonResponse = JSONObject(responseString!!)
+                    val items = jsonResponse.optJSONArray("items")
+
+                    if (items != null && items.length() > 0) {
+                        val firstItem = items.getJSONObject(0)
+                        val lowestPrice = firstItem.optDouble("lowest_recorded_price", -1.0)
+                        val highestPrice = firstItem.optDouble("highest_recorded_price", -1.0)
+
+                        val priceEstimate = if (lowestPrice >= 0 && highestPrice >= 0) {
+                            "Estimated Price Range: $${lowestPrice} - $${highestPrice}"
+                        } else {
+                            "Price not available"
+                        }
+
+                        // Ensure the UI is updated on the main thread
+                        Handler(Looper.getMainLooper()).post {
+                            onResult(priceEstimate)
+                        }
+                    } else {
+                        Handler(Looper.getMainLooper()).post {
+                            onResult("No product information found")
+                        }
+                    }
+                }
+            }
+        })
+    }
+
 }
 
 

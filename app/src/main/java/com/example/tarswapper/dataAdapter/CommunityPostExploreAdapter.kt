@@ -16,6 +16,7 @@ import com.bumptech.glide.Glide
 import com.example.tarswapper.CommunityDetail
 import com.example.tarswapper.R
 import com.example.tarswapper.TradeProductDetail
+import com.example.tarswapper.UserDetail
 import com.example.tarswapper.data.Community
 import com.example.tarswapper.data.Product
 import com.example.tarswapper.data.User
@@ -157,6 +158,24 @@ class CommunityPostExploreAdapter(private val communityList: List<Community>, pr
 
                                 }
                             }
+                            holder.binding.productTagContainer.setOnClickListener{
+                                val fragment = TradeProductDetail()
+
+                                // Create a Bundle to pass data
+                                val bundle = Bundle()
+                                bundle.putString("ProductID", product.productID) // Example data
+
+                                // Set the Bundle as arguments for the fragment
+                                fragment.arguments = bundle
+
+                                (context as? AppCompatActivity)?.supportFragmentManager?.beginTransaction()
+                                    ?.apply {
+                                        replace(R.id.frameLayout, fragment)
+                                        setCustomAnimations(R.anim.fade_out, R.anim.fade_in)
+                                        addToBackStack(null)
+                                        commit()
+                                    }
+                            }
                         }
 
                     }
@@ -178,6 +197,27 @@ class CommunityPostExploreAdapter(private val communityList: List<Community>, pr
                     Glide.with(context).load(it.profileImage) // User Icon URL string
                         .into(holder.binding.profileImgV)
                 }
+            }
+
+            //on click
+            holder.binding.userProfileLayout.setOnClickListener{
+                val fragment = UserDetail()
+
+                // Create a Bundle to pass data
+                val bundle = Bundle()
+                bundle.putString("UserID", community.created_by_UserID) // Example data
+
+                // Set the Bundle as arguments for the fragment
+                fragment.arguments = bundle
+
+                val transaction = (context as AppCompatActivity)?.supportFragmentManager?.beginTransaction()
+                transaction?.replace(R.id.frameLayout, fragment)
+                transaction?.setCustomAnimations(
+                    R.anim.fade_out,  // Enter animation
+                    R.anim.fade_in  // Exit animation
+                )
+                transaction?.addToBackStack(null)
+                transaction?.commit()
             }
 
             holder.binding.likeBtn.setOnClickListener {

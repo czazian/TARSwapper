@@ -63,14 +63,42 @@ class Trade : Fragment() {
         }
 
         //on click
+        binding.userProfileLayout.setOnClickListener{
+            val fragment = UserDetail()
+
+            // Create a Bundle to pass data
+            val bundle = Bundle()
+            bundle.putString("UserID", userID) // Example data
+
+            // Set the Bundle as arguments for the fragment
+            fragment.arguments = bundle
+
+            val transaction = activity?.supportFragmentManager?.beginTransaction()
+            transaction?.replace(R.id.frameLayout, fragment)
+            transaction?.setCustomAnimations(
+                R.anim.fade_out,  // Enter animation
+                R.anim.fade_in  // Exit animation
+            )
+            transaction?.addToBackStack(null)
+            transaction?.commit()
+        }
+
+        binding.meetUpBtn.setOnClickListener{
+            val fragment = MeetUpCalender()
+
+            val transaction = activity?.supportFragmentManager?.beginTransaction()
+            transaction?.replace(R.id.frameLayout, fragment)
+            transaction?.setCustomAnimations(
+                R.anim.fade_out,  // Enter animation
+                R.anim.fade_in  // Exit animation
+            )
+            transaction?.addToBackStack(null)
+            transaction?.commit()
+        }
+
         binding.myProductBtn.setOnClickListener(){
 
             val fragment = TradeMyShop()
-
-            //Bottom Navigation Indicator Update
-            val navigationView =
-                requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigationView)
-            navigationView.selectedItemId = R.id.setting
 
             val transaction = activity?.supportFragmentManager?.beginTransaction()
             transaction?.replace(R.id.frameLayout, fragment)

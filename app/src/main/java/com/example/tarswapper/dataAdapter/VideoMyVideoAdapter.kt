@@ -113,6 +113,25 @@ class VideoMyVideoAdapter(private val videoList: List<ShortVideo>, private val c
                                 holder.binding.tradeDetailTV.setCompoundDrawablesWithIntrinsicBounds(R.drawable.baseline_wifi_protected_setup_24, 0, 0, 0)
                                 holder.binding.tradeImg.setImageResource(R.drawable.baseline_wifi_protected_setup_24)
                             }
+
+                            holder.binding.productTagContainer.setOnClickListener{
+                                val fragment = TradeProductDetail()
+
+                                // Create a Bundle to pass data
+                                val bundle = Bundle()
+                                bundle.putString("ProductID", product.productID) // Example data
+
+                                // Set the Bundle as arguments for the fragment
+                                fragment.arguments = bundle
+
+                                (context as? AppCompatActivity)?.supportFragmentManager?.beginTransaction()
+                                    ?.apply {
+                                        replace(R.id.frameLayout, fragment)
+                                        setCustomAnimations(R.anim.fade_out, R.anim.fade_in)
+                                        addToBackStack(null)
+                                        commit()
+                                    }
+                            }
                         }
 
                     }
