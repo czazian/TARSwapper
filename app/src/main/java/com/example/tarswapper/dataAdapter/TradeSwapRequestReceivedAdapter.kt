@@ -2,6 +2,7 @@ package com.example.tarswapper.dataAdapter
 
 import android.content.Context
 import android.os.Build
+import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -36,6 +37,9 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import java.io.IOException
 import android.os.Handler
 import android.os.Looper
+import androidx.appcompat.app.AppCompatActivity
+import com.example.tarswapper.TradeProductDetail
+import com.example.tarswapper.UserDetail
 
 class TradeSwapRequestReceivedAdapter(private var swapRequestList: List<SwapRequest>, private val context: Context) :
     RecyclerView.Adapter<TradeSwapRequestReceivedAdapter.SwapRequestViewHolder>() {
@@ -63,6 +67,27 @@ class TradeSwapRequestReceivedAdapter(private var swapRequestList: List<SwapRequ
                     holder.binding.usernameTV.text = it.name.toString()
                     Glide.with(profileImgV.context).load(it.profileImage) // User Icon URL string
                         .into(profileImgV)
+
+                    val userId = it.userID.toString()
+                    holder.binding.usernameTV.setOnClickListener{
+                        val fragment = UserDetail()
+
+                        // Create a Bundle to pass data
+                        val bundle = Bundle()
+                        bundle.putString("UserID", userId) // Example data
+
+                        // Set the Bundle as arguments for the fragment
+                        fragment.arguments = bundle
+
+                        val transaction = (context as AppCompatActivity)?.supportFragmentManager?.beginTransaction()
+                        transaction?.replace(R.id.frameLayout, fragment)
+                        transaction?.setCustomAnimations(
+                            R.anim.fade_out,  // Enter animation
+                            R.anim.fade_in  // Exit animation
+                        )
+                        transaction?.addToBackStack(null)
+                        transaction?.commit()
+                    }
                 } else {
                     // Handle the case where the image URL is not retrieved
                     profileImgV.setImageResource(R.drawable.ai) // Set a placeholder
@@ -93,6 +118,25 @@ class TradeSwapRequestReceivedAdapter(private var swapRequestList: List<SwapRequ
                         userItemImg.setImageResource(R.drawable.ai) // Set a placeholder
                     }
                 }
+
+                holder.binding.productGiveContainer.setOnClickListener{
+                    val fragment = TradeProductDetail()
+
+                    // Create a Bundle to pass data
+                    val bundle = Bundle()
+                    bundle.putString("ProductID", product.productID) // Example data
+
+                    // Set the Bundle as arguments for the fragment
+                    fragment.arguments = bundle
+
+                    (context as? AppCompatActivity)?.supportFragmentManager?.beginTransaction()
+                        ?.apply {
+                            replace(R.id.frameLayout, fragment)
+                            setCustomAnimations(R.anim.fade_out, R.anim.fade_in)
+                            addToBackStack(null)
+                            commit()
+                        }
+                }
             }
 
             //set content - you received
@@ -117,6 +161,25 @@ class TradeSwapRequestReceivedAdapter(private var swapRequestList: List<SwapRequ
                         // Handle the case where the image URL is not retrieved
                         userReceiveItemImg.setImageResource(R.drawable.ai) // Set a placeholder
                     }
+                }
+
+                holder.binding.productReceiveContainer.setOnClickListener{
+                    val fragment = TradeProductDetail()
+
+                    // Create a Bundle to pass data
+                    val bundle = Bundle()
+                    bundle.putString("ProductID", product.productID) // Example data
+
+                    // Set the Bundle as arguments for the fragment
+                    fragment.arguments = bundle
+
+                    (context as? AppCompatActivity)?.supportFragmentManager?.beginTransaction()
+                        ?.apply {
+                            replace(R.id.frameLayout, fragment)
+                            setCustomAnimations(R.anim.fade_out, R.anim.fade_in)
+                            addToBackStack(null)
+                            commit()
+                        }
                 }
             }
 

@@ -112,6 +112,7 @@
 
 
                         <androidx.constraintlayout.widget.ConstraintLayout
+                            android:id="@+id/productGiveContainer"
                             android:layout_width="wrap_content"
                             android:layout_height="120dp">
 
@@ -163,6 +164,7 @@
                         </androidx.constraintlayout.widget.ConstraintLayout>
 
                         <androidx.constraintlayout.widget.ConstraintLayout
+                            android:id="@+id/productReceiveContainer"
                             android:layout_width="wrap_content"
                             android:layout_height="120dp">
 

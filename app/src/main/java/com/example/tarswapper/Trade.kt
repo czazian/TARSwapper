@@ -83,18 +83,18 @@ class Trade : Fragment() {
             transaction?.commit()
         }
 
-        binding.meetUpBtn.setOnClickListener{
-            val fragment = MeetUpCalender()
-
-            val transaction = activity?.supportFragmentManager?.beginTransaction()
-            transaction?.replace(R.id.frameLayout, fragment)
-            transaction?.setCustomAnimations(
-                R.anim.fade_out,  // Enter animation
-                R.anim.fade_in  // Exit animation
-            )
-            transaction?.addToBackStack(null)
-            transaction?.commit()
-        }
+//        binding.meetUpBtn.setOnClickListener{
+//            val fragment = MeetUpCalender()
+//
+//            val transaction = activity?.supportFragmentManager?.beginTransaction()
+//            transaction?.replace(R.id.frameLayout, fragment)
+//            transaction?.setCustomAnimations(
+//                R.anim.fade_out,  // Enter animation
+//                R.anim.fade_in  // Exit animation
+//            )
+//            transaction?.addToBackStack(null)
+//            transaction?.commit()
+//        }
 
         binding.myProductBtn.setOnClickListener(){
 

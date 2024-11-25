@@ -66,7 +66,7 @@ class TradeSwapRequestHistory : Fragment() {
                     // Step 2: Fetch swap requests where receiverProductID matches any of user's product IDs and status is "AwaitingResponse"
                     fetchSwapRequestsForUserProducts(userProductIds) {swapRequestList ->
                         binding.recyclerViewSRHistory.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
-                        binding.recyclerViewSRHistory.adapter = TradeSwapRequestHistoryAdapter(swapRequestList)
+                        binding.recyclerViewSRHistory.adapter = TradeSwapRequestHistoryAdapter(swapRequestList, requireContext())
                     }
                 }
 

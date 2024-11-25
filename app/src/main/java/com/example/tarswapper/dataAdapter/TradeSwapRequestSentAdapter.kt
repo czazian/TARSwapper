@@ -2,14 +2,18 @@ package com.example.tarswapper.dataAdapter
 
 import android.content.Context
 import android.os.Build
+import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.tarswapper.R
+import com.example.tarswapper.TradeProductDetail
+import com.example.tarswapper.UserDetail
 import com.example.tarswapper.data.Product
 import com.example.tarswapper.data.SwapRequest
 import com.example.tarswapper.data.User
@@ -25,7 +29,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
 
-class TradeSwapRequestSentAdapter(private val swapRequestList: List<SwapRequest>) :
+class TradeSwapRequestSentAdapter(private val swapRequestList: List<SwapRequest>, private val context: Context) :
     RecyclerView.Adapter<TradeSwapRequestSentAdapter.SwapRequestViewHolder>() {
 
     class SwapRequestViewHolder(val binding: TradeSwapRequestSentListBinding) : RecyclerView.ViewHolder(binding.root){}
@@ -51,6 +55,27 @@ class TradeSwapRequestSentAdapter(private val swapRequestList: List<SwapRequest>
                     holder.binding.usernameTV.text = it.name.toString()
                     Glide.with(profileImgV.context).load(it.profileImage) // User Icon URL string
                         .into(profileImgV)
+
+                    val userId = it.userID.toString()
+                    holder.binding.usernameTV.setOnClickListener{
+                        val fragment = UserDetail()
+
+                        // Create a Bundle to pass data
+                        val bundle = Bundle()
+                        bundle.putString("UserID", userId) // Example data
+
+                        // Set the Bundle as arguments for the fragment
+                        fragment.arguments = bundle
+
+                        val transaction = (context as AppCompatActivity)?.supportFragmentManager?.beginTransaction()
+                        transaction?.replace(R.id.frameLayout, fragment)
+                        transaction?.setCustomAnimations(
+                            R.anim.fade_out,  // Enter animation
+                            R.anim.fade_in  // Exit animation
+                        )
+                        transaction?.addToBackStack(null)
+                        transaction?.commit()
+                    }
                 } else {
                     // Handle the case where the image URL is not retrieved
                     profileImgV.setImageResource(R.drawable.ai) // Set a placeholder
@@ -73,6 +98,25 @@ class TradeSwapRequestSentAdapter(private val swapRequestList: List<SwapRequest>
                         userItemImg.setImageResource(R.drawable.ai) // Set a placeholder
                     }
                 }
+
+                holder.binding.productGiveContainer.setOnClickListener{
+                    val fragment = TradeProductDetail()
+
+                    // Create a Bundle to pass data
+                    val bundle = Bundle()
+                    bundle.putString("ProductID", product.productID) // Example data
+
+                    // Set the Bundle as arguments for the fragment
+                    fragment.arguments = bundle
+
+                    (context as? AppCompatActivity)?.supportFragmentManager?.beginTransaction()
+                        ?.apply {
+                            replace(R.id.frameLayout, fragment)
+                            setCustomAnimations(R.anim.fade_out, R.anim.fade_in)
+                            addToBackStack(null)
+                            commit()
+                        }
+                }
             }
 
             //set content - you received
@@ -88,6 +132,25 @@ class TradeSwapRequestSentAdapter(private val swapRequestList: List<SwapRequest>
                         // Handle the case where the image URL is not retrieved
                         userReceiveItemImg.setImageResource(R.drawable.ai) // Set a placeholder
                     }
+                }
+
+                holder.binding.productReceiveContainer.setOnClickListener{
+                    val fragment = TradeProductDetail()
+
+                    // Create a Bundle to pass data
+                    val bundle = Bundle()
+                    bundle.putString("ProductID", product.productID) // Example data
+
+                    // Set the Bundle as arguments for the fragment
+                    fragment.arguments = bundle
+
+                    (context as? AppCompatActivity)?.supportFragmentManager?.beginTransaction()
+                        ?.apply {
+                            replace(R.id.frameLayout, fragment)
+                            setCustomAnimations(R.anim.fade_out, R.anim.fade_in)
+                            addToBackStack(null)
+                            commit()
+                        }
                 }
             }
         }

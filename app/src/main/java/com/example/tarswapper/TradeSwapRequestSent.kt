@@ -70,7 +70,7 @@ class TradeSwapRequestSent : Fragment() {
                     fetchSwapRequestsForUserProducts(userProductIds) {swapRequestList ->
                         Log.d("list fetched", swapRequestList.toString())
                         binding.recyclerViewSRSent.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
-                        binding.recyclerViewSRSent.adapter = TradeSwapRequestSentAdapter(swapRequestList)
+                        binding.recyclerViewSRSent.adapter = TradeSwapRequestSentAdapter(swapRequestList, requireContext())
                     }
                 }
 
