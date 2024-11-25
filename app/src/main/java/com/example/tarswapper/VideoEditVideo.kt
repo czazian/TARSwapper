@@ -4,6 +4,9 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.drawable.Drawable
+import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -13,14 +16,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import com.bumptech.glide.Glide
+import com.bumptech.glide.request.target.CustomTarget
 import com.example.tarswapper.data.Community
 import com.example.tarswapper.data.Product
+import com.example.tarswapper.data.ShortVideo
 import com.example.tarswapper.data.User
-import com.example.tarswapper.dataAdapter.ProductImageListAdapter
-import com.example.tarswapper.databinding.FragmentCommunityEditPostBinding
+import com.example.tarswapper.databinding.FragmentVideoEditVideoBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -31,35 +36,23 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.UUID
 
-class CommunityEditPost : Fragment() {
+class VideoEditVideo : Fragment() {
     //fragment name
-    private lateinit var binding: FragmentCommunityEditPostBinding
+    private lateinit var binding: FragmentVideoEditVideoBinding
     private lateinit var userObj: User
+    private var selectedVideoUri: Uri? = null
 
-    private val selectedImages: MutableList<Uri> = mutableListOf()  // List to store selected images
-    private lateinit var multi_image_adapter: ProductImageListAdapter
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
 
+        binding = FragmentVideoEditVideoBinding.inflate(layoutInflater, container, false)
+
         val args = arguments
-        val communityID = args?.getString("CommunityID")
+        val shortVideoID = args?.getString("ShortVideoID")
 
-        binding = FragmentCommunityEditPostBinding.inflate(layoutInflater, container, false)
-
-        // Set up RecyclerView with GridLayoutManager
-        val layoutManager = GridLayoutManager(requireContext(), 4) // 4 columns in the grid
-        binding.multiImagesRecyclerView.layoutManager = layoutManager
-
-        //load the uploaded selected images
-        loadCommunityImages(communityID.toString())
-        Log.d("RV resultr", selectedImages.toString())
-        multi_image_adapter = ProductImageListAdapter(selectedImages)
-        multi_image_adapter.notifyDataSetChanged()
-        binding.multiImagesRecyclerView.adapter = multi_image_adapter
-        Log.d("RV resultr", selectedImages.toString())
 
         //Show Bottom Navigation Bar
         val bottomNavigation =
@@ -72,30 +65,44 @@ class CommunityEditPost : Fragment() {
             requireActivity().getSharedPreferences("TARSwapperPreferences", Context.MODE_PRIVATE)
         val userID = sharedPreferencesTARSwapper.getString("userID", null)
 
+        //get short video id
+
         getUserRecord(userID.toString()) {
             if (it != null) {
                 userObj = it
             }
         }
 
-        //set form view value
-        getCommunityFromFirebase(communityID = communityID) { community ->
-            binding.titleED.setText(community.title)
-            binding.descriptionED.setText(community.description)
-            if (community.status == getString(R.string.COMMUNITY_POST_PUBLIC)) {
-                binding.radioGroupStatus.check(R.id.radioPublic)
-            } else if (community.status == getString(R.string.COMMUNITY_POST_HIDE)) {
-                binding.radioGroupStatus.check(R.id.radioHide)
-            }
+        getVideoUri(shortVideoID.toString()){ uri->
+            selectedVideoUri = uri
+            //holder.binding.videoImg.setImageBitmap(getFirstFrameFromVideo(context, videoUri = uri!!))
+            Glide.with(requireContext())
+                .asBitmap()
+                .load(uri) // Video URI
+                .frame(0) // Retrieves the frame at the 0ms mark (start of the video)
+                .into(object : CustomTarget<Bitmap>() {
+                    override fun onResourceReady(
+                        resource: Bitmap,
+                        transition: com.bumptech.glide.request.transition.Transition<in Bitmap>?
+                    ) {
+                        binding.uploadVideoBtn.setImageBitmap(resource)
+                    }
+
+                    override fun onLoadCleared(placeholder: Drawable?) {
+                        // Handle cleanup if needed
+                    }
+                })
+        }
 
 
-            //get product tag id
+        getShortVideoFromFirebase(shortVideoID.toString()){ shortVideo ->
+            binding.titleED.setText(shortVideo.title)
+
             val database = FirebaseDatabase.getInstance()
-            // Reference to the Community_ProductTag
-            val communityProductTagRef = database.getReference("Community/$communityID/Community_ProductTag")
+            val shortVideoProductTagRef = database.getReference("ShortVideo/${shortVideo.shortVideoID}/ShortVideo_ProductTag")
 
             // Fetch the product tags associated with the community
-            communityProductTagRef.get().addOnSuccessListener { dataSnapshot ->
+            shortVideoProductTagRef.get().addOnSuccessListener { dataSnapshot ->
                 if (dataSnapshot.exists()) {
                     // Retrieve the list of product tags
                     val productTags = dataSnapshot.children.map { it.getValue(String::class.java) }
@@ -139,32 +146,71 @@ class CommunityEditPost : Fragment() {
             }
         }
 
+        //set onclick for select product
+        binding.selectProductBtn.setOnClickListener{
 
-        binding.btnBack.setOnClickListener{
-            //put bundle
-            val fragment = CommunityDetail()
+            getUserProductsFromFirebase { productList ->
 
-            val args = Bundle()
-            args.putString("CommunityID", communityID)
+                val productNames = productList.map { it.name } // Extract the names from the products
+                val namesArray = productNames.toTypedArray()  // Convert List<String> to Array<String>
 
-            fragment.arguments = args
+                // Show the AlertDialog with the product names
+                val builder = AlertDialog.Builder(requireContext())
+                builder.setTitle("Select a Product")
+                builder.setItems(namesArray) { _, position ->
+                    // Handle item click, e.g., get the selected product
+                    val selectedProduct = productList[position]
+                    Log.d("Selected Product", selectedProduct.toString())
 
-            val transaction = activity?.supportFragmentManager?.beginTransaction()
-            transaction?.replace(R.id.frameLayout, fragment)
-            transaction?.setCustomAnimations(
-                R.anim.fade_out,  // Enter animation
-                R.anim.fade_in  // Exit animation
-            )
-            transaction?.addToBackStack(null)
-            transaction?.commit()
+                    //store selected product in hidden field
+                    binding.selectedProductID.setText(selectedProduct.productID)
+
+                    //display the container
+                    binding.productTagContainer.visibility = View.VISIBLE
+                    binding.productTagNameTV.text = selectedProduct.name
+                    if (selectedProduct.tradeType == "Sale"){
+                        //is sale
+                        binding.tradeDetailTV.text = "RM ${selectedProduct.price}"
+                        binding.tradeDetailTV.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
+                        binding.tradeDetailTV.backgroundTintList = null
+                        binding.tradeImg.setImageResource(R.drawable.baseline_attach_money_24)
+
+                    } else if (selectedProduct.tradeType == "Swap"){
+                        //is swap
+                        binding.tradeDetailTV.text = selectedProduct.swapCategory
+                        binding.tradeDetailTV.setCompoundDrawablesWithIntrinsicBounds(R.drawable.baseline_wifi_protected_setup_24, 0, 0, 0)
+                        binding.tradeDetailTV.backgroundTintList = null
+                        binding.tradeImg.setImageResource(R.drawable.baseline_wifi_protected_setup_24)
+
+                    }
+
+                    getProductThumnailImageUrl(selectedProduct) { url ->
+                        if (url != null) {
+                            Glide.with(binding.productTagImgV.context)
+                                .load(url)
+                                .into(binding.productTagImgV)
+                        } else {
+                            // Handle the case where the image URL is not retrieved
+                            binding.productTagImgV.setImageResource(R.drawable.ai) // Set a placeholder
+                        }
+                    }
+                }
+                builder.setNegativeButton("Cancel") { dialog, _ ->
+                    dialog.dismiss()
+                }
+                builder.create().show()
+            }
+
         }
 
-        // Set up the  to open gallery for selecting multiple images
-        binding.addImgBtn.setOnClickListener {
+        binding.btnBack.setOnClickListener{
+            activity?.supportFragmentManager?.popBackStack()
+        }
+
+        binding.uploadVideoBtn.setOnClickListener{
             val intent = Intent(Intent.ACTION_PICK)
-            intent.type = "image/*"
-            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)  // Allow multiple image selection
-            startActivityForResult(intent, PICK_MULTIPLE_IMAGE_REQUEST)
+            intent.type = "video/*"
+            startActivityForResult(intent, REQUEST_CODE_PICK_VIDEO)
         }
 
         //set onclick for select product
@@ -234,55 +280,34 @@ class CommunityEditPost : Fragment() {
         binding.submitBtn.setOnClickListener {
             var isValid = true
 
-            // Validate fields
-            if (binding.titleED.text.isNullOrBlank()) {
+            // Validate that the title is not empty
+            val title = binding.titleED.text.toString().trim()
+            if (title.isEmpty()) {
                 binding.titleED.error = "Title is required"
                 isValid = false
+            } else {
+                binding.titleED.error = null
             }
 
-            if (binding.descriptionED.text.isNullOrBlank()) {
-                binding.descriptionED.error = "Description is required"
+            // Validate that a video is selected
+            if (selectedVideoUri == null) {
+                Toast.makeText(context, "Please select a video before submitting.", Toast.LENGTH_SHORT).show()
                 isValid = false
             }
 
+            // Add your validation checks here
             if (isValid) {
-                val selectedOptionId = binding.radioGroupStatus.checkedRadioButtonId
-                var status : String
-                when (selectedOptionId) {
-                    R.id.radioPublic -> {
-                        status = getString(R.string.COMMUNITY_POST_PUBLIC)
-                        Toast.makeText(requireContext(), "Public selected", Toast.LENGTH_SHORT).show()
-                    }
-                    R.id.radioHide -> {
-                        status = getString(R.string.COMMUNITY_POST_HIDE)
-                        Toast.makeText(requireContext(), "Private selected", Toast.LENGTH_SHORT).show()
-                    }
-                    else -> {
-                        status = getString(R.string.COMMUNITY_POST_PUBLIC)
-                        Toast.makeText(requireContext(), "No selection made", Toast.LENGTH_SHORT).show()
-                    }
+                if (selectedVideoUri != null) {
+                    val updatedVideo = ShortVideo(
+                        shortVideoID = shortVideoID,
+                        title = binding.titleED.text.toString(),
+                    )
+                    // Add short video data to Firebase and upload video
+                    updateShortVideoToFirebase(updatedVideo)
+
+                } else {
+                    Toast.makeText(context, "Please select a video before submitting.", Toast.LENGTH_SHORT).show()
                 }
-
-                val updatedCommunity = Community(
-                    communityID = communityID,
-                    title = binding.titleED.text.toString(),
-                    description = binding.descriptionED.text.toString(),
-                    status = status.toString()
-                )
-
-                updateCommunityInFirebase(updatedCommunity)
-                Toast.makeText(context, "Community updated successfully", Toast.LENGTH_SHORT).show()
-
-                // Optionally, navigate back or to another fragment
-                val fragment = com.example.tarswapper.Community()
-                val transaction = activity?.supportFragmentManager?.beginTransaction()
-                transaction?.replace(R.id.frameLayout, fragment)
-                transaction?.setCustomAnimations(
-                    R.anim.fade_out,  // Enter animation
-                    R.anim.fade_in  // Exit animation
-                )
-                transaction?.addToBackStack(null)
-                transaction?.commit()
             } else {
                 Toast.makeText(context, "Please fill in all required fields", Toast.LENGTH_SHORT).show()
             }
@@ -314,33 +339,25 @@ class CommunityEditPost : Fragment() {
         })
     }
 
-    fun updateCommunityInFirebase(updatedCommunity: Community) {
-        // Get reference to Firebase database
+    private fun updateShortVideoToFirebase(video: ShortVideo) {
         val database = FirebaseDatabase.getInstance()
-        val communityRef = database.getReference("Community")
-
-        // Use the communityID to locate the existing community post
-        val communityID = updatedCommunity.communityID
-        val communityPostRef = communityRef.child(communityID.toString())
+        val shortVideoRef = database.getReference("ShortVideo/${video.shortVideoID}")
 
         // Update the community data
         val updatedData = hashMapOf<String, Any>(
-            "title" to updatedCommunity.title.toString(),
-            "description" to updatedCommunity.description.toString(),
-            "status" to updatedCommunity.status.toString(),
+            "title" to video.title.toString(),
         )
 
-        communityPostRef.updateChildren(updatedData)
+        shortVideoRef.updateChildren(updatedData)
             .addOnSuccessListener {
-                // Data successfully updated
-                Log.d("Firebase", "Community updated successfully")
-                val communityProductTagRef = database.getReference("Community/${updatedCommunity.communityID}/Community_ProductTag")
+                //create product tag if have
+                val shortVideoProductTagRef = database.getReference("ShortVideo/${video.shortVideoID}/ShortVideo_ProductTag")
                 if (!binding.selectedProductID.text.isNullOrBlank()) {
                     // Remove old tags and add the new one
-                    communityProductTagRef.removeValue()
+                    shortVideoProductTagRef.removeValue()
                         .addOnSuccessListener {
                             val newProductTag = binding.selectedProductID.text.toString()
-                            communityProductTagRef.push().setValue(newProductTag)
+                            shortVideoProductTagRef.push().setValue(newProductTag)
                                 .addOnSuccessListener {
                                     Log.d("Firebase", "New product tag added successfully.")
                                 }
@@ -354,7 +371,7 @@ class CommunityEditPost : Fragment() {
                 }
                 else {
                     // Remove the entire Community_ProductTag node
-                    communityProductTagRef.removeValue()
+                    shortVideoProductTagRef.removeValue()
                         .addOnSuccessListener {
                             Log.d("Firebase", "Community_ProductTag node removed successfully.")
                         }
@@ -362,103 +379,16 @@ class CommunityEditPost : Fragment() {
                             Log.e("Firebase", "Failed to remove Community_ProductTag node: ${e.message}")
                         }
                 }
-                // Optionally, upload new images if any (not implemented here)
-                uploadCommunityImages(updatedCommunity)
+
+                // Upload video after data is successfully written
+                uploadVideoToFirebase(selectedVideoUri!!, video.shortVideoID!!) {
+                    // Only navigate after the upload is complete
+                    navigateToPreviousFragment()
+                }
             }
             .addOnFailureListener { e ->
-                // Handle failure
-                Log.e("Firebase", "Failed to update community: ${e.message}")
+                println("Failed to add video: ${e.message}")
             }
-    }
-
-    fun uploadCommunityImages(community: Community) {
-        // Get a reference to Firebase Storage
-        val storage = FirebaseStorage.getInstance()
-        val storageRef = storage.getReference("CommunityImages")
-        val imagesFolder         = storageRef.child(community.communityID + "/Images")     // Use productID to organize images in folders
-
-        // Iterate over selected images and upload each one
-        selectedImages.forEach { imageUri ->
-            val imageRef = imagesFolder.child(UUID.randomUUID().toString())  // Use a unique name for each image
-
-            // Upload the image
-            imageRef.putFile(imageUri)
-                .addOnSuccessListener {
-                    // Get the download URL
-                    imageRef.downloadUrl.addOnSuccessListener { uri ->
-                        // Update the product with the image URL
-                        //updateProductWithImageUrl(product.productID, uri.toString())
-                    }
-                }
-                .addOnFailureListener { e ->
-                    // Handle image upload failure
-                    println("Image upload failed: ${e.message}")
-                }
-        }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (resultCode == Activity.RESULT_OK) {
-            when (requestCode) {
-                // Multiple image selection
-                PICK_MULTIPLE_IMAGE_REQUEST -> {
-                    data?.clipData?.let { clipData ->
-                        // If multiple images are selected
-                        for (i in 0 until clipData.itemCount) {
-                            val imageUri = clipData.getItemAt(i).uri
-                            selectedImages.add(imageUri)
-                        }
-                    } ?: run {
-                        // If only one image is selected (not in a ClipData)
-                        data?.data?.let { imageUri ->
-                            selectedImages.add(imageUri)
-                        }
-                    }
-
-                    // Notify adapter that the data has changed
-                    multi_image_adapter.notifyDataSetChanged()
-                }
-            }
-        }
-    }
-
-    fun loadCommunityImages(communityID: String) {
-        // Clear the list to avoid duplicates
-        selectedImages.clear()
-
-        // Get a reference to Firebase Storage
-        val storageRef = FirebaseStorage.getInstance().reference
-        val communityImagesRef = storageRef.child("CommunityImages/$communityID/Images")
-
-        communityImagesRef.listAll().addOnSuccessListener { listResult ->
-            if (listResult.items.isEmpty()) {
-                Log.d("Firebase", "No images found in this community.")
-                // Optionally, handle the case where there are no images
-                return@addOnSuccessListener
-            }
-
-            // Fetch download URLs for all images
-            listResult.items.forEach { item ->
-                item.downloadUrl.addOnSuccessListener { uri ->
-                    selectedImages.add(uri) // Add the URI to the list
-
-                    // Check if all items are loaded
-                    if (selectedImages.size == listResult.items.size) {
-                        // All images loaded, now set up the adapter
-                        multi_image_adapter = ProductImageListAdapter(selectedImages)
-                        binding.multiImagesRecyclerView.adapter = multi_image_adapter
-                        multi_image_adapter.notifyDataSetChanged() // Notify adapter about data change
-                        Log.d("RV result", "Images loaded and adapter updated: $selectedImages")
-                    }
-                }.addOnFailureListener { exception ->
-                    Log.e("Firebase", "Error fetching image URL: ${exception.message}")
-                }
-            }
-        }.addOnFailureListener { exception ->
-            Log.e("Firebase", "Error listing images: ${exception.message}")
-        }
     }
 
     fun getUserProductsFromFirebase(onResult: (List<Product>) -> Unit) {
@@ -531,31 +461,110 @@ class CommunityEditPost : Fragment() {
                 onResult(null)  // Handle any failure when listing items
             }
     }
+    private fun uploadVideoToFirebase(videoUri: Uri, shortVideoID: String, onUploadComplete: () -> Unit) {
+        val progressContainer = binding.progressContainer
+        val progressBar = binding.uploadProgressBar
+        val progressPercentage = binding.progressPercentage
 
-    fun getCommunityFromFirebase(communityID: String? = null, onResult: (com.example.tarswapper.data.Community) -> Unit) {
-//        val sharedPreferencesTARSwapper =
-//            requireActivity().getSharedPreferences("TARSwapperPreferences", Context.MODE_PRIVATE)
-//        val userID = sharedPreferencesTARSwapper.getString("userID", null)
-        // Reference to the "Product" node in Firebase Database
+        // Show progress container
+        progressContainer.visibility = View.VISIBLE
 
-        val databaseRef = FirebaseDatabase.getInstance().getReference("Community")
-        val query = databaseRef.child(communityID.toString()) // Query for a specific product by its productID
+        // Disable submit button during upload
+        binding.submitBtn.isEnabled = false
+        binding.submitBtn.text = "Video is uploading. Please wait..."
+
+        // Get Firebase Storage reference
+        val storage = FirebaseStorage.getInstance()
+        val storageRef =
+            storage.reference.child("ShortVideo/$shortVideoID/video.mp4") // File path based on shortVideoID
+
+        // Start the upload
+        val uploadTask = storageRef.putFile(videoUri)
+
+        // Monitor the upload process
+        uploadTask.addOnProgressListener { snapshot ->
+            val progress = (100.0 * snapshot.bytesTransferred / snapshot.totalByteCount).toInt()
+            progressBar.progress = progress
+            progressPercentage.text = "$progress%"
+            Log.d("Firebase", "Upload is $progress% done")
+        }.addOnSuccessListener {
+            storageRef.downloadUrl.addOnSuccessListener { downloadUri ->
+                Log.d("Firebase", "Video uploaded successfully: $downloadUri")
+                Toast.makeText(context, "Video uploaded successfully!", Toast.LENGTH_SHORT).show()
+
+                // Hide progress container and enable submit button
+                progressContainer.visibility = View.GONE
+                binding.submitBtn.isEnabled = true
+
+                // Notify upload completion
+                onUploadComplete()
+            }
+        }.addOnFailureListener { exception ->
+            Log.e("Firebase", "Failed to upload video: ${exception.message}")
+            Toast.makeText(context, "Failed to upload video.", Toast.LENGTH_SHORT).show()
+
+            // Hide progress container and re-enable submit button
+            progressContainer.visibility = View.GONE
+            binding.submitBtn.isEnabled = true
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == REQUEST_CODE_PICK_VIDEO && resultCode == AppCompatActivity.RESULT_OK && data != null) {
+            val videoUri: Uri? = data.data
+            if (videoUri != null) {
+                Log.d("VideoPicker", "Selected video URI: $videoUri")
+
+                // Save the URI
+                selectedVideoUri = videoUri
+
+                // Extract and set the thumbnail to the ImageButton
+                val retriever = MediaMetadataRetriever()
+                try {
+                    retriever.setDataSource(context, videoUri)
+                    val thumbnail = retriever.frameAtTime // Extract the first frame
+                    binding.uploadVideoBtn.setImageBitmap(thumbnail) // Set the thumbnail
+                } catch (e: Exception) {
+                    Log.e("VideoPicker", "Failed to retrieve video thumbnail: ${e.message}")
+                } finally {
+                    retriever.release()
+                }
+            } else {
+                Log.e("VideoPicker", "Video URI is null")
+            }
+        }
+    }
+
+    private fun navigateToPreviousFragment() {
+        val fragment = Video()
+        val transaction = activity?.supportFragmentManager?.beginTransaction()
+        transaction?.replace(R.id.frameLayout, fragment)
+        transaction?.setCustomAnimations(R.anim.fade_out, R.anim.fade_in)
+        transaction?.addToBackStack(null)
+        transaction?.commit()
+    }
+
+    fun getShortVideoFromFirebase(shortVideoID : String, onResult: (ShortVideo) -> Unit) {
+        val databaseRef = FirebaseDatabase.getInstance().getReference("ShortVideo")
+        val query = databaseRef.child(shortVideoID.toString()) // Query for a specific product by its productID
 
         query.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists()) {
                     // Retrieve the product from the snapshot
-                    val community = snapshot.getValue(com.example.tarswapper.data.Community::class.java)
-                    if (community != null) {
-                        onResult(community) // Wrap it in a list to match the expected result format
-                        Log.d("community found", community.toString())
+                    val shortVideo = snapshot.getValue(com.example.tarswapper.data.ShortVideo::class.java)
+                    if (shortVideo != null) {
+                        onResult(shortVideo) // Wrap it in a list to match the expected result format
+                        Log.d("community found", shortVideo.toString())
                     } else {
                         // If the product doesn't match criteria
-                        Log.d("No matching product", "community either doesn't exist or is created by the user.")
+                        Log.d("No matching shortVideo", "community either doesn't exist or is created by the user.")
                     }
                 } else {
                     // Handle if the product is not found in the database
-                    Log.d("Product not found", "No product exists for the given productID.")
+                    Log.d("shortVideo not found", "No product exists for the given productID.")
                 }
             }
 
@@ -566,6 +575,21 @@ class CommunityEditPost : Fragment() {
         })
     }
 
+    fun getVideoUri(shortVideoID: String, onComplete: (Uri?) -> Unit) {
+        val storage = FirebaseStorage.getInstance()
+        val videoRef = storage.reference.child("ShortVideo/$shortVideoID/video.mp4")
+
+        videoRef.downloadUrl
+            .addOnSuccessListener { uri ->
+                // Successfully retrieved the URI
+                onComplete(uri)
+            }
+            .addOnFailureListener { exception ->
+                // Handle the error
+                exception.printStackTrace()
+                onComplete(null)
+            }
+    }
 
     fun getProductFromFirebase(productID: String? = null, onResult: (Product) -> Unit) {
 //        val sharedPreferencesTARSwapper =
@@ -630,9 +654,11 @@ class CommunityEditPost : Fragment() {
     }
 
 
+
     companion object {
         private const val PICK_IMAGE_REQUEST = 1
         private const val PICK_MULTIPLE_IMAGE_REQUEST = 2
+        private const val REQUEST_CODE_PICK_VIDEO = 1001
     }
 
 

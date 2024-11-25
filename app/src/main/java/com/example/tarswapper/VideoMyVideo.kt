@@ -58,7 +58,7 @@ class VideoMyVideo : Fragment() {
         // Set LayoutManager for RecyclerView & Call getCommunityFromFirebase to populate the RecyclerView
         binding.myVideoRV.layoutManager = GridLayoutManager(requireContext(), 1)
         getUserShortVideoFromFirebase { videoList ->
-            binding.myVideoRV.adapter = VideoMyVideoAdapter(videoList, requireContext())
+            binding.myVideoRV.adapter = VideoMyVideoAdapter(videoList, requireContext(), this)
         }
 
         binding.addVideoBtn.setOnClickListener{

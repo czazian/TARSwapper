@@ -28,7 +28,7 @@
             android:layout_marginLeft="30dp"
             android:background="?android:attr/selectableItemBackground"
             android:padding="12dp"
-            android:text="Edit post"
+            android:text="Edit"
             android:textSize="20dp" />
     </LinearLayout>
 

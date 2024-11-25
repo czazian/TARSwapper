@@ -26,7 +26,7 @@
             android:shadowDx="6"
             android:shadowDy="6"
             android:shadowRadius="2"
-            android:text="Add Short Video"
+            android:text="Edit Short Video"
             android:textColor="#FFFFFF"
             android:textSize="21dp"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -125,7 +125,7 @@
 
 
 
-    <EditText
+            <EditText
                 android:id="@+id/titleED"
                 android:layout_width="360dp"
                 android:layout_height="39dp"
@@ -160,7 +160,7 @@
                 app:layout_constraintTop_toTopOf="@+id/textView22" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/productTagContainerContainer"
+                android:id="@+id/productTagContainer"
                 android:layout_width="wrap_content"
                 android:layout_height="100dp"
                 android:padding="4dp"
@@ -262,14 +262,14 @@
                 android:layout_width="320dp"
                 android:layout_height="50dp"
                 android:backgroundTint="#AC87C5"
-                android:text="Add"
+                android:text="Edit"
                 android:textSize="20dp"
                 android:textStyle="bold"
                 android:layout_marginTop="25dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.533"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/productTagContainerContainer" />
+                app:layout_constraintTop_toBottomOf="@+id/productTagContainer" />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

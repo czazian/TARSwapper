@@ -59,6 +59,7 @@ class VideoExplore : Fragment() {
         }
 
         // Set LayoutManager for RecyclerView & Call getCommunityFromFirebase to populate the RecyclerView
+
         getUserShortVideoFromFirebase { videoList ->
             binding.viewPager2.adapter = VideoExploreAdapter(videoList, parentFragmentManager, requireContext())
         }
@@ -130,6 +131,5 @@ class VideoExplore : Fragment() {
             }
         })
     }
-
 
 }

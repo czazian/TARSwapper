@@ -21,6 +21,19 @@
             android:background="#000000"
             android:keepScreenOn="true" />
 
+        <ImageButton
+            android:id="@+id/btnBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:background="@drawable/ripple_effect"
+            android:backgroundTint="@color/white"
+            android:src="@drawable/baseline_chevron_left_24"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="@color/white"
+            android:visibility="gone"/>
+
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -155,8 +168,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="80dp"
                     android:backgroundTint="#F8F8FB"
-                    android:clickable="true"
-                    android:focusable="true"
                     android:visibility="visible"
                     app:cardCornerRadius="15dp"
                     app:cardElevation="5dp"
