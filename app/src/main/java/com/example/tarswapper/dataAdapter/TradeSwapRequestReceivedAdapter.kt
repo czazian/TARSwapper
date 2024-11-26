@@ -95,6 +95,10 @@ class TradeSwapRequestReceivedAdapter(private var swapRequestList: MutableList<S
             }
 
             holder.binding.dateTV.text = customizeDate(swapRequest.created_at.toString())
+
+            var userPrice : Double = 0.0
+            var userReceivedPrice : Double = 0.0
+
             //set content - you give
             getProductDetail(swapRequest.receiverProductID.toString()){ product ->
                 holder.binding.userItemNameTV.text = product!!.name
@@ -103,7 +107,11 @@ class TradeSwapRequestReceivedAdapter(private var swapRequestList: MutableList<S
                 getProductPrice(product.name.toString()) { priceEstimate ->
                     // Ensure this is updated on the main thread
                     holder.itemView.post {
-                        holder.binding.userItemEstimatePriceTV.text = priceEstimate ?: "N/A"
+                        holder.binding.userItemEstimatePriceTV.text = priceEstimate.toString() ?: "N/A"
+                    }
+
+                    if (priceEstimate != null) {
+                        userPrice = priceEstimate
                     }
                 }
 
@@ -147,7 +155,11 @@ class TradeSwapRequestReceivedAdapter(private var swapRequestList: MutableList<S
                 getProductPrice(product.name.toString()) { priceEstimate ->
                     // Ensure this is updated on the main thread
                     holder.itemView.post {
-                        holder.binding.userReceiveItemEstimatePriceTV.text = priceEstimate ?: "N/A"
+                        holder.binding.userReceiveItemEstimatePriceTV.text = priceEstimate.toString() ?: "N/A"
+                    }
+
+                    if (priceEstimate != null) {
+                        userReceivedPrice = priceEstimate
                     }
                 }
 
@@ -180,6 +192,14 @@ class TradeSwapRequestReceivedAdapter(private var swapRequestList: MutableList<S
                             addToBackStack(null)
                             commit()
                         }
+                }
+
+
+
+                if(userReceivedPrice >= userPrice){
+                    holder.binding.suggestionTV.visibility = View.VISIBLE
+                }else{
+                    holder.binding.suggestionTV.visibility = View.GONE
                 }
             }
 
@@ -268,8 +288,6 @@ class TradeSwapRequestReceivedAdapter(private var swapRequestList: MutableList<S
                         }
                 }
 
-                notifyItemRemoved(position)
-
             }
 
             holder.binding.rejectBtn.setOnClickListener{
@@ -307,7 +325,7 @@ class TradeSwapRequestReceivedAdapter(private var swapRequestList: MutableList<S
                             println("Failed to add Notification: ${e.message}")
                         }
                 }
-                notifyItemRemoved(position)
+                //notifyItemRemoved(position)
             }
 
 
@@ -507,7 +525,7 @@ class TradeSwapRequestReceivedAdapter(private var swapRequestList: MutableList<S
     }
 
 
-    fun getProductPrice(productName: String, onResult: (String?) -> Unit) {
+    fun getProductPrice(productName: String, onResult: (Double?) -> Unit) {
         val url = "https://api.upcitemdb.com/prod/trial/search"
         val client = OkHttpClient()
 
@@ -541,7 +559,7 @@ class TradeSwapRequestReceivedAdapter(private var swapRequestList: MutableList<S
                         val rateLimitReset = response.header("X-RateLimit-Reset")
                         Log.d("API_RATE_LIMIT", "Remaining: $rateLimitRemaining, Reset: $rateLimitReset")
                         Handler(Looper.getMainLooper()).post {
-                            onResult("N/A")
+                            onResult(0.0)
                         }
                         return
                     }
@@ -555,11 +573,11 @@ class TradeSwapRequestReceivedAdapter(private var swapRequestList: MutableList<S
                         val lowestPrice = firstItem.optDouble("lowest_recorded_price", -1.0)
                         val highestPrice = firstItem.optDouble("highest_recorded_price", -1.0)
 
-                        val mean = (lowestPrice + highestPrice)/2
+                        val mean : Double = (lowestPrice + highestPrice)/2
                         val priceEstimate = if (lowestPrice >= 0 && highestPrice >= 0) {
-                            "RM $mean"
+                            mean
                         } else {
-                            "Price not available"
+                            0.0
                         }
 
                         // Ensure the UI is updated on the main thread
@@ -568,7 +586,7 @@ class TradeSwapRequestReceivedAdapter(private var swapRequestList: MutableList<S
                         }
                     } else {
                         Handler(Looper.getMainLooper()).post {
-                            onResult("No product information found")
+                            onResult(0.0)
                         }
                     }
                 }

@@ -1,5 +1,6 @@
 package com.example.tarswapper.dataAdapter
 
+import VideoCommentBottomSheet
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -42,6 +43,7 @@ class VideoCommentAdapter(private val commentList: List<ShortVideoComment>, priv
                 .into(holder.binding.profileImgV)
 
             holder.binding.usernameTV.setOnClickListener{
+
                 val fragment = UserDetail()
 
                 // Create a Bundle to pass data
