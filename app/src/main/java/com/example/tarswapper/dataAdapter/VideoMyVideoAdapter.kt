@@ -42,7 +42,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
 
-class VideoMyVideoAdapter(private val videoList: List<ShortVideo>, private val context: Context, private val fragment: Fragment) :
+class VideoMyVideoAdapter(private val videoList: MutableList<ShortVideo>, private val context: Context, private val fragment: Fragment) :
     RecyclerView.Adapter<VideoMyVideoAdapter.VideoViewHolder>() {
 
     class VideoViewHolder(val binding: VideoMyVideoListBinding) : RecyclerView.ViewHolder(binding.root){}
@@ -277,6 +277,11 @@ class VideoMyVideoAdapter(private val videoList: List<ShortVideo>, private val c
                                         }
 
                                         Toast.makeText(context, "All files deleted successfully.", Toast.LENGTH_SHORT).show()
+
+                                        val position = getItemPosition(shortVideo)  // Implement a method to get the position based on your adapter data
+                                        if (position != -1) {
+                                            removeItem(position)  // Your adapter should have a method to remove an item
+                                        }
                                     }
                                     .addOnFailureListener { exception ->
                                         Log.e("Firebase", "Error listing files: ${exception.message}")
@@ -427,6 +432,19 @@ class VideoMyVideoAdapter(private val videoList: List<ShortVideo>, private val c
             retriever.release() // Always release the retriever
         }
     }
+
+    fun removeItem(position: Int) {
+        // Remove item from dataList
+        videoList.removeAt(position)
+        // Notify adapter that item has been removed
+        notifyItemRemoved(position)
+    }
+
+    // You should have a method to find the position of the item
+    fun getItemPosition(shortVideo: ShortVideo): Int {
+        return videoList.indexOf(shortVideo) // Returns -1 if the item is not found
+    }
+
 
     fun formatDuration(durationMillis: Long): String {
         val totalSeconds = durationMillis / 1000

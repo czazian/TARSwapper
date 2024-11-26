@@ -119,7 +119,7 @@ class TradeSwapRequestReceived : Fragment() {
         })
     }
 
-    fun fetchSwapRequestsForUserProducts(userProductIds: List<String>, onResult: (List<SwapRequest>) -> Unit) {
+    fun fetchSwapRequestsForUserProducts(userProductIds: List<String>, onResult: (MutableList<SwapRequest>) -> Unit) {
         val swapRequestRef = FirebaseDatabase.getInstance().getReference("SwapRequest")
 
         swapRequestRef.addListenerForSingleValueEvent(object : ValueEventListener {

@@ -41,7 +41,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.tarswapper.TradeProductDetail
 import com.example.tarswapper.UserDetail
 
-class TradeSwapRequestReceivedAdapter(private var swapRequestList: List<SwapRequest>, private val context: Context) :
+class TradeSwapRequestReceivedAdapter(private var swapRequestList: MutableList<SwapRequest>, private val context: Context) :
     RecyclerView.Adapter<TradeSwapRequestReceivedAdapter.SwapRequestViewHolder>() {
 
     class SwapRequestViewHolder(val binding: TradeSwapRequestReceivedListBinding) : RecyclerView.ViewHolder(binding.root){}

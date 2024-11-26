@@ -42,6 +42,7 @@ class Community : Fragment() {
         binding.viewPager.adapter = adapter
 
         // Use TabLayoutMediator to bind TabLayout with ViewPager2
+        binding.viewPager.isUserInputEnabled = false
         TabLayoutMediator(binding.headerTab, binding.viewPager) { tab, position ->
             // Set tab text from TabItem
             tab.text = when (position) {

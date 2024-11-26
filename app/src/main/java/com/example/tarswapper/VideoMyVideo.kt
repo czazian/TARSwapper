@@ -102,7 +102,7 @@ class VideoMyVideo : Fragment() {
     }
 
 
-    fun getUserShortVideoFromFirebase(onResult: (List<ShortVideo>) -> Unit) {
+    fun getUserShortVideoFromFirebase(onResult: (MutableList<ShortVideo>) -> Unit) {
         val sharedPreferencesTARSwapper =
             requireActivity().getSharedPreferences("TARSwapperPreferences", Context.MODE_PRIVATE)
         val userID = sharedPreferencesTARSwapper.getString("userID", null)
@@ -129,7 +129,7 @@ class VideoMyVideo : Fragment() {
                     Log.d("Community list found", videoList.size.toString())
                 } else {
                     // Handle empty database
-                    onResult(emptyList())
+                    onResult(mutableListOf<ShortVideo>())
                     Log.d("Empty found", videoList.size.toString())
                 }
             }
@@ -137,7 +137,7 @@ class VideoMyVideo : Fragment() {
             override fun onCancelled(error: DatabaseError) {
                 // Handle errors
                 println("Error fetching data: ${error.message}")
-                onResult(emptyList())
+                onResult(mutableListOf<ShortVideo>())
             }
         })
     }

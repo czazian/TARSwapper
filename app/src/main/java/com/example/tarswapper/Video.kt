@@ -36,6 +36,7 @@ class Video : Fragment() {
         binding = FragmentVideoBinding.inflate(layoutInflater, container, false)
 
         // Set the adapter for ViewPager2
+        binding.viewPager.isUserInputEnabled = false
         val adapter = VideoVPAdapter(requireActivity())
         binding.viewPager.adapter = adapter
 

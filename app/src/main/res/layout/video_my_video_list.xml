@@ -4,23 +4,23 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/frameLayout8"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:padding="6dp">
+    android:layout_height="wrap_content">
 
 
     <androidx.cardview.widget.CardView
         android:id="@+id/myVideoLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:backgroundTint="#F8F8FB"
+        android:layout_height="wrap_content"
         android:layout_margin="10dp"
+        android:backgroundTint="#F8F8FB"
+        android:clickable="true"
+        android:focusable="true"
         app:cardCornerRadius="15dp"
         app:cardElevation="5dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:clickable="true"
-        android:focusable="true">
+        app:layout_constraintTop_toTopOf="parent">
 
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -32,9 +32,9 @@
                 android:id="@+id/video_titleTV"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:ellipsize="end"
                 android:text="Video Title"
                 android:textSize="14dp"
-                android:ellipsize="end"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -54,9 +54,9 @@
                 android:id="@+id/videoImg"
                 android:layout_width="80dp"
                 android:layout_height="100dp"
-                android:src="@drawable/item"
                 android:layout_marginTop="4dp"
                 android:scaleType="centerCrop"
+                android:src="@drawable/item"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/video_titleTV" />
 
@@ -64,9 +64,9 @@
                 android:id="@+id/linearLayout3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
                 android:gravity="start"
                 android:orientation="vertical"
-                android:layout_marginStart="8dp"
                 app:layout_constraintBottom_toBottomOf="@+id/videoImg"
                 app:layout_constraintStart_toEndOf="@+id/videoImg"
                 app:layout_constraintTop_toTopOf="@+id/videoImg">
@@ -269,7 +269,6 @@
                 </androidx.cardview.widget.CardView>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
-
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>
