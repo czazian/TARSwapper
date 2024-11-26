@@ -36,6 +36,7 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageMetadata
+import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -49,12 +50,19 @@ import java.util.Calendar
 import java.util.Locale
 
 import java.util.UUID
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 
 class AIChatbot : Fragment() {
     private lateinit var binding: FragmentAIChatbotBinding
     private var listOfConversation = ArrayList<Message>()
     var adapter: AIChatbotAdapter? = null
+
+    private var cachedToken: String? = null
+    private var tokenExpiryTime: Long = 0
+    private var isProcessing: Boolean = false
+    private var typingMessage:Message? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -65,7 +73,7 @@ class AIChatbot : Fragment() {
 
 
         //Check weather the conversation is empty
-        if(listOfConversation.isNotEmpty()) {
+        if (listOfConversation.isNotEmpty()) {
             binding.imageView.visibility = View.GONE
             binding.previewTextAI.visibility = View.GONE
         } else {
@@ -115,7 +123,7 @@ class AIChatbot : Fragment() {
         binding.aiRecyclerView.adapter = adapter
 
         //Send Message to AI
-        binding.faqBtn.setOnClickListener(){
+        binding.faqBtn.setOnClickListener() {
             binding.imageView.visibility = View.GONE
             binding.previewTextAI.visibility = View.GONE
             val question = binding.faqText.text.toString()
@@ -151,6 +159,24 @@ class AIChatbot : Fragment() {
                         //Clear Text
                         binding.faqText.setText("")
 
+
+
+
+                        //Add Pending Text
+                        typingMessage = Message(
+                            "...",
+                            "AI",
+                            SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Calendar.getInstance().time),
+                            null,
+                            null
+                        )
+                        listOfConversation.add(typingMessage!!)
+                        adapter?.notifyItemInserted(listOfConversation.size - 1)
+                        binding.aiRecyclerView.scrollToPosition(listOfConversation.size - 1)
+
+                        binding.faqBtn.isEnabled = false
+                        binding.btnPreQues1.isEnabled = false
+                        binding.btnPreQues2.isEnabled = false
                     }
                 }
             }
@@ -158,7 +184,7 @@ class AIChatbot : Fragment() {
 
 
         //Quick Question 1
-        binding.btnPreQues1.setOnClickListener(){
+        binding.btnPreQues1.setOnClickListener() {
             binding.imageView.visibility = View.GONE
             binding.previewTextAI.visibility = View.GONE
             val question = "What is TARSwapper?"
@@ -191,6 +217,24 @@ class AIChatbot : Fragment() {
                         //Optionally, scroll to the bottom of the RecyclerView to show the latest message
                         binding.aiRecyclerView.scrollToPosition(listOfConversation.size - 1)
 
+
+
+
+                        //Add Pending Text
+                        typingMessage = Message(
+                            "...",
+                            "AI",
+                            SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Calendar.getInstance().time),
+                            null,
+                            null
+                        )
+                        listOfConversation.add(typingMessage!!)
+                        adapter?.notifyItemInserted(listOfConversation.size - 1)
+                        binding.aiRecyclerView.scrollToPosition(listOfConversation.size - 1)
+
+                        binding.faqBtn.isEnabled = false
+                        binding.btnPreQues1.isEnabled = false
+                        binding.btnPreQues2.isEnabled = false
                     }
                 }
             }
@@ -198,7 +242,7 @@ class AIChatbot : Fragment() {
 
 
         //Quick Question 2
-        binding.btnPreQues2.setOnClickListener(){
+        binding.btnPreQues2.setOnClickListener() {
             binding.imageView.visibility = View.GONE
             binding.previewTextAI.visibility = View.GONE
 
@@ -232,6 +276,23 @@ class AIChatbot : Fragment() {
                         //Optionally, scroll to the bottom of the RecyclerView to show the latest message
                         binding.aiRecyclerView.scrollToPosition(listOfConversation.size - 1)
 
+
+
+                        //Add Pending Text
+                        typingMessage = Message(
+                            "...",
+                            "AI",
+                            SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Calendar.getInstance().time),
+                            null,
+                            null
+                        )
+                        listOfConversation.add(typingMessage!!)
+                        adapter?.notifyItemInserted(listOfConversation.size - 1)
+                        binding.aiRecyclerView.scrollToPosition(listOfConversation.size - 1)
+
+                        binding.faqBtn.isEnabled = false
+                        binding.btnPreQues1.isEnabled = false
+                        binding.btnPreQues2.isEnabled = false
                     }
                 }
             }
@@ -271,141 +332,154 @@ class AIChatbot : Fragment() {
     }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
     ////START OF AI CHAT BOT////
     private fun sendRequestToAgent(inputText: String) {
+        lifecycleScope.launch(Dispatchers.Main) {
+            // Add typing message (UI operation)
+            binding.faqBtn.isEnabled = false
+            binding.btnPreQues1.isEnabled = false
+            binding.btnPreQues2.isEnabled = false
+
+            //Move network call to IO dispatcher
+            val responseResult = withContext(Dispatchers.IO) {
+                try {
+                    makeNetworkRequest(inputText) // Call function for your network request
+                } catch (e: Exception) {
+                    Log.e("NetworkError", e.toString())
+                    null
+                }
+            }
+
+            //Process response (back on Main thread for UI updates)
+            responseResult?.let { fulfillmentText ->
+                //Remove typing message
+                val position = listOfConversation.indexOf(typingMessage)
+                if (position != -1) {
+                    listOfConversation.removeAt(position)
+                    adapter?.notifyItemRemoved(position)
+                }
+
+                // Add response message
+                val message = Message(
+                    fulfillmentText, "AI",
+                    SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Calendar.getInstance().time),
+                    null, null
+                )
+                listOfConversation.add(message)
+                adapter?.notifyItemInserted(listOfConversation.size - 1)
+                binding.aiRecyclerView.scrollToPosition(listOfConversation.size - 1)
+            } ?: run {
+                //Remove typing message
+                val position = listOfConversation.indexOf(typingMessage)
+                if (position != -1) {
+                    listOfConversation.removeAt(position)
+                    adapter?.notifyItemRemoved(position)
+                }
+                Toast.makeText(requireContext(), "Failed to get a response.", Toast.LENGTH_LONG).show()
+                Log.e("AI Response", "Failed to get a response.")
+            }
+
+            binding.faqBtn.isEnabled = true
+            binding.btnPreQues1.isEnabled = true
+            binding.btnPreQues2.isEnabled = true
+        }
+    }
+
+
+    private suspend fun makeNetworkRequest(inputText: String): String? {
         val projectID = "tarswapper-d4b2a"
         val agentID = "488f5e39-9441-4b76-8d5b-5550b0757c7b"
         val location = "us-central1"
         val sessionID = UUID.randomUUID().toString()
 
-        val url = "https://$location-dialogflow.googleapis.com/v3/projects/$projectID/locations/$location/agents/$agentID/sessions/$sessionID:detectIntent"
+        return try {
+            val requestQueue: RequestQueue = Volley.newRequestQueue(requireContext())
+            val url =
+                "https://$location-dialogflow.googleapis.com/v3/projects/$projectID/locations/$location/agents/$agentID/sessions/$sessionID:detectIntent"
 
-        val requestBody = JSONObject().apply {
-            put("queryInput", JSONObject().apply {
-                put("text", JSONObject().apply {
-                    put("text", inputText)  // User input text
+            val requestBody = JSONObject().apply {
+                put("queryInput", JSONObject().apply {
+                    put("text", JSONObject().apply { put("text", inputText) })
+                    put("languageCode", "en")
                 })
-                put("languageCode", "en")  // Language code
-            })
+                put("queryParams", JSONObject().apply { put("timeZone", "America/Los_Angeles") })
+            }
 
-            // Adding the queryParams with timeZone
-            put("queryParams", JSONObject().apply {
-                put("timeZone", "America/Los_Angeles")
-            })
-        }
+            // Perform the network request
+            suspendCoroutine<String?> { continuation ->
+                val jsonObjectRequest = object : JsonObjectRequest(
+                    Method.POST, url, requestBody,
+                    { response ->
+                        val fulfillmentText = response.optJSONObject("queryResult")
+                            ?.optJSONArray("responseMessages")
+                            ?.optJSONObject(0)
+                            ?.optJSONObject("text")
+                            ?.optJSONArray("text")
+                            ?.optString(0)
 
-        Log.d("RequestBody", requestBody.toString())
+                        continuation.resume(fulfillmentText)
 
-        GlobalScope.launch(Dispatchers.Main) {
-            try {
-                val response = withContext(Dispatchers.IO) {
-                    val requestQueue: RequestQueue = Volley.newRequestQueue(requireContext())
-
-                    val jsonObjectRequest = object : JsonObjectRequest(
-                        Method.POST,
-                        url,
-                        requestBody,
-                        { response ->
-                            val responseText = response.toString()
-                            Log.d("API Response", responseText)
-
-                            val queryResult = response.optJSONObject("queryResult")
-                            if (queryResult != null) {
-                                val responseMessages = queryResult.optJSONArray("responseMessages")
-
-                                // Check if responseMessages is not null and contains data
-                                if (responseMessages != null && responseMessages.length() > 0) {
-                                    val fulfillmentText = responseMessages.getJSONObject(0)
-                                        .optJSONObject("text")?.optJSONArray("text")?.optString(0)
-
-                                    if (!fulfillmentText.isNullOrEmpty()) {
-                                        // Add the answer from AI to the conversation
-                                        val message = Message(
-                                            fulfillmentText,
-                                            "AI",
-                                            SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Calendar.getInstance().time),
-                                            null,
-                                            null
-                                        )
-                                        listOfConversation.add(message)
-
-                                        // Notify the adapter and scroll to the new message
-                                        adapter?.notifyItemInserted(listOfConversation.size - 1)
-                                        binding.aiRecyclerView.scrollToPosition(listOfConversation.size - 1)
-                                    } else {
-                                        Log.e("Dialogflow Error", "No text response found.")
-                                    }
-                                } else {
-                                    Log.e("Dialogflow Error", "Response messages are empty or null.")
-                                }
-                            } else {
-                                Log.e("Dialogflow Error", "queryResult is null.")
-                            }
-
-                        },
-                        { error ->
-                            Log.e("VolleyError", error.toString())
-                            error.networkResponse?.let {
-                                Log.e("VolleyErrorResponse", String(it.data))
-                            }
-                            Toast.makeText(requireContext(), error.toString(), Toast.LENGTH_LONG).show()
-                        }) {
-
-                        override fun getHeaders(): MutableMap<String, String> {
-                            val headers = mutableMapOf<String, String>()
-                            headers["Authorization"] = "Bearer ${getAccessToken()}"
-                            headers["Content-Type"] = "application/json"
-                            Log.d("RequestHeaders", headers.toString())
-                            return headers
+                        Log.d("AI Response", response.toString())
+                    },
+                    { error ->
+                        Log.e("VolleyError", "Error: ${error.message}")
+                        error.networkResponse?.let { response ->
+                            Log.e("VolleyError", "Response: ${String(response.data)}")
                         }
+                        continuation.resume(null)
 
-                        override fun getRetryPolicy(): RetryPolicy {
-                            //Retry policy example with exponential backoff
-                            return DefaultRetryPolicy(
-                                DefaultRetryPolicy.DEFAULT_TIMEOUT_MS,
-                                3,
-                                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
-                            )
-                        }
+
+                        binding.faqBtn.isEnabled = true
+                        binding.btnPreQues1.isEnabled = true
+                        binding.btnPreQues2.isEnabled = true
+                    }
+                ) {
+                    override fun getHeaders(): MutableMap<String, String> {
+                        val headers = mutableMapOf<String, String>()
+                        headers["Authorization"] = "Bearer ${getAccessToken()}"
+                        headers["Content-Type"] = "application/json"
+                        return headers
                     }
 
-
-                    requestQueue.add(jsonObjectRequest)
+                    override fun getRetryPolicy(): RetryPolicy {
+                        return DefaultRetryPolicy(
+                            5000,
+                            DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                            DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+                        )
+                    }
                 }
-            } catch (e: Exception) {
-                Log.e("NetworkError", e.toString())
+
+                requestQueue.add(jsonObjectRequest)
             }
+        } catch (e: Exception) {
+            Log.e("NetworkRequestError", e.toString())
+
+
+            binding.faqBtn.isEnabled = true
+            binding.btnPreQues1.isEnabled = true
+            binding.btnPreQues2.isEnabled = true
+            null
         }
     }
 
     fun getAccessToken(): String {
+        val currentTime = System.currentTimeMillis()
+        if (cachedToken != null && currentTime < tokenExpiryTime) {
+            return cachedToken!!
+        }
+
         val inputStream: InputStream = resources.openRawResource(R.raw.dialogflow_service)
         val credentials = GoogleCredentials.fromStream(inputStream)
             .createScoped(listOf("https://www.googleapis.com/auth/dialogflow"))
 
         credentials.refreshIfExpired()
-        val token = credentials.accessToken.tokenValue
-        Log.d("AccessToken", token)
-        return token
+        cachedToken = credentials.accessToken.tokenValue
+        tokenExpiryTime = credentials.accessToken.expirationTime.time
+        Log.d("AccessToken", cachedToken!!)
+        return cachedToken!!
     }
     ////END OF AI CHAT BOT////
-
-
-
-
 
 
 
@@ -438,10 +512,6 @@ class AIChatbot : Fragment() {
             }
         })
     }
-
-
-
-
 
 
     private fun createPDFWithIndividualTables(products: List<Product>): ByteArray {
@@ -511,7 +581,8 @@ class AIChatbot : Fragment() {
             canvas.drawText("Product #${index + 1}", startX, currentY - 30f, titlePaint)
 
             // Draw table header background
-            val headerRect = RectF(startX, currentY, startX + columnWidths.sum(), currentY + rowHeight)
+            val headerRect =
+                RectF(startX, currentY, startX + columnWidths.sum(), currentY + rowHeight)
             canvas.drawRect(headerRect, headerBackgroundPaint)
 
             // Draw header texts
@@ -544,10 +615,12 @@ class AIChatbot : Fragment() {
             )
 
             productDetails.forEach { (key, value) ->
-                val wrappedValue = wrapTextToWidth(value, contentPaint, columnWidths[1] - cellPadding * 2)
+                val wrappedValue =
+                    wrapTextToWidth(value, contentPaint, columnWidths[1] - cellPadding * 2)
 
                 // Calculate required height for wrapped text
-                val requiredHeight = maxOf(rowHeight, wrappedValue.size * (contentPaint.textSize + cellPadding))
+                val requiredHeight =
+                    maxOf(rowHeight, wrappedValue.size * (contentPaint.textSize + cellPadding))
 
                 // Check if we need a new page
                 if (currentY + requiredHeight > pageInfo.pageHeight - tableMargin) {
@@ -625,7 +698,7 @@ class AIChatbot : Fragment() {
 
             lines.forEach { line ->
                 canvas.drawText(line, textX, textY, paint)
-                textY += paint.textSize + padding/2
+                textY += paint.textSize + padding / 2
             }
 
             // Draw vertical line
@@ -675,7 +748,8 @@ class AIChatbot : Fragment() {
 
     private fun formatDateTime(input: String): String {
         return try {
-            val originalFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS", Locale.getDefault())
+            val originalFormat =
+                SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS", Locale.getDefault())
             val date = originalFormat.parse(input)
             val newFormat = SimpleDateFormat("MMMM dd, yyyy, hh:mm a", Locale.getDefault())
             newFormat.format(date)
@@ -684,13 +758,6 @@ class AIChatbot : Fragment() {
             input
         }
     }
-
-
-
-
-
-
-
 
 
     private fun storeToFirebaseStorage(pdfData: ByteArray) {
@@ -711,4 +778,5 @@ class AIChatbot : Fragment() {
             Log.e("Upload PDF Error", "Upload failed: ${exception.message}")
         }
     }
+
 }

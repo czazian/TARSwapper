@@ -616,6 +616,14 @@ class Navigation : Fragment() {
                     //Draw the new route and save a reference to it
                     currentPolyline = drawRoute(route)
 
+                    //Extract distance and duration
+                    val jsonObject = JSONObject(response.toString())
+                    val legs = jsonObject.getJSONArray("routes")
+                        .getJSONObject(0)
+                        .getJSONArray("legs")
+                        .getJSONObject(0)
+                    binding.distance.text = "  " + legs.getJSONObject("distance").getString("text")
+                    binding.duration.text = "  " + legs.getJSONObject("duration").getString("text")
 
                     ////Check Distance every 5 seconds////
                     //Check the distance between current location and destination

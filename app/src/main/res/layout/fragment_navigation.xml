@@ -61,6 +61,42 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/coinShopTopHeader">
 
+        <LinearLayout
+            android:id="@+id/desdu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
+            android:elevation="10dp"
+            android:orientation="horizontal"
+            app:flow_horizontalGap="10dp"
+            app:flow_verticalGap="10dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/toggleButton">
+
+            <TextView
+                android:id="@+id/duration"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="5dp"
+                android:background="@drawable/input_border3"
+                android:drawableStart="@drawable/baseline_access_time_24"
+                android:padding="10dp"
+                android:paddingLeft="5dp"
+                android:textColor="#000000"
+                android:textSize="14dp" />
+
+            <TextView
+                android:id="@+id/distance"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/input_border3"
+                android:drawableStart="@drawable/sharp_assistant_direction_24"
+                android:padding="10dp"
+                android:paddingLeft="20dp"
+                android:textColor="#000000"
+                android:textSize="14dp" />
+        </LinearLayout>
+
         <com.google.android.material.button.MaterialButtonToggleGroup
             android:id="@+id/toggleButton"
             android:layout_width="wrap_content"
