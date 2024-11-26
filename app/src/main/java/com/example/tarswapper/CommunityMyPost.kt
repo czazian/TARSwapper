@@ -6,12 +6,15 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.tarswapper.data.Community
 import com.example.tarswapper.data.User
 import com.example.tarswapper.dataAdapter.CommunityMyPostAdapter
+import com.example.tarswapper.dataAdapter.TradeMyPostedProductAdapter
 import com.example.tarswapper.databinding.FragmentCommunityMyPostBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.tabs.TabLayoutMediator
@@ -50,11 +53,39 @@ class CommunityMyPost : Fragment() {
             }
         }
 
+        //bind spinner
+        // Initialize Spinner and Status List
+        val displaySortList = listOf("Relevant", "Popularity", "Latest")
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, displaySortList)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.statusSpinner.adapter = adapter
+
+        binding.statusSpinner.setSelection(0)
+
         // Set LayoutManager for RecyclerView & Call getCommunityFromFirebase to populate the RecyclerView
-        binding.myPostRecyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
+/*        binding.myPostRecyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
         getUserCommunityFromFirebase { communityList ->
             binding.myPostRecyclerView.adapter = CommunityMyPostAdapter(communityList, requireContext())
+        }*/
+
+        binding.statusSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                // Call getUserProductsFromFirebase with the selected status
+                getUserCommunityFromFirebase(position) { communityList ->
+                    // Update RecyclerView with filtered products
+                    binding.myPostRecyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
+                    binding.myPostRecyclerView.adapter = CommunityMyPostAdapter(communityList, requireContext())
+                }
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                // Optional: Handle no selection scenario if needed
+            }
         }
+
+
+
+
 
         binding.addPostBtn.setOnClickListener{
             val fragment = CommunityCreatePost()
@@ -110,16 +141,17 @@ class CommunityMyPost : Fragment() {
     }
 
 
-    fun getUserCommunityFromFirebase(onResult: (List<Community>) -> Unit) {
+    fun getUserCommunityFromFirebase(position: Int, onResult: (List<Community>) -> Unit) {
         val sharedPreferencesTARSwapper =
             requireActivity().getSharedPreferences("TARSwapperPreferences", Context.MODE_PRIVATE)
         val userID = sharedPreferencesTARSwapper.getString("userID", null)
-        // Reference to the "Product" node in Firebase Realtime Database
-        val databaseRef = FirebaseDatabase.getInstance().getReference("Community")
-        val query       = databaseRef.orderByChild("created_by_UserID").equalTo(userID)
 
-        // List to hold products retrieved from Firebase
-        val communitylist = mutableListOf<com.example.tarswapper.data.Community>()
+        // Reference to the "Community" node in Firebase Realtime Database
+        val databaseRef = FirebaseDatabase.getInstance().getReference("Community")
+        val query = databaseRef.orderByChild("created_by_UserID").equalTo(userID)
+
+        // List to hold communities retrieved from Firebase
+        val communityList = mutableListOf<Community>()
 
         // Add a listener to retrieve data
         query.addListenerForSingleValueEvent(object : ValueEventListener {
@@ -127,18 +159,28 @@ class CommunityMyPost : Fragment() {
                 if (snapshot.exists()) {
                     // Loop through the products in the snapshot
                     for (communitySnapshot in snapshot.children) {
-                        // Convert each child into a Product object
+                        // Convert each child into a Community object
                         val community = communitySnapshot.getValue(Community::class.java)
                         if (community != null) {
-                            communitylist.add(community) // Add the product to the list
+                            communityList.add(community) // Add the community to the list
                         }
                     }
-                    onResult(communitylist) // Return the list of products
-                    Log.d("Community list found", communitylist.size.toString())
+
+                    // Sort based on the position
+                    val sortedCommunityList = when (position) {
+                        0 -> communityList // No sorting (default order)
+                        1 -> communityList.sortedByDescending { it.view } // Sort by views descending
+                        2 -> communityList.sortedByDescending { it.created_at } // Sort by created_at descending
+                        else -> communityList // Default, no sorting
+                    }
+
+                    // Return the sorted list
+                    onResult(sortedCommunityList)
+                    Log.d("Community list found", sortedCommunityList.size.toString())
                 } else {
                     // Handle empty database
                     onResult(emptyList())
-                    Log.d("Empty found", communitylist.size.toString())
+                    Log.d("Empty found", communityList.size.toString())
                 }
             }
 
@@ -149,6 +191,7 @@ class CommunityMyPost : Fragment() {
             }
         })
     }
+
 
 
 }

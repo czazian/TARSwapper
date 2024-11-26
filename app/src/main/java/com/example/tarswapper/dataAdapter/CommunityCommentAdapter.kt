@@ -1,10 +1,14 @@
 package com.example.tarswapper.dataAdapter
 
 import android.content.Context
+import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.example.tarswapper.R
+import com.example.tarswapper.UserDetail
 import com.example.tarswapper.data.CommunityComment
 import com.example.tarswapper.data.User
 import com.example.tarswapper.databinding.CommunityCommentListBinding
@@ -35,6 +39,26 @@ class CommunityCommentAdapter(private val commentList: List<CommunityComment>, p
                 holder.binding.usernameTV.text = user!!.name.toString()
                 Glide.with(context).load(user.profileImage) // User Icon URL string
                     .into(holder.binding.profileImgV)
+
+            holder.binding.usernameTV.setOnClickListener{
+                val fragment = UserDetail()
+
+                // Create a Bundle to pass data
+                val bundle = Bundle()
+                bundle.putString("UserID", user.userID) // Example data
+
+                // Set the Bundle as arguments for the fragment
+                fragment.arguments = bundle
+
+                val transaction = (context as AppCompatActivity)?.supportFragmentManager?.beginTransaction()
+                transaction?.replace(R.id.frameLayout, fragment)
+                transaction?.setCustomAnimations(
+                    R.anim.fade_out,  // Enter animation
+                    R.anim.fade_in  // Exit animation
+                )
+                transaction?.addToBackStack(null)
+                transaction?.commit()
+            }
             }
         }
 

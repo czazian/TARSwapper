@@ -6,6 +6,8 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.tarswapper.data.Product
@@ -48,6 +50,16 @@ class TradeSearch : Fragment() {
                 userObj = it
             }
         }
+
+        // Delay the focus and keyboard appearance slightly to ensure the view is ready
+        binding.searchInput.post {
+            binding.searchInput.requestFocus()
+
+            // Show the keyboard
+            val imm = ContextCompat.getSystemService(requireContext(), InputMethodManager::class.java)
+            imm?.showSoftInput(binding.searchInput, InputMethodManager.SHOW_IMPLICIT)
+        }
+
 
         binding.ProductRV.layoutManager = GridLayoutManager(requireContext(), 2)
         //default

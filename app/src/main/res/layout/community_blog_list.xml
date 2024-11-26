@@ -45,6 +45,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
+                android:ellipsize="end"
+                android:maxWidth="150dp"
                 android:text="User 1"
                 android:textSize="20dp"
                 android:textStyle="bold"
@@ -52,6 +54,25 @@
                 app:layout_constraintStart_toEndOf="@+id/profile_ImgV"
                 app:layout_constraintTop_toTopOf="@+id/profile_ImgV"
                 app:layout_constraintVertical_bias="0.478" />
+
+            <TextView
+                android:id="@+id/youTV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/rounded_button"
+                android:backgroundTint="#756AB6"
+                android:paddingStart="15dp"
+                android:paddingTop="5dp"
+                android:paddingEnd="15dp"
+                android:paddingBottom="5dp"
+                android:text="You"
+                android:layout_marginStart="4dp"
+                android:textColor="@color/white"
+                android:textSize="14dp"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="@+id/usernameTV"
+                app:layout_constraintStart_toEndOf="@+id/usernameTV"
+                app:layout_constraintTop_toTopOf="@+id/usernameTV" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

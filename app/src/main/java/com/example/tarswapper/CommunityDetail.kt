@@ -9,9 +9,12 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
@@ -260,6 +263,14 @@ class CommunityDetail : Fragment() {
                     Log.e("Firebase", "Error checking Likes: ${error.message}")
                 }
             })
+        }
+
+        binding.commentBtn.setOnClickListener{
+            binding.commentED.requestFocus()
+
+            // Show the keyboard
+            val imm = ContextCompat.getSystemService(requireContext(), InputMethodManager::class.java)
+            imm?.showSoftInput(binding.commentED, InputMethodManager.SHOW_IMPLICIT)
         }
 
         //sent comment button

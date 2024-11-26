@@ -4,36 +4,37 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/frameLayout8"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:padding="6dp">
 
 
     <androidx.cardview.widget.CardView
         android:id="@+id/myVideoLayout"
-        android:layout_width="360dp"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:backgroundTint="#F8F8FB"
+        android:layout_margin="10dp"
         app:cardCornerRadius="15dp"
+        app:cardElevation="5dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginTop="12dp"
-        android:layout_marginBottom="12dp"
         android:clickable="true"
         android:focusable="true">
 
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="15dp"
-            android:padding="16dp">
+            android:layout_height="match_parent"
+            android:padding="10dp">
 
             <TextView
                 android:id="@+id/video_titleTV"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Video Title"
-                android:textSize="20dp"
+                android:textSize="14dp"
+                android:ellipsize="end"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -54,6 +55,8 @@
                 android:layout_width="80dp"
                 android:layout_height="100dp"
                 android:src="@drawable/item"
+                android:layout_marginTop="4dp"
+                android:scaleType="centerCrop"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/video_titleTV" />
 
@@ -63,13 +66,15 @@
                 android:layout_height="wrap_content"
                 android:gravity="start"
                 android:orientation="vertical"
+                android:layout_marginStart="8dp"
                 app:layout_constraintBottom_toBottomOf="@+id/videoImg"
                 app:layout_constraintStart_toEndOf="@+id/videoImg"
                 app:layout_constraintTop_toTopOf="@+id/videoImg">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="5dp">
 
                     <TextView
                         android:id="@+id/textView31"
@@ -84,6 +89,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="12:00:00"
+                        android:textColor="@color/grey_font"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toEndOf="@+id/textView31"
                         app:layout_constraintTop_toTopOf="@+id/textView31" />
@@ -92,7 +98,7 @@
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp">
+                    android:layout_marginBottom="5dp">
 
                     <TextView
                         android:id="@+id/textView32"
@@ -106,7 +112,8 @@
                         android:id="@+id/uploadTV"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="13/11/2020"
+                        android:text=""
+                        android:textColor="@color/grey_font"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toEndOf="@+id/textView32"
                         app:layout_constraintTop_toTopOf="@+id/textView32" />
@@ -115,7 +122,7 @@
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp">
+                    android:layout_marginBottom="5dp">
 
                     <ImageView
                         android:id="@+id/imageView16"

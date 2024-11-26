@@ -113,8 +113,8 @@ class TradeProductDetail : Fragment() {
                     binding.submitBtn.visibility = View.GONE
                     binding.submitBtn.isEnabled = false
                     binding.btnChatStart.visibility = View.GONE
+                    binding.youTV.visibility = View.VISIBLE
                 }
-
                 //get product owner
                 getUserRecord(product.created_by_UserID.toString()) {
                     if (it != null) {

@@ -38,6 +38,11 @@ class CommunityPostExploreUserAdapter(private val userList: List<User>, private 
         val user = userList[position]
         var userObj: User
 
+        val sharedPreferencesTARSwapper =
+            context.getSharedPreferences("TARSwapperPreferences", Context.MODE_PRIVATE)
+        val userID = sharedPreferencesTARSwapper.getString("userID", null)
+
+
         with(holder.binding) {
             getUserRecord(user.userID.toString()) {
                 if (it != null) {

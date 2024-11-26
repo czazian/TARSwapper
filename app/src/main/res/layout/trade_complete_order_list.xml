@@ -169,11 +169,14 @@
 
                             <TextView
                                 android:id="@+id/userItemNameTV"
-                                android:layout_width="wrap_content"
+                                android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:text="Item 1"
                                 android:textStyle="bold"
-                                android:textSize="15dp"
+                                android:textSize="14dp"
+                                android:ellipsize="end"
+                                android:singleLine="true"
+                                android:textAlignment="center"
                                 app:layout_constraintEnd_toEndOf="@+id/userItemImg"
                                 app:layout_constraintStart_toStartOf="@+id/userItemImg"
                                 app:layout_constraintTop_toBottomOf="@+id/userItemImg" />
@@ -222,11 +225,14 @@
 
                             <TextView
                                 android:id="@+id/userReceiveItemNameTV"
-                                android:layout_width="wrap_content"
+                                android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:text="Item 1"
                                 android:textStyle="bold"
-                                android:textSize="15dp"
+                                android:textSize="14dp"
+                                android:ellipsize="end"
+                                android:singleLine="true"
+                                android:textAlignment="center"
                                 app:layout_constraintEnd_toEndOf="@+id/userReceiveItemImg"
                                 app:layout_constraintStart_toStartOf="@+id/userReceiveItemImg"
                                 app:layout_constraintTop_toBottomOf="@+id/userReceiveItemImg" />

@@ -137,14 +137,29 @@
                         android:id="@+id/usernameTV"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
-                        android:text="User 1"
-                        android:textSize="20dp"
+                        android:layout_marginStart="5dp"
+                        android:text=""
+                        android:textSize="14dp"
                         android:textStyle="bold"
                         app:layout_constraintBottom_toBottomOf="@+id/profile_ImgV"
                         app:layout_constraintStart_toEndOf="@+id/profile_ImgV"
                         app:layout_constraintTop_toTopOf="@+id/profile_ImgV" />
 
+                    <TextView
+                        android:id="@+id/youTV"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="You"
+                        android:textColor="@color/white"
+                        android:backgroundTint="#756AB6"
+                        android:paddingStart="15dp"
+                        android:paddingEnd="15dp"
+                        android:paddingTop="5dp"
+                        android:paddingBottom="5dp"
+                        android:layout_marginStart="4dp"
+                        android:textSize="12dp"
+                        android:visibility="gone"
+                        android:background="@drawable/rounded_button"/>
                 </LinearLayout>
 
                 <TextView
@@ -154,7 +169,7 @@
                     android:layout_marginRight="24dp"
                     android:text="28/12/2204"
                     android:textColor="@color/grey_font"
-                    android:textSize="16dp"
+                    android:textSize="12dp"
                     app:layout_constraintBottom_toBottomOf="@+id/userProfileLayout"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="@+id/userProfileLayout" />

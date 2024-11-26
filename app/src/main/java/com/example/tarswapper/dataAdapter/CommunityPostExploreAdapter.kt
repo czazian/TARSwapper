@@ -61,6 +61,7 @@ class CommunityPostExploreAdapter(private val communityList: List<Community>, pr
         val sharedPreferencesTARSwapper =
             context.getSharedPreferences("TARSwapperPreferences", Context.MODE_PRIVATE)
         val userID = sharedPreferencesTARSwapper.getString("userID", null)
+
         with(holder.binding) {
             //every time access to this page update view number
             setupViewPager(community.communityID, holder)
@@ -196,6 +197,9 @@ class CommunityPostExploreAdapter(private val communityList: List<Community>, pr
                     holder.binding.usernameTV.text = it.name.toString()
                     Glide.with(context).load(it.profileImage) // User Icon URL string
                         .into(holder.binding.profileImgV)
+                    if(it.userID == userID){
+                        holder.binding.youTV.visibility = View.VISIBLE
+                    }
                 }
             }
 

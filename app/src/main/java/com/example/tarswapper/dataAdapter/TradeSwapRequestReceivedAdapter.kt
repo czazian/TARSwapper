@@ -487,9 +487,9 @@ class TradeSwapRequestReceivedAdapter(private var swapRequestList: List<SwapRequ
                     if (swapRequestID == excludeSwapRequestID) continue
 
                     // Check if senderProduct or receiverProduct matches the IDs
-                    if ((senderProduct == senderProductID || receiverProduct == receiverProductID) && status == "AwaitingResponse") {
+                    if ((senderProduct == senderProductID || receiverProduct == receiverProductID) && status == context.getString(R.string.SWAP_REQUEST_AWAITING_RESPONSE)) {
                         // Update the status to "Product Not Available"
-                        swapRequestSnap.ref.child("status").setValue("ProductNotAvailable")
+                        swapRequestSnap.ref.child("status").setValue(context.getString(R.string.SWAP_REQUEST_PRODUCT_NOT_AVAILABLE))
                             .addOnSuccessListener {
                                 Log.d("UpdateStatus", "SwapRequest $swapRequestID updated to Product Not Available")
                             }
@@ -555,8 +555,9 @@ class TradeSwapRequestReceivedAdapter(private var swapRequestList: List<SwapRequ
                         val lowestPrice = firstItem.optDouble("lowest_recorded_price", -1.0)
                         val highestPrice = firstItem.optDouble("highest_recorded_price", -1.0)
 
+                        val mean = (lowestPrice + highestPrice)/2
                         val priceEstimate = if (lowestPrice >= 0 && highestPrice >= 0) {
-                            "Estimated Price Range: $${lowestPrice} - $${highestPrice}"
+                            "RM $mean"
                         } else {
                             "Price not available"
                         }

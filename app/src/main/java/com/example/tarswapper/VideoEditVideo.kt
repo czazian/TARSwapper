@@ -41,6 +41,7 @@ class VideoEditVideo : Fragment() {
     private lateinit var binding: FragmentVideoEditVideoBinding
     private lateinit var userObj: User
     private var selectedVideoUri: Uri? = null
+    private var newVideo = false
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreateView(
@@ -351,6 +352,7 @@ class VideoEditVideo : Fragment() {
         shortVideoRef.updateChildren(updatedData)
             .addOnSuccessListener {
                 //create product tag if have
+                Toast.makeText(context, "Short Video edit successfully.", Toast.LENGTH_SHORT).show()
                 val shortVideoProductTagRef = database.getReference("ShortVideo/${video.shortVideoID}/ShortVideo_ProductTag")
                 if (!binding.selectedProductID.text.isNullOrBlank()) {
                     // Remove old tags and add the new one
@@ -381,10 +383,16 @@ class VideoEditVideo : Fragment() {
                 }
 
                 // Upload video after data is successfully written
-                uploadVideoToFirebase(selectedVideoUri!!, video.shortVideoID!!) {
-                    // Only navigate after the upload is complete
+
+                if(newVideo == true){
+                    uploadVideoToFirebase(selectedVideoUri!!, video.shortVideoID!!) {
+                        // Only navigate after the upload is complete
+                        navigateToPreviousFragment()
+                    }
+                }else{
                     navigateToPreviousFragment()
                 }
+
             }
             .addOnFailureListener { e ->
                 println("Failed to add video: ${e.message}")
@@ -526,6 +534,7 @@ class VideoEditVideo : Fragment() {
                     retriever.setDataSource(context, videoUri)
                     val thumbnail = retriever.frameAtTime // Extract the first frame
                     binding.uploadVideoBtn.setImageBitmap(thumbnail) // Set the thumbnail
+                    newVideo = true
                 } catch (e: Exception) {
                     Log.e("VideoPicker", "Failed to retrieve video thumbnail: ${e.message}")
                 } finally {
@@ -538,12 +547,7 @@ class VideoEditVideo : Fragment() {
     }
 
     private fun navigateToPreviousFragment() {
-        val fragment = Video()
-        val transaction = activity?.supportFragmentManager?.beginTransaction()
-        transaction?.replace(R.id.frameLayout, fragment)
-        transaction?.setCustomAnimations(R.anim.fade_out, R.anim.fade_in)
-        transaction?.addToBackStack(null)
-        transaction?.commit()
+        activity?.supportFragmentManager?.popBackStack()
     }
 
     fun getShortVideoFromFirebase(shortVideoID : String, onResult: (ShortVideo) -> Unit) {

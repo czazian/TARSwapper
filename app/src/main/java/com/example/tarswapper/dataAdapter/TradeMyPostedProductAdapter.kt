@@ -2,6 +2,7 @@ package com.example.tarswapper.dataAdapter
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,7 +18,10 @@ import com.example.tarswapper.TradeProductDetail
 import com.example.tarswapper.data.Product
 import com.example.tarswapper.databinding.ProductListHoriBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
 import okhttp3.internal.notifyAll
 
@@ -107,6 +111,8 @@ class TradeMyPostedProductAdapter(private val productList: List<Product>, privat
                                 // Optionally, show a message or update the UI
                                 Toast.makeText(holder.itemView.context, "Product removed successfully", Toast.LENGTH_SHORT).show()
 
+                                //update all revevent swap request status into product Not available
+                                updateSwapRequestStatus(product.productID.toString())
                                 // Optionally, remove the product from the list and notify the adapter
                                 // You can update your productList and notify the adapter to refresh the view
                                 //val updatedList = productList.toMutableList()
@@ -180,5 +186,39 @@ class TradeMyPostedProductAdapter(private val productList: List<Product>, privat
                 imgBtn.visibility = View.GONE
             }
         }
+    }
+
+    private fun updateSwapRequestStatus(
+        productID: String
+    ) {
+        val database = FirebaseDatabase.getInstance().getReference("SwapRequest")
+
+        // Fetch all swap requests
+        database.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                for (swapRequestSnap in snapshot.children) {
+                    val swapRequestID = swapRequestSnap.key ?: continue
+                    val senderProduct = swapRequestSnap.child("senderProductID").getValue(String::class.java)
+                    val receiverProduct = swapRequestSnap.child("receiverProductID").getValue(String::class.java)
+                    val status = swapRequestSnap.child("status").getValue(String::class.java)
+
+                    // Check if senderProduct or receiverProduct matches the IDs
+                    if ((senderProduct == productID || receiverProduct == productID) && status == context.getString(R.string.SWAP_REQUEST_AWAITING_RESPONSE)) {
+                        // Update the status to "Product Not Available"
+                        swapRequestSnap.ref.child("status").setValue(context.getString(R.string.SWAP_REQUEST_PRODUCT_NOT_AVAILABLE))
+                            .addOnSuccessListener {
+                                Log.d("UpdateStatus", "SwapRequest $swapRequestID updated to Product Not Available")
+                            }
+                            .addOnFailureListener { e ->
+                                Log.e("UpdateStatus", "Failed to update SwapRequest $swapRequestID: ${e.message}")
+                            }
+                    }
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("Firebase", "Error fetching data: ${error.message}")
+            }
+        })
     }
 }
