@@ -455,7 +455,6 @@ class AIChatbot : Fragment() {
         } catch (e: Exception) {
             Log.e("NetworkRequestError", e.toString())
 
-
             binding.faqBtn.isEnabled = true
             binding.btnPreQues1.isEnabled = true
             binding.btnPreQues2.isEnabled = true
@@ -518,34 +517,31 @@ class AIChatbot : Fragment() {
         val outputStream = ByteArrayOutputStream()
         val document = PdfDocument()
 
-        // Page settings - A4 size in landscape orientation
-        val pageInfo = PdfDocument.PageInfo.Builder(2480, 1754, 1).create()
+        // Portrait orientation: Reduced page size to fit more content
+        val pageInfo = PdfDocument.PageInfo.Builder(1240, 1748, 1).create()  // Portrait (Width: 1240px, Height: 1748px)
         var currentPage = document.startPage(pageInfo)
         var canvas = currentPage.canvas
 
-        // Enhanced styling
         val titlePaint = Paint().apply {
-            textSize = 40f
+            textSize = 24f  // Smaller font size for titles
             typeface = Typeface.create(Typeface.DEFAULT_BOLD, Typeface.BOLD)
             color = Color.rgb(33, 33, 33)
         }
 
         val headerPaint = Paint().apply {
-            textSize = 32f
+            textSize = 18f  // Smaller font size for headers
             typeface = Typeface.create(Typeface.DEFAULT_BOLD, Typeface.BOLD)
             color = Color.rgb(255, 255, 255)
         }
 
-        // New: Separate paint for field names (bold)
         val fieldPaint = Paint().apply {
-            textSize = 30f
+            textSize = 18f  // Smaller font size for fields
             typeface = Typeface.create(Typeface.DEFAULT_BOLD, Typeface.BOLD)
             color = Color.rgb(66, 66, 66)
         }
 
-        // Regular paint for values
         val contentPaint = Paint().apply {
-            textSize = 30f
+            textSize = 18f  // Smaller font size for content
             color = Color.rgb(66, 66, 66)
         }
 
@@ -556,17 +552,17 @@ class AIChatbot : Fragment() {
         }
 
         val headerBackgroundPaint = Paint().apply {
-            color = Color.rgb(63, 81, 181) // Material Design primary color
+            color = Color.rgb(63, 81, 181)
             style = Paint.Style.FILL
         }
 
-        // Table dimensions
-        val tableMargin = 50f
-        val cellPadding = 20f
-        val columnWidths = listOf(600f, 1000f)
-        val rowHeight = 100f
+        // Further reduced margins and padding
+        val tableMargin = 10f  // Smaller margin
+        val cellPadding = 5f  // Smaller padding
+        val columnWidths = listOf(400f, 600f)  // Adjusted column widths to fit more content
+        val rowHeight = 50f  // Reduced row height
         val startX = (pageInfo.pageWidth - columnWidths.sum() - tableMargin * 2) / 2
-        var currentY = 150f
+        var currentY = 80f  // Starting Y position with reduced space
 
         products.forEachIndexed { index, product ->
             // Check if we need a new page
@@ -574,25 +570,19 @@ class AIChatbot : Fragment() {
                 document.finishPage(currentPage)
                 currentPage = document.startPage(pageInfo)
                 canvas = currentPage.canvas
-                currentY = 150f
+                currentY = 80f  // Reset Y position for new page
             }
 
-            // Draw product title
-            canvas.drawText("Product #${index + 1}", startX, currentY - 30f, titlePaint)
-
-            // Draw table header background
-            val headerRect =
-                RectF(startX, currentY, startX + columnWidths.sum(), currentY + rowHeight)
+            val headerRect = RectF(startX, currentY, startX + columnWidths.sum(), currentY + rowHeight)
             canvas.drawRect(headerRect, headerBackgroundPaint)
 
-            // Draw header texts
             val headers = listOf("Field", "Value")
             drawTableRow(
                 canvas = canvas,
                 cells = headers,
                 startX = startX,
                 startY = currentY,
-                fieldPaint = headerPaint, // Use header paint for both columns in header
+                fieldPaint = headerPaint,
                 valuePaint = headerPaint,
                 columnWidths = columnWidths,
                 rowHeight = rowHeight,
@@ -602,7 +592,7 @@ class AIChatbot : Fragment() {
 
             currentY += rowHeight
 
-            // Product details
+            // Optimized product details
             val productDetails = listOf(
                 "Product ID" to (product.productID ?: ""),
                 "Product Name" to (product.name ?: ""),
@@ -615,48 +605,35 @@ class AIChatbot : Fragment() {
             )
 
             productDetails.forEach { (key, value) ->
-                val wrappedValue =
-                    wrapTextToWidth(value, contentPaint, columnWidths[1] - cellPadding * 2)
+                val wrappedValue = wrapTextToWidth(value, contentPaint, columnWidths[1] - cellPadding * 2)
 
-                // Calculate required height for wrapped text
-                val requiredHeight =
-                    maxOf(rowHeight, wrappedValue.size * (contentPaint.textSize + cellPadding))
+                val requiredHeight = maxOf(rowHeight, wrappedValue.size * (contentPaint.textSize + cellPadding))
 
-                // Check if we need a new page
                 if (currentY + requiredHeight > pageInfo.pageHeight - tableMargin) {
                     document.finishPage(currentPage)
                     currentPage = document.startPage(pageInfo)
                     canvas = currentPage.canvas
-                    currentY = 150f
+                    currentY = 80f  // Reset Y position for new page
                 }
 
-                // Draw the row with wrapped text
                 drawTableRow(
                     canvas = canvas,
                     cells = listOf(key, wrappedValue.joinToString("\n")),
                     startX = startX,
                     startY = currentY,
-                    fieldPaint = fieldPaint,  // Use bold paint for field names
-                    valuePaint = contentPaint, // Use regular paint for values
+                    fieldPaint = fieldPaint,
+                    valuePaint = contentPaint,
                     columnWidths = columnWidths,
                     rowHeight = requiredHeight,
                     padding = cellPadding,
                     isHeader = false
                 )
 
-                // Draw cell borders
-                canvas.drawRect(
-                    startX,
-                    currentY,
-                    startX + columnWidths.sum(),
-                    currentY + requiredHeight,
-                    tablePaint
-                )
-
+                canvas.drawRect(startX, currentY, startX + columnWidths.sum(), currentY + requiredHeight, tablePaint)
                 currentY += requiredHeight
             }
 
-            currentY += 100f // Space between products
+            currentY += 20f  // Smaller space between products to fit more on the page
         }
 
         document.finishPage(currentPage)
@@ -665,6 +642,9 @@ class AIChatbot : Fragment() {
 
         return outputStream.toByteArray()
     }
+
+
+
 
     private fun drawTableRow(
         canvas: Canvas,
