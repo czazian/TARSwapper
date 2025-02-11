@@ -11,9 +11,6 @@ public class Bomb {
     //Single bitmap for bomb image
     Bitmap bomb;
 
-    //Current animation frame
-    int bombFrame = 0;
-
     //Position and speed of the bomb
     int bombX, bombY, bombVelocity;
     Random random;

@@ -65,7 +65,7 @@ class MiniGame : Fragment() {
         }
 
         //Check game chance and reset it if necessary
-        checkGameChanceAndUpdateSharedPreference()
+        checkGameChanceAndUpdate()
 
         //Display current chance status
         updateGameChanceDisplay()
@@ -110,8 +110,8 @@ class MiniGame : Fragment() {
         }
     }
 
-    //Check GameChance and Update to the Shared Preference
-    private fun checkGameChanceAndUpdateSharedPreference() {
+    //Check GameChance
+    private fun checkGameChanceAndUpdate() {
         //Retrieve all necessary data from SharedPreference (TARSwapperPreferences)
         val sharedPreferencesTARSwapper =
             requireActivity().getSharedPreferences("TARSwapperPreferences", Context.MODE_PRIVATE)
@@ -122,7 +122,6 @@ class MiniGame : Fragment() {
 
         if (userID != null) {
             getUserById(userID) { user ->
-                //Update GameChance SharedPreference, if
                 if (dateNow != user!!.lastPlayDate && user!!.userID == userID) {
                     //Specify the specific column of a record to update
                     val updates =

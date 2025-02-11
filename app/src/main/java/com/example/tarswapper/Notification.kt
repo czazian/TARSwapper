@@ -88,11 +88,11 @@ class Notification : Fragment() {
                 when(tab.position){
                     //Trade
                     0 -> {
-                        bindTrade()
+                        //bindTrade()
                     }
                     //Community
                     1 -> {
-                        bindCommunity()
+                        //bindCommunity()
                     }
                     //Message
                     2 -> {

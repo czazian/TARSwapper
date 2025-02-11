@@ -768,6 +768,7 @@ class ChatAdapter(
         var conditions = DownloadConditions.Builder()
             .requireWifi()
             .build()
+
         translator.downloadModelIfNeeded(conditions)
             .addOnSuccessListener {
                 Log.e("Translation", "Language model downloaded")

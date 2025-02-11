@@ -2,7 +2,7 @@ package com.example.tarswapper.data
 
 import java.io.Serializable
 
-data class Transaction(
+data class Transaction (
     var transactionID: String? = null,
     var scheduledDateTime: String? = null,
     var completedDateTime: String? = null,
